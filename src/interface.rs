@@ -3,12 +3,12 @@ use anyhow::Result;
 use crossterm::{
     execute,
     cursor,
-    cursor::{CursorShape::Line, SetCursorShape},
-    style::{style, Attribute, Color, Stylize}, event::Event,
+    style::{style, Attribute, Color, Stylize}, 
+    terminal::{Clear, ClearType::All}
 };
 use std::io::{Stdout, Write};
 
-pub fn print_select_screen(mut stdout: &Stdout, db: &Database) -> Result<()> {
+pub fn select_screen(mut stdout: &Stdout, db: &Database) -> Result<()> {
     let all_characters = db.get_all_characters()?;
 
     for character in all_characters {
@@ -17,10 +17,12 @@ pub fn print_select_screen(mut stdout: &Stdout, db: &Database) -> Result<()> {
     }
     write!(stdout, "New Character Sheet..")?;
     stdout.flush()?;
+    execute!(stdout, cursor::MoveTo(0, 0))?;
     Ok(())
 }
 
 pub fn get_sheet(mut stdout: &Stdout, character: &Character) -> Result<()> {
+    execute!(stdout, Clear(All), cursor::MoveTo(0, 0))?;
     let character_name = style(&character.name)
         .with(Color::Blue)
         .attribute(Attribute::Bold);
@@ -28,6 +30,6 @@ pub fn get_sheet(mut stdout: &Stdout, character: &Character) -> Result<()> {
         .with(Color::Red)
         .attribute(Attribute::Italic);
 
-    write!(stdout, "{}\r\n{}\r\n", character_name, character_class)?;
+    write!(stdout, "Name: {}\r\nClass: {}\r\n", character_name, character_class)?;
     Ok(())
 }

@@ -8,9 +8,9 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn new(path: &str) -> Self {
+    pub fn new() -> Self {
         Self {
-            path: path.to_string(),
+            path: "characters.sqlite3".to_string(),
             connection: OnceCell::new(),
         }
     }

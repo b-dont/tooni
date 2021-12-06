@@ -1,5 +1,3 @@
-// TODO: SRD data in DB.
-
 pub struct Character {
     pub name: String,
     pub class: String,
