@@ -2,9 +2,8 @@ use crate::{database::Database, input::handle_keybord_event, interface::select_s
 use anyhow::Result;
 use crossterm::{
     cursor,
-    queue,
-    execute,
     event::{read, Event},
+    execute, queue,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{stdout, Write};
@@ -20,7 +19,7 @@ fn main() -> Result<()> {
     enable_raw_mode()?;
 
     let db = Database::new();
-    db.create_database()?;
+    db.create_character_table()?;
 
     select_screen(&stdout, &db)?;
     execute!(stdout, cursor::MoveTo(0, 0))?;
