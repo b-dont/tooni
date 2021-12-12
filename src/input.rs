@@ -18,8 +18,8 @@ pub fn handle_keybord_event(event: KeyEvent, mut stdout: &Stdout, db: &Database)
         KeyCode::Esc => Ok(false),
 
         // TODO: This needs to change. 'q' will call the `select_screen()`
-        // function. If in a character sheet will revert to the select_screen, 
-        // or will re-render select_screen if already there. User input needs 
+        // function. If in a character sheet will revert to the select_screen,
+        // or will re-render select_screen if already there. User input needs
         // to be accounted for differently while in different `screens`.
         KeyCode::Char('q') => {
             select_screen(&stdout, &db)?;
@@ -38,16 +38,16 @@ pub fn handle_keybord_event(event: KeyEvent, mut stdout: &Stdout, db: &Database)
         }
 
         // TODO: This `Enter` is configured for the `select_screen()`.
-        // Another will need to exist in another input loop for the 
+        // Another will need to exist in another input loop for the
         // character sheet.
         //
         // Upon matching `Enter`, we need to account for the cursor's current
-        // row position and match this with the corresponding element in the 
+        // row position and match this with the corresponding element in the
         // vector returned by `get_all_characters()`. We then call `load_character()`
         // on that Character struct and return only that character struct.
         //
-        // TODO: This seems somewhat inefficent, as we already instantiate the character 
-        // struct when we return the vactor of structs. Look into a better way to handle 
+        // TODO: This seems somewhat inefficent, as we already instantiate the character
+        // struct when we return the vactor of structs. Look into a better way to handle
         // the struct instead of re-instantiating it.
         KeyCode::Enter => {
             let all_characters = db.get_all_characters()?;
