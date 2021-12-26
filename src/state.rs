@@ -1,5 +1,5 @@
 use crate::character::Character;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use crossterm::{
     cursor,
     event::{read, Event, KeyCode, KeyEvent},
@@ -15,11 +15,14 @@ use tui::{
     Terminal,
 };
 
+enum HandleKeyboardInput {
+    ChangeState(Box<dyn State>),
+    Input,
+    Exit,
+}
+
 pub struct Screen {
     state: Option<Box<dyn State>>,
-    //    previous_state: Option<Box<dyn State>>,
-    saved_characters: Option<Vec<Character>>,
-    current_character: Option<Character>,
     stdout: Stdout,
 }
 
@@ -29,9 +32,6 @@ impl Screen {
             state: Some(Box::new(SelectScreen {
                 saved_characters: saved_characters.clone(),
             })),
-            //            previous_state: None,
-            saved_characters: Some(saved_characters),
-            current_character: Some(Character::new()),
             stdout: stdout(),
         }
     }
@@ -49,9 +49,9 @@ impl Screen {
             match read()? {
                 Event::Key(event) => {
                     if let Some(state) = &self.state {
-                        if state.handle_keybord_event(&mut self.stdout, event)? {
-                        } else {
-                            break;
+                        match state.handle_keyboard_event(&mut self.stdout, event)? {
+                            None => {}
+                            _ => {}
                         }
                     }
                 }
@@ -64,7 +64,11 @@ impl Screen {
 
 trait State {
     fn display_screen(&self, stdout: &mut Stdout) -> Result<()>;
-    fn handle_keybord_event(&self, stdout: &Stdout, event: KeyEvent) -> Result<bool>;
+    fn handle_keyboard_event(
+        &self,
+        stdout: &Stdout,
+        event: KeyEvent,
+    ) -> Result<HandleKeyboardInput>;
 }
 
 struct SelectScreen {
@@ -86,37 +90,49 @@ impl State for SelectScreen {
         Ok(())
     }
 
-    fn handle_keybord_event(&self, mut stdout: &Stdout, event: KeyEvent) -> Result<bool> {
-        let all_characters = &self.saved_characters;
+    fn handle_keyboard_event(
+        &self,
+        mut stdout: &Stdout,
+        event: KeyEvent,
+    ) -> Result<HandleKeyboardInput> {
         let current_row = cursor::position()?.1 as u16;
         let all_characters_length = all_characters.len() as u16;
+        let all_characters = self.saved_characters;
 
         match event.code {
             // On matching the Esc key, return false to the caller.
             // This will end the main loop and the application.
-            KeyCode::Esc => Ok(false),
+            KeyCode::Esc => Ok(HandleKeyboardInput::Exit),
 
             // Currently set to "Vim" key-bindings for `up` and `down` navigation.
             // TODO: Possible feature: user config for key-bindings.
             KeyCode::Char('k') => {
                 execute!(stdout, cursor::MoveToPreviousLine(1))?;
-                Ok(true)
+                Ok(HandleKeyboardInput::Input)
             }
             KeyCode::Char('j') => {
                 if current_row != all_characters_length {
                     execute!(stdout, cursor::MoveToNextLine(1))?;
                 } else {
                 }
-                Ok(true)
+                Ok(HandleKeyboardInput::Input)
             }
             KeyCode::Enter => {
                 if current_row == all_characters_length {
+                    Ok(HandleKeyboardInput::ChangeState(Box::new(
+                        CharacterScreen {
+                            current_character: Some(Character::new()),
+                        },
+                    )))
                 } else {
-                    let selected_character = &all_characters[current_row as usize];
+                    let selected_character = all_characters[current_row as usize];
+
+                    Ok(HandleKeyboardInput::ChangeState(Box::new(CharacterScreen {
+                        current_character: Some(selected_character),
+                    })))
                 }
-                Ok(true)
             }
-            _ => Ok(true),
+            _ => { Ok(HandleKeyboardInput::Input) }
         }
     }
 }
@@ -126,7 +142,7 @@ struct CharacterScreen {
 }
 
 impl State for CharacterScreen {
-    fn display_screen(&self, mut stdout: &mut Stdout) -> Result<()> {
+    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
         let backend = CrosstermBackend::new(stdout);
 
         // This vector of vectors represents each line of our `Paragraph`,
@@ -135,11 +151,23 @@ impl State for CharacterScreen {
         let character_text = vec![
             Spans::from(vec![
                 Span::styled("Name: ", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(self.current_character.as_ref().unwrap().name.as_str()),
+                Span::raw(
+                    self.current_character
+                        .as_ref()
+                        .context("No Character")?
+                        .name
+                        .as_str(),
+                ),
             ]),
             Spans::from(vec![
                 Span::styled("Class: ", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(self.current_character.as_ref().unwrap().class.as_str()),
+                Span::raw(
+                    self.current_character
+                        .as_ref()
+                        .context("No Character")?
+                        .class
+                        .as_str(),
+                ),
             ]),
         ];
         let mut terminal = Terminal::new(backend)?;
@@ -163,7 +191,11 @@ impl State for CharacterScreen {
         Ok(())
     }
 
-    fn handle_keybord_event(&self, stdout: &Stdout, event: KeyEvent) -> Result<bool> {
-        Ok(true)
+    fn handle_keyboard_event(
+        &self,
+        stdout: &Stdout,
+        event: KeyEvent,
+    ) -> Result<HandleKeyboardInput> {
+        Ok(HandleKeyboardInput::Input)
     }
 }
