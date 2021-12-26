@@ -1,4 +1,4 @@
-#[derive(Default)]
+#[derive(Default, Clone)]
 
 // The character struct is used by both the database interface
 // and the TUI interface to save and render character data.
