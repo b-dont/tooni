@@ -126,4 +126,8 @@ impl Database {
 
         Ok(all_characters)
     }
+
+    //    pub fn list_all_characters(&self) -> Result<Vec<String>> {
+    //        Ok()
+    //    }
 }

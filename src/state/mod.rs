@@ -4,7 +4,6 @@ use crossterm::{
     cursor,
     event::{read, Event, KeyCode, KeyEvent},
     execute,
-    terminal::{Clear, ClearType::All},
 };
 use std::io::{stdout, Stdout, Write};
 use tui::{
@@ -14,14 +13,25 @@ use tui::{
     widgets::{Block, Borders, Paragraph},
     Terminal,
 };
+use HandleKeyboardInput::*;
+use States::*;
+
+mod select_screen;
 
 enum HandleKeyboardInput {
-    ChangeState(Box<dyn State>),
+    ChangeState(States),
     Input,
     Exit,
 }
 
+enum States {
+    SelectScreen,
+    CharacterScreen(Character),
+}
+
 pub struct Screen {
+    saved_characters: Vec<Character>,
+    current_character: Option<Character>,
     state: Option<Box<dyn State>>,
     stdout: Stdout,
 }
@@ -29,11 +39,30 @@ pub struct Screen {
 impl Screen {
     pub fn new(saved_characters: Vec<Character>) -> Screen {
         Screen {
-            state: Some(Box::new(SelectScreen {
-                saved_characters: saved_characters.clone(),
-            })),
+            // TODO: have either Screen or SelectScreen own this,
+            // and the other hold a reference.
+            saved_characters: saved_characters.clone(),
+            current_character: None,
+            state: Some(Box::new(select_screen::SelectScreen::new(saved_characters))),
             stdout: stdout(),
         }
+    }
+
+    fn change_state(&mut self, state: States) -> Result<()> {
+        match state {
+            SelectScreen => {
+                self.state = Some(Box::new(select_screen::SelectScreen::new(
+                    self.saved_characters.clone(),
+                )))
+            }
+            CharacterScreen(character) => {
+                self.state = Some(Box::new(CharacterScreen {
+                    current_character: Some(character.clone()),
+                }));
+                self.current_character = Some(character.clone())
+            }
+        }
+        Ok(())
     }
 
     pub fn display_screen(&mut self) -> Result<()> {
@@ -50,8 +79,12 @@ impl Screen {
                 Event::Key(event) => {
                     if let Some(state) = &self.state {
                         match state.handle_keyboard_event(&mut self.stdout, event)? {
-                            None => {}
-                            _ => {}
+                            Input => {}
+                            Exit => break,
+                            ChangeState(state) => {
+                                self.change_state(state)?;
+                                self.display_screen()?;
+                            }
                         }
                     }
                 }
@@ -69,72 +102,6 @@ trait State {
         stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput>;
-}
-
-struct SelectScreen {
-    saved_characters: Vec<Character>,
-}
-
-impl State for SelectScreen {
-    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
-        execute!(stdout, Clear(All), cursor::MoveTo(0, 0))?;
-
-        for character in &self.saved_characters {
-            write!(stdout, "{} {}\r\n", character.name, character.class)?;
-            stdout.flush()?;
-        }
-
-        write!(stdout, "New Character Sheet..")?;
-        stdout.flush()?;
-        execute!(stdout, cursor::MoveTo(0, 0))?;
-        Ok(())
-    }
-
-    fn handle_keyboard_event(
-        &self,
-        mut stdout: &Stdout,
-        event: KeyEvent,
-    ) -> Result<HandleKeyboardInput> {
-        let current_row = cursor::position()?.1 as u16;
-        let all_characters_length = all_characters.len() as u16;
-        let all_characters = self.saved_characters;
-
-        match event.code {
-            // On matching the Esc key, return false to the caller.
-            // This will end the main loop and the application.
-            KeyCode::Esc => Ok(HandleKeyboardInput::Exit),
-
-            // Currently set to "Vim" key-bindings for `up` and `down` navigation.
-            // TODO: Possible feature: user config for key-bindings.
-            KeyCode::Char('k') => {
-                execute!(stdout, cursor::MoveToPreviousLine(1))?;
-                Ok(HandleKeyboardInput::Input)
-            }
-            KeyCode::Char('j') => {
-                if current_row != all_characters_length {
-                    execute!(stdout, cursor::MoveToNextLine(1))?;
-                } else {
-                }
-                Ok(HandleKeyboardInput::Input)
-            }
-            KeyCode::Enter => {
-                if current_row == all_characters_length {
-                    Ok(HandleKeyboardInput::ChangeState(Box::new(
-                        CharacterScreen {
-                            current_character: Some(Character::new()),
-                        },
-                    )))
-                } else {
-                    let selected_character = all_characters[current_row as usize];
-
-                    Ok(HandleKeyboardInput::ChangeState(Box::new(CharacterScreen {
-                        current_character: Some(selected_character),
-                    })))
-                }
-            }
-            _ => { Ok(HandleKeyboardInput::Input) }
-        }
-    }
 }
 
 struct CharacterScreen {
@@ -183,7 +150,7 @@ impl State for CharacterScreen {
             let sheet = Paragraph::new(character_text).block(
                 Block::default()
                     .title(self.current_character.as_ref().unwrap().name.as_str())
-                    .borders(Borders::ALL),
+                    .borders(Borders::NONE),
             );
             f.render_widget(sheet, size);
         })?;
@@ -193,9 +160,26 @@ impl State for CharacterScreen {
 
     fn handle_keyboard_event(
         &self,
-        stdout: &Stdout,
+        mut stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput> {
-        Ok(HandleKeyboardInput::Input)
+        match event.code {
+            // On matching the Esc key, return false to the caller.
+            // This will end the main loop and the application.
+            KeyCode::Esc => Ok(Exit),
+
+            // Currently set to "Vim" key-bindings for `up` and `down` navigation.
+            // TODO: Possible feature: user config for key-bindings.
+            KeyCode::Char('k') => {
+                execute!(stdout, cursor::MoveToPreviousLine(1))?;
+                Ok(Input)
+            }
+            KeyCode::Char('j') => {
+                execute!(stdout, cursor::MoveToNextLine(1))?;
+                Ok(Input)
+            }
+            KeyCode::Char('q') => Ok(ChangeState(SelectScreen)),
+            _ => Ok(Input),
+        }
     }
 }
