@@ -123,7 +123,6 @@ impl Database {
         for character in character_iter {
             all_characters.push(character.unwrap());
         }
-
         Ok(all_characters)
     }
 
