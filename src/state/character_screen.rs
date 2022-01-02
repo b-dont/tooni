@@ -1,6 +1,6 @@
 use super::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::Character;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use crossterm::{
     cursor,
     event::{KeyCode, KeyEvent},
@@ -9,71 +9,21 @@ use crossterm::{
 use std::io::Stdout;
 use tui::{
     backend::CrosstermBackend,
-    style::{Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Block, Borders, Paragraph},
-    Terminal,
+    style::{Modifier, Style, Color},
+    widgets::{Block, Borders, List, ListItem},
 };
 
 pub struct CharacterScreen {
-    current_character: Option<Character>,
+    current_character: Character
 }
 
 impl CharacterScreen {
-    pub fn new(current_character: Option<Character>) -> CharacterScreen {
+    pub fn new(current_character: Character) -> CharacterScreen {
         CharacterScreen { current_character }
     }
 }
 
 impl State for CharacterScreen {
-    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
-        let backend = CrosstermBackend::new(stdout);
-
-        // This vector of vectors represents each line of our `Paragraph`,
-        // TODO: This method will need to be reviewed; I'm not sure if this
-        // is the best way to render the text to the screen.
-        let character_text = vec![
-            Spans::from(vec![
-                Span::styled("Name: ", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(
-                    self.current_character
-                        .as_ref()
-                        .context("No Character")?
-                        .name
-                        .as_str(),
-                ),
-            ]),
-            Spans::from(vec![
-                Span::styled("Class: ", Style::default().add_modifier(Modifier::BOLD)),
-                Span::raw(
-                    self.current_character
-                        .as_ref()
-                        .context("No Character")?
-                        .class
-                        .as_str(),
-                ),
-            ]),
-        ];
-        let mut terminal = Terminal::new(backend)?;
-        terminal.clear()?;
-        terminal.set_cursor(0, 0)?;
-
-        // Render the full `sheet`.
-        // TODO: This also needs review, as we need to account
-        // for user navigation around the sheet and how the user
-        // may edit and save character data.
-        terminal.draw(|f| {
-            let size = f.size();
-            let sheet = Paragraph::new(character_text).block(
-                Block::default()
-                    .borders(Borders::NONE),
-            );
-            f.render_widget(sheet, size);
-        })?;
-
-        Ok(())
-    }
-
     fn handle_keyboard_event(
         &self,
         mut stdout: &Stdout,
@@ -97,5 +47,23 @@ impl State for CharacterScreen {
             KeyCode::Char('q') => Ok(ChangeState(SelectScreen)),
             _ => Ok(Input),
         }
+    }
+
+    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
+        let backend = CrosstermBackend::new(stdout);
+        let character = &self.current_character;
+        let character_details = [
+            ListItem::new(format!("Name: {}", character.name)),
+            ListItem::new(format!("Class: {}", character.class)),
+            ListItem::new(format!("Race: {}", character.race))
+        ];
+
+        List::new(character_details)
+            .block(Block::default().borders(Borders::ALL))
+            .style(Style::default().fg(Color::White))
+            .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
+            .highlight_symbol(">");
+
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
 use super::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
-use crate::character::Character;
+use crate::character::{Character, SavedCharacter};
 use anyhow::Result;
 use crossterm::{
     cursor,
@@ -10,11 +10,11 @@ use crossterm::{
 use std::io::{Stdout, Write};
 
 pub struct SelectScreen {
-    saved_characters: Vec<Character>,
+    saved_characters: Vec<SavedCharacter>,
 }
 
 impl SelectScreen {
-    pub fn new(saved_characters: Vec<Character>) -> SelectScreen {
+    pub fn new(saved_characters: Vec<SavedCharacter>) -> SelectScreen {
         SelectScreen { saved_characters }
     }
 }

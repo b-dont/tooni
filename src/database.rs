@@ -1,4 +1,4 @@
-use crate::character::Character;
+use crate::character::{Character, SavedCharacter};
 use once_cell::sync::OnceCell;
 use rusqlite::{params, Connection, Result};
 
@@ -107,7 +107,7 @@ impl Database {
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
         let conn = self.get_connection()?;
         let mut stmt = conn.prepare("SELECT * FROM characters")?;
-        let character_iter = stmt.query_map([], |row| {
+        let characters = stmt.query_map([], |row| {
             Ok(Character {
                 name: row.get(0)?,
                 race: row.get(1)?,
@@ -118,15 +118,20 @@ impl Database {
                 id: row.get(6)?,
             })
         })?;
-
-        let mut all_characters = Vec::new();
-        for character in character_iter {
-            all_characters.push(character.unwrap());
-        }
-        Ok(all_characters)
+        characters.into_iter().collect()
     }
 
-    //    pub fn list_all_characters(&self) -> Result<Vec<String>> {
-    //        Ok()
-    //    }
+    pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
+        let conn = self.get_connection()?;
+        let mut stmt = conn.prepare("SELECT name, race, class, id FROM characters")?;
+        let characters = stmt.query_map([], |row| {
+            Ok(SavedCharacter {
+                name: row.get(0)?,
+                race: row.get(1)?,
+                class: row.get(2)?,
+                id: row.get(3)?
+            })
+        })?;
+        characters.into_iter().collect()
+    }
 }

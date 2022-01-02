@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     let db = Database::new();
 
     // Instantiate state machine
-    let mut screen_state = Screen::new(db.get_all_characters()?);
+    let mut screen_state = Screen::new(db.list_all_characters()?);
 
     // Create our `characters` table if it does not
     // already exist. Additional tables may be built in

@@ -26,3 +26,18 @@ impl Character {
         Self::default()
     }
 }
+
+#[derive(Default, Clone)]
+
+pub struct SavedCharacter {
+    pub name: String,
+    pub race: String,
+    pub class: String,
+    pub id: u8
+}
+
+impl SavedCharacter {
+    pub fn new() -> Self {
+        Self::default()
+    }
+}

@@ -1,4 +1,4 @@
-use crate::character::Character;
+use crate::character::{Character, SavedCharacter};
 use anyhow::Result;
 use crossterm::event::{read, Event, KeyEvent};
 use std::io::{stdout, Stdout, Write};
@@ -20,14 +20,14 @@ enum States {
 }
 
 pub struct Screen {
-    saved_characters: Vec<Character>,
+    saved_characters: Vec<SavedCharacter>,
     current_character: Option<Character>,
     state: Option<Box<dyn State>>,
     stdout: Stdout,
 }
 
 impl Screen {
-    pub fn new(saved_characters: Vec<Character>) -> Screen {
+    pub fn new(saved_characters: Vec<SavedCharacter>) -> Screen {
         Screen {
             // TODO: have either Screen or SelectScreen own this,
             // and the other hold a reference.
@@ -46,10 +46,10 @@ impl Screen {
                 )))
             }
             CharacterScreen(character) => {
+                self.current_character = Some(character.clone());
                 self.state = Some(Box::new(character_screen::CharacterScreen::new(
-                    self.current_character.clone(),
+                    self.current_character.clone().unwrap_or(Character::new()),
                 )));
-                self.current_character = Some(character.clone())
             }
         }
         Ok(())
