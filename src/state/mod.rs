@@ -1,4 +1,7 @@
-use crate::character::{Character, SavedCharacter};
+use crate::{
+    character::{Character, SavedCharacter},
+    database::Database,
+};
 use anyhow::Result;
 use crossterm::event::{read, Event, KeyEvent};
 use std::io::{stdout, Stdout, Write};
@@ -16,26 +19,32 @@ enum HandleKeyboardInput {
 
 enum States {
     SelectScreen,
-    CharacterScreen(Character),
+    CharacterScreen(SavedCharacter),
 }
 
-pub struct Screen {
+pub struct App {
     saved_characters: Vec<SavedCharacter>,
     current_character: Option<Character>,
     state: Option<Box<dyn State>>,
     stdout: Stdout,
+    pub db: Database,
 }
 
-impl Screen {
-    pub fn new(saved_characters: Vec<SavedCharacter>) -> Screen {
-        Screen {
-            // TODO: have either Screen or SelectScreen own this,
-            // and the other hold a reference.
-            saved_characters: saved_characters.clone(),
+impl App {
+    pub fn new(db: Database) -> Result<App> {
+        let mut not_self = App {
+            saved_characters: Vec::new(),
             current_character: None,
-            state: Some(Box::new(select_screen::SelectScreen::new(saved_characters))),
+            state: None,
             stdout: stdout(),
-        }
+            db,
+        };
+        not_self.db.create_character_table()?;
+        not_self.saved_characters = not_self.db.list_all_characters()?;
+        not_self.state = Some(Box::new(select_screen::SelectScreen::new(
+            not_self.saved_characters.clone(),
+        )));
+        Ok(not_self)
     }
 
     fn change_state(&mut self, state: States) -> Result<()> {
@@ -46,7 +55,11 @@ impl Screen {
                 )))
             }
             CharacterScreen(character) => {
-                self.current_character = Some(character.clone());
+                if let Some(id) = character.id {
+                    self.current_character = Some(self.db.load_character(id)?);
+                } else {
+                    self.current_character = Some(Character::new());
+                }
                 self.state = Some(Box::new(character_screen::CharacterScreen::new(
                     self.current_character.clone().unwrap_or(Character::new()),
                 )));
@@ -56,7 +69,7 @@ impl Screen {
     }
 
     pub fn display_screen(&mut self) -> Result<()> {
-        if let Some(state) = &self.state {
+        if let Some(state) = &mut self.state {
             state.display_screen(&mut self.stdout)?;
         }
         Ok(())
@@ -67,7 +80,7 @@ impl Screen {
             self.stdout.flush()?;
             match read()? {
                 Event::Key(event) => {
-                    if let Some(state) = &self.state {
+                    if let Some(state) = &mut self.state {
                         match state.handle_keyboard_event(&mut self.stdout, event)? {
                             Input => {}
                             Exit => break,
@@ -86,9 +99,9 @@ impl Screen {
 }
 
 trait State {
-    fn display_screen(&self, stdout: &mut Stdout) -> Result<()>;
+    fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()>;
     fn handle_keyboard_event(
-        &self,
+        &mut self,
         stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput>;

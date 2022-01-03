@@ -1,7 +1,7 @@
-use crate::{database::Database, state::Screen};
+use crate::{database::Database, state::App};
 use anyhow::Result;
 use crossterm::{
-    cursor, execute, queue,
+    cursor, queue,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{stdout, Write};
@@ -19,16 +19,13 @@ fn main() -> Result<()> {
     let db = Database::new();
 
     // Instantiate state machine
-    let mut screen_state = Screen::new(db.list_all_characters()?);
+    let mut app = App::new(db)?;
 
     // Create our `characters` table if it does not
     // already exist. Additional tables may be built in
     // the future for SRD data and other datasets.
-    db.create_character_table()?;
-    screen_state.display_screen();
-    execute!(stdout, cursor::MoveTo(0, 0))?;
-
-    screen_state.handle_input()?;
+    app.display_screen()?;
+    app.handle_input()?;
 
     disable_raw_mode()?;
     queue!(stdout, LeaveAlternateScreen)?;

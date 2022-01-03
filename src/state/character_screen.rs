@@ -9,12 +9,12 @@ use crossterm::{
 use std::io::Stdout;
 use tui::{
     backend::CrosstermBackend,
-    style::{Modifier, Style, Color},
+    style::{Color, Modifier, Style},
     widgets::{Block, Borders, List, ListItem},
 };
 
 pub struct CharacterScreen {
-    current_character: Character
+    current_character: Character,
 }
 
 impl CharacterScreen {
@@ -25,7 +25,7 @@ impl CharacterScreen {
 
 impl State for CharacterScreen {
     fn handle_keyboard_event(
-        &self,
+        &mut self,
         mut stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput> {
@@ -49,13 +49,13 @@ impl State for CharacterScreen {
         }
     }
 
-    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
+    fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()> {
         let backend = CrosstermBackend::new(stdout);
         let character = &self.current_character;
         let character_details = [
             ListItem::new(format!("Name: {}", character.name)),
             ListItem::new(format!("Class: {}", character.class)),
-            ListItem::new(format!("Race: {}", character.race))
+            ListItem::new(format!("Race: {}", character.race)),
         ];
 
         List::new(character_details)

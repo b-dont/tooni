@@ -33,7 +33,7 @@ pub struct SavedCharacter {
     pub name: String,
     pub race: String,
     pub class: String,
-    pub id: u8
+    pub id: Option<u8>,
 }
 
 impl SavedCharacter {

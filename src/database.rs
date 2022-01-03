@@ -129,7 +129,7 @@ impl Database {
                 name: row.get(0)?,
                 race: row.get(1)?,
                 class: row.get(2)?,
-                id: row.get(3)?
+                id: row.get(3)?,
             })
         })?;
         characters.into_iter().collect()

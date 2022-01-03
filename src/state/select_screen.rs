@@ -1,41 +1,67 @@
 use super::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
-use crate::character::{Character, SavedCharacter};
+use crate::character::SavedCharacter;
 use anyhow::Result;
 use crossterm::{
     cursor,
     event::{KeyCode, KeyEvent},
     execute,
-    terminal::{Clear, ClearType::All},
 };
-use std::io::{Stdout, Write};
+use std::io::Stdout;
+use tui::{
+    backend::CrosstermBackend,
+    style::{Color, Modifier, Style},
+    widgets::{Block, Borders, List, ListItem, ListState},
+    Terminal,
+};
 
 pub struct SelectScreen {
     saved_characters: Vec<SavedCharacter>,
+    state: ListState
 }
 
 impl SelectScreen {
     pub fn new(saved_characters: Vec<SavedCharacter>) -> SelectScreen {
-        SelectScreen { saved_characters }
+        let mut state = ListState::default();
+        state.select(Some(0));
+        SelectScreen { 
+            saved_characters,
+            state
+        }
     }
 }
 
 impl State for SelectScreen {
-    fn display_screen(&self, stdout: &mut Stdout) -> Result<()> {
-        execute!(stdout, Clear(All), cursor::MoveTo(0, 0))?;
+    fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()> {
+        let backend = CrosstermBackend::new(stdout);
+        let mut terminal = Terminal::new(backend)?;
+        let all_characters = self
+            .saved_characters
+            .iter()
+            .map(|c| ListItem::new(c.name.clone()))
+            .collect::<Vec<_>>();
 
-        for character in &self.saved_characters {
-            write!(stdout, "{} {}\r\n", character.name, character.class)?;
-            stdout.flush()?;
-        }
-
-        write!(stdout, "New Character Sheet..")?;
-        stdout.flush()?;
-        execute!(stdout, cursor::MoveTo(0, 0))?;
+        terminal.draw(|f| {
+            let size = f.size();
+            let character_list = List::new(all_characters)
+                .block(
+                    Block::default()
+                        .title("Character Sheets")
+                        .borders(Borders::ALL),
+                )
+                .style(Style::default().fg(Color::White))
+                .highlight_style(
+                    Style::default()
+                        .fg(Color::Green)
+                        .add_modifier(Modifier::BOLD),
+                )
+                .highlight_symbol(">");
+            f.render_stateful_widget(character_list, size, &mut self.state)
+        })?;
         Ok(())
     }
 
     fn handle_keyboard_event(
-        &self,
+        &mut self,
         mut stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput> {
@@ -46,14 +72,11 @@ impl State for SelectScreen {
             // On matching the Esc key, return false to the caller.
             // This will end the main loop and the application.
             KeyCode::Esc => Ok(Exit),
-
-            // Currently set to "Vim" key-bindings for `up` and `down` navigation.
-            // TODO: Possible feature: user config for key-bindings.
-            KeyCode::Char('k') => {
-                execute!(stdout, cursor::MoveToPreviousLine(1))?;
+            KeyCode::Char('k') | KeyCode::Down => {
+                self.state.select(self.state.selected().map(|x| x + 1));
                 Ok(Input)
             }
-            KeyCode::Char('j') => {
+            KeyCode::Char('j') | KeyCode::Up => {
                 if current_row != all_characters_length {
                     execute!(stdout, cursor::MoveToNextLine(1))?;
                 } else {
@@ -62,7 +85,7 @@ impl State for SelectScreen {
             }
             KeyCode::Enter => {
                 if current_row == all_characters_length {
-                    Ok(ChangeState(CharacterScreen(Character::new())))
+                    Ok(ChangeState(CharacterScreen(SavedCharacter::new())))
                 } else {
                     let selected_character = &self.saved_characters[current_row as usize];
                     Ok(ChangeState(CharacterScreen(selected_character.clone())))
