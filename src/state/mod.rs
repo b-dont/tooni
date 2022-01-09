@@ -14,6 +14,7 @@ mod select_screen;
 enum HandleKeyboardInput {
     ChangeState(States),
     Input,
+    Void,
     Exit,
 }
 
@@ -83,16 +84,17 @@ impl App {
                     if let Some(state) = &mut self.state {
                         match state.handle_keyboard_event(&mut self.stdout, event)? {
                             Input => {}
+                            Void => {}
                             Exit => break,
                             ChangeState(state) => {
                                 self.change_state(state)?;
-                                self.display_screen()?;
                             }
                         }
                     }
                 }
                 _ => {}
             }
+            self.display_screen()?;
         }
         Ok(())
     }
@@ -102,7 +104,7 @@ trait State {
     fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()>;
     fn handle_keyboard_event(
         &mut self,
-        stdout: &Stdout,
+        _stdout: &Stdout,
         event: KeyEvent,
     ) -> Result<HandleKeyboardInput>;
 }

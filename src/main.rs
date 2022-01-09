@@ -1,4 +1,4 @@
-use crate::{database::Database, state::App};
+use crate::{database::Database, state::App, character::Character};
 use anyhow::Result;
 use crossterm::{
     cursor, queue,
@@ -17,7 +17,6 @@ fn main() -> Result<()> {
 
     // Instantiate the SQLite database struct
     let db = Database::new();
-
     // Instantiate state machine
     let mut app = App::new(db)?;
 
