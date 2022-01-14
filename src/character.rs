@@ -11,6 +11,11 @@
 // and consideration is needed for possible enums or additional structs
 // for data such as race, class, background, and others.
 
+// Character is a full, struct representation of a D&D character. 
+// This struct is used by the CharacterScreen state to display and 
+// interact with all elements of the saved character. Any changes 
+// that are made in to the character the CharacterScreen state are 
+// saved dynamically to the struct (at least that's the plan).
 pub struct Character {
     pub name: String,
     pub race: String,
@@ -29,6 +34,10 @@ impl Character {
 
 #[derive(Default, Clone)]
 
+// A SavedCharacter is a lightweight character representation
+// that holds only the most basic information. This is used 
+// by the SelectScreen state to display a menu of all currently-saved
+// characters in the database.
 pub struct SavedCharacter {
     pub name: String,
     pub race: String,

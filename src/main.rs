@@ -20,12 +20,15 @@ fn main() -> Result<()> {
     // Instantiate state machine
     let mut app = App::new(db)?;
 
-    // Create our `characters` table if it does not
-    // already exist. Additional tables may be built in
-    // the future for SRD data and other datasets.
+    // Display the first state
     app.display_screen()?;
+
+    // This is effectively the main program loop; listens
+    // for any user input from crossterm KeyEvent, MouseEvent, or Resize.
     app.handle_input()?;
 
+    // If handle_input is broken, we exit the application;
+    // disable raw mode and clean up stdout.
     disable_raw_mode()?;
     queue!(stdout, LeaveAlternateScreen)?;
     stdout.flush()?;
