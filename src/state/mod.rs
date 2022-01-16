@@ -24,8 +24,8 @@ enum States {
     CharacterSheet(SavedCharacter),
 }
 
-// All the information needed for any state 
-// of the application is held in the App. 
+// All the information needed for any state
+// of the application is held in the App.
 pub struct App {
     saved_characters: Vec<SavedCharacter>,
     current_character: Option<Character>,
@@ -45,20 +45,20 @@ impl App {
         };
 
         // Calls on the db are made at instantiation;
-        // the .create_character_table() method will 
+        // the .create_character_table() method will
         // never make duplicate tables. It will check
-        // for an existing table internally, and if 
+        // for an existing table internally, and if
         // it does not exist, it will create one.
         not_self.db.create_character_table()?;
 
         // .list_all_characters() returns a Vector of SavedCharacter
         // structs; a lightweight representation of each character saved
-        // in the db. It contains the name, race, and class strings of 
+        // in the db. It contains the name, race, and class strings of
         // the characters and their corresponding id.
         not_self.saved_characters = not_self.db.list_all_characters()?;
 
         // The default state when launching the application is SelectScreen,
-        // so the App's state is instantiated with a Box<SelectScreen>. 
+        // so the App's state is instantiated with a Box<SelectScreen>.
         // The saved_characters vector is then passed as its new() argument.
         not_self.state = Some(Box::new(select_screen::SelectScreen::new(
             not_self.saved_characters.clone(),
@@ -74,8 +74,8 @@ impl App {
                     self.saved_characters.clone(),
                 )))
             }
-            // When changing to the CharacterScreen state, we're provided 
-            // with a SavedCharacter struct, which contains the id of the 
+            // When changing to the CharacterScreen state, we're provided
+            // with a SavedCharacter struct, which contains the id of the
             // corresponding character we're attempting to load.
             CharacterSheet(character) => {
                 // If the returned SavedCharacter has an id, we call .load_character()
@@ -92,11 +92,11 @@ impl App {
                 // current_character as its argument.
                 //
                 // .clone() is called on the current_character struct and unwrap_or
-                // to account for the Option. If it's None, then we give it a 
+                // to account for the Option. If it's None, then we give it a
                 // blank Character struct instead (this scinario should never happen).
                 self.state = Some(Box::new(character_sheet::CharacterSheet::new(
                     self.current_character.clone().unwrap_or(Character::new()),
-                )));
+                )?));
             }
         }
         Ok(())
@@ -112,13 +112,13 @@ impl App {
     }
 
     pub fn handle_input(&mut self) -> Result<()> {
-        // This is effectively the main program loop. We listen for 
-        // user input here in the form of crossterm events. Input is classified 
+        // This is effectively the main program loop. We listen for
+        // user input here in the form of crossterm events. Input is classified
         // as Key(KetEvent), Mouse(MouseEvent), and Resize(u16, u16) (for terminal resizing)
-        // Like display_screen, there is a method for handling each type 
-        // of input for each state, which is called. 
+        // Like display_screen, there is a method for handling each type
+        // of input for each state, which is called.
         //
-        // Each handle method returns an enum corresponding to the event type, which 
+        // Each handle method returns an enum corresponding to the event type, which
         // is handled by App, rather than the states, as the states do not have access
         // to all the information needed to handle every scinario, but App does.
         loop {
@@ -138,7 +138,7 @@ impl App {
                 }
                 _ => {}
             }
-            // Display screen is always called after any input is detected and handled 
+            // Display screen is always called after any input is detected and handled
             // to account for any new changes in the display of the state.
             self.display_screen()?;
         }

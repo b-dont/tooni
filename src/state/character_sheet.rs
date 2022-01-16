@@ -1,4 +1,4 @@
-use super::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
+use super::{tabs::TabsState, HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::Character;
 use anyhow::Result;
 use crossterm::{
@@ -11,21 +11,24 @@ use tui::{
     backend::CrosstermBackend,
     layout::{Constraint, Layout},
     style::{Color, Modifier, Style},
-    widgets::{Block, Borders, List, ListItem, ListState},
+    text::{Span, Spans},
+    widgets::{Paragraph, Tabs},
     Terminal,
 };
 
 pub struct CharacterSheet {
     current_character: Character,
+    current_tab: TabsState,
 }
 
 impl CharacterSheet {
-    pub fn new(current_character: Character) -> CharacterSheet {
-        let mut state = ListState::default();
-        state.select(Some(0));
-        CharacterSheet { 
+    pub fn new(current_character: Character) -> Result<CharacterSheet> {
+        let mut current_tab = TabsState::default();
+        current_tab.select(Some(0))?;
+        Ok(CharacterSheet {
             current_character,
-        }
+            current_tab,
+        })
     }
 }
 
@@ -34,6 +37,50 @@ impl State for CharacterSheet {
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
         terminal.clear()?;
+        terminal.draw(|f| {
+            let chunks = Layout::default()
+                .direction(tui::layout::Direction::Vertical)
+                .margin(1)
+                .constraints(
+                    [
+                        Constraint::Percentage(10),
+                        Constraint::Percentage(10),
+                        Constraint::Percentage(80),
+                    ]
+                    .as_ref(),
+                )
+                .split(f.size());
+
+            let titles = ["Deatils", "Features", "Spells"]
+                .iter()
+                .cloned()
+                .map(Spans::from)
+                .collect();
+
+            let tabs = Tabs::new(titles)
+                .style(Style::default().fg(Color::Gray))
+                .highlight_style(Style::default().fg(Color::Green))
+                .divider("|");
+
+            let character_details = vec![Spans::from(vec![Span::styled(
+                format!(
+                    "{} {} {}",
+                    self.current_character.name,
+                    self.current_character.race,
+                    self.current_character.class
+                ),
+                Style::default()
+                    .add_modifier(Modifier::BOLD)
+                    .fg(Color::Green),
+            )])];
+
+            let details = Paragraph::new(character_details)
+                .alignment(tui::layout::Alignment::Center)
+                .wrap(tui::widgets::Wrap { trim: true });
+
+            f.render_widget(details, chunks[0]);
+            f.render_widget(tabs, chunks[1]);
+        })?;
         Ok(())
     }
 
@@ -62,3 +109,5 @@ impl State for CharacterSheet {
         }
     }
 }
+
+trait SheetTab: State {}
