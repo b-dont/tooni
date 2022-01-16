@@ -1,4 +1,4 @@
-use crate::{database::Database, state::App, character::Character};
+use crate::{character::Character, database::Database, state::App};
 use anyhow::Result;
 use crossterm::{
     cursor, queue,

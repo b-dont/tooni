@@ -8,8 +8,9 @@ use std::io::{stdout, Stdout, Write};
 use HandleKeyboardInput::*;
 use States::*;
 
-mod character_screen;
+mod character_sheet;
 mod select_screen;
+mod tabs;
 
 enum HandleKeyboardInput {
     ChangeState(States),
@@ -20,7 +21,7 @@ enum HandleKeyboardInput {
 
 enum States {
     SelectScreen,
-    CharacterScreen(SavedCharacter),
+    CharacterSheet(SavedCharacter),
 }
 
 // All the information needed for any state 
@@ -76,7 +77,7 @@ impl App {
             // When changing to the CharacterScreen state, we're provided 
             // with a SavedCharacter struct, which contains the id of the 
             // corresponding character we're attempting to load.
-            CharacterScreen(character) => {
+            CharacterSheet(character) => {
                 // If the returned SavedCharacter has an id, we call .load_character()
                 // with that id on the db. Else, it's a blank character, so
                 // we creadte a new Character struct instead.
@@ -93,7 +94,7 @@ impl App {
                 // .clone() is called on the current_character struct and unwrap_or
                 // to account for the Option. If it's None, then we give it a 
                 // blank Character struct instead (this scinario should never happen).
-                self.state = Some(Box::new(character_screen::CharacterScreen::new(
+                self.state = Some(Box::new(character_sheet::CharacterSheet::new(
                     self.current_character.clone().unwrap_or(Character::new()),
                 )));
             }

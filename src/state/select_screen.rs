@@ -33,11 +33,12 @@ impl State for SelectScreen {
         // Define the backend for our tui terminal and instantiate it
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
+        terminal.clear()?;
 
         // This is a vector of tui-rs ListItems which contain the name,
-        // race and class of each character saved in the database. 
-        // Each of these corresponds with a SavedCharacter struct saved 
-        // in the saved_characters vector, which have the corresponding 
+        // race and class of each character saved in the database.
+        // Each of these corresponds with a SavedCharacter struct saved
+        // in the saved_characters vector, which have the corresponding
         // id to load the full character struct from the sqlite db.
         let mut selections = self
             .saved_characters
@@ -56,7 +57,7 @@ impl State for SelectScreen {
         // character sheet from the main selection screen
         selections.push(ListItem::new("New Character Sheet"));
 
-        // Call the .draw() method on the terminal instance to format 
+        // Call the .draw() method on the terminal instance to format
         // and display the vector of ListItems to the terminal.
         terminal.draw(|f| {
             let size = f.size();
@@ -89,9 +90,9 @@ impl State for SelectScreen {
 
             // Vim key-binds for up/down navigation as well as arrow-keys. When 'down' is detected,
             // we call the .select() method on the list state, and pass
-            // the results from the .selected() method on itself to obtian the 
+            // the results from the .selected() method on itself to obtian the
             // next ListItem in the ListState. When 'up' is detected, the
-            // opposite occurs. 
+            // opposite occurs.
             //
             // The argument for .selected() is clamped to keep the caller in the
             // bounds of the ListItem vector.
@@ -112,7 +113,7 @@ impl State for SelectScreen {
                 Ok(Input)
             }
 
-            // When enter is detected, we check the saved_characters 
+            // When enter is detected, we check the saved_characters
             // index that corresponds with the ListState index; if the last
             // index is currently 'selected' then we return a SavedCharacter::new(),
             // or a blank character; else, we return the SavedCharacter at the selected
@@ -122,9 +123,9 @@ impl State for SelectScreen {
             // state changes internally.
             KeyCode::Enter => {
                 if self.state.selected() == Some(all_characters_length - 1) {
-                    Ok(ChangeState(CharacterScreen(SavedCharacter::new())))
+                    Ok(ChangeState(CharacterSheet(SavedCharacter::new())))
                 } else {
-                    Ok(ChangeState(CharacterScreen(
+                    Ok(ChangeState(CharacterSheet(
                         self.saved_characters
                             [self.state.selected().unwrap_or(all_characters_length - 1)]
                         .clone(),

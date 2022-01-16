@@ -9,36 +9,31 @@ use crossterm::{
 use std::io::Stdout;
 use tui::{
     backend::CrosstermBackend,
+    layout::{Constraint, Layout},
     style::{Color, Modifier, Style},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, Borders, List, ListItem, ListState},
+    Terminal,
 };
 
-pub struct CharacterScreen {
+pub struct CharacterSheet {
     current_character: Character,
 }
 
-impl CharacterScreen {
-    pub fn new(current_character: Character) -> CharacterScreen {
-        CharacterScreen { current_character }
+impl CharacterSheet {
+    pub fn new(current_character: Character) -> CharacterSheet {
+        let mut state = ListState::default();
+        state.select(Some(0));
+        CharacterSheet { 
+            current_character,
+        }
     }
 }
 
-impl State for CharacterScreen {
+impl State for CharacterSheet {
     fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()> {
         let backend = CrosstermBackend::new(stdout);
-        let character = &self.current_character;
-        let character_details = [
-            ListItem::new(format!("Name: {}", character.name)),
-            ListItem::new(format!("Class: {}", character.class)),
-            ListItem::new(format!("Race: {}", character.race)),
-        ];
-
-        List::new(character_details)
-            .block(Block::default().borders(Borders::ALL))
-            .style(Style::default().fg(Color::White))
-            .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
-            .highlight_symbol(">");
-
+        let mut terminal = Terminal::new(backend)?;
+        terminal.clear()?;
         Ok(())
     }
 
