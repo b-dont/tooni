@@ -1,4 +1,4 @@
-use super::{tabs::TabsState, HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
+use super::{tabs::TabState, HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::Character;
 use anyhow::Result;
 use crossterm::{
@@ -18,12 +18,12 @@ use tui::{
 
 pub struct CharacterSheet {
     current_character: Character,
-    current_tab: TabsState,
+    current_tab: TabState,
 }
 
 impl CharacterSheet {
     pub fn new(current_character: Character) -> Result<CharacterSheet> {
-        let mut current_tab = TabsState::default();
+        let mut current_tab = TabState::default();
         current_tab.select(Some(0))?;
         Ok(CharacterSheet {
             current_character,
@@ -51,13 +51,13 @@ impl State for CharacterSheet {
                 )
                 .split(f.size());
 
-            let titles = ["Deatils", "Features", "Spells"]
+            let tab_titles = ["Deatils", "Features", "Spells"]
                 .iter()
                 .cloned()
                 .map(Spans::from)
                 .collect();
 
-            let tabs = Tabs::new(titles)
+            let tabs = Tabs::new(tab_titles)
                 .style(Style::default().fg(Color::Gray))
                 .highlight_style(Style::default().fg(Color::Green))
                 .divider("|");
@@ -109,5 +109,3 @@ impl State for CharacterSheet {
         }
     }
 }
-
-trait SheetTab: State {}

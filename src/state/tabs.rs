@@ -1,29 +1,12 @@
-use super::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
-use crate::character::Character;
 use anyhow::Result;
-use crossterm::{
-    cursor,
-    event::{KeyCode, KeyEvent},
-    execute,
-};
-use std::io::Stdout;
-use tui::{
-    backend::CrosstermBackend,
-    layout::{Constraint, Layout},
-    style::{Color, Modifier, Style},
-    text::{Span, Spans},
-    widgets::{Paragraph, Tabs},
-    Terminal,
-};
 
 #[derive(Default, Clone)]
-
-pub struct TabsState {
+pub struct TabState {
     offset: usize,
     selected: Option<usize>
 }
 
-impl TabsState {
+impl TabState {
     pub fn new() -> Self {
         Self::default()
     }
