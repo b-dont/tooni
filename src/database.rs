@@ -1,5 +1,4 @@
 use crate::character::{Character, SavedCharacter};
-use crossterm::ExecutableCommand;
 use once_cell::sync::OnceCell;
 use rusqlite::{params, Connection, Result};
 
@@ -29,13 +28,13 @@ impl Database {
     pub fn create_character_table(&self) -> Result<()> {
         self.get_connection()?.execute(
             "CREATE TABLE IF NOT EXISTS characters (
-                id INTEGER PRIMARY KEY
+                id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 race TEXT NOT NULL,
                 class TEXT NOT NULL,
                 background TEXT NOT NULL,
                 alignment TEXT NOT NULL,
-                xp INTEGER,
+                xp INTEGER
             )",
             [],
         )?;
@@ -55,7 +54,8 @@ impl Database {
             "REPLACE INTO characters (id, name, race, class, background, alignment, xp)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)")?;
 
-        stm.execute([
+        stm.execute(
+            params![
             character.id,
             character.name,
             character.race,
@@ -63,7 +63,7 @@ impl Database {
             character.background,
             character.alignment,
             character.xp
-        ]);
+            ])?;
 
         Ok(())
     }
@@ -73,7 +73,7 @@ impl Database {
     // will need to handle this error instead of panicing. This kind of
     // error shouldn't happen, as a user will never call this function with
     // any kind of "custom" id argument.
-    pub fn load_character(&self, id: u8) -> Result<Character> {
+    pub fn load_character(&self, id: u64) -> Result<Character> {
         let mut stmt = self
             .get_connection()?
             .prepare("SELECT * FROM characters WHERE id=?1")?;
@@ -100,7 +100,7 @@ impl Database {
             .get_connection()?
             .prepare("DELETE FROM characters WHERE id=?1")?;
 
-        stmt.execute([character.id]);
+        stmt.execute([character.id])?;
 
         Ok(())
     }

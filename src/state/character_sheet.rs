@@ -1,4 +1,5 @@
-use super::{tabs::TabState, HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
+use super::tabs::TabState;
+use crate::state::app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::Character;
 use anyhow::Result;
 use crossterm::{

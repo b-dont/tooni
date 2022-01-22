@@ -23,7 +23,7 @@ pub struct Character {
     pub class: String,
     pub background: String,
     pub alignment: String,
-    pub xp: u8,
+    pub xp: u64,
 }
 
 impl Character {

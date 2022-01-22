@@ -1,6 +1,7 @@
 use crate::{
     character::{Character, SavedCharacter},
     database::Database,
+    state::{select_screen, character_sheet}
 };
 use anyhow::Result;
 use crossterm::event::{read, Event, KeyEvent};
@@ -8,14 +9,14 @@ use std::io::{stdout, Stdout, Write};
 use HandleKeyboardInput::*;
 use States::*;
 
-enum HandleKeyboardInput {
+pub enum HandleKeyboardInput {
     ChangeState(States),
     Input,
     Void,
     Exit,
 }
 
-enum States {
+pub enum States {
     SelectScreen,
     CharacterSheet(SavedCharacter),
 }
@@ -142,7 +143,7 @@ impl App {
     }
 }
 
-trait State {
+pub trait State {
     fn display_screen(&mut self, stdout: &mut Stdout) -> Result<()>;
     fn handle_keyboard_event(
         &mut self,
