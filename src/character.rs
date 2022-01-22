@@ -17,13 +17,13 @@
 // that are made in to the character the CharacterScreen state are
 // saved dynamically to the struct (at least that's the plan).
 pub struct Character {
+    pub id: Option<u64>,
     pub name: String,
     pub race: String,
     pub class: String,
     pub background: String,
     pub alignment: String,
     pub xp: u8,
-    pub id: Option<u8>,
 }
 
 impl Character {
@@ -39,10 +39,10 @@ impl Character {
 // by the SelectScreen state to display a menu of all currently-saved
 // characters in the database.
 pub struct SavedCharacter {
+    pub id: Option<u64>,
     pub name: String,
     pub race: String,
     pub class: String,
-    pub id: Option<u8>,
 }
 
 impl SavedCharacter {

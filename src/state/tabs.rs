@@ -3,7 +3,8 @@ use anyhow::Result;
 #[derive(Default, Clone)]
 pub struct TabState {
     offset: usize,
-    selected: Option<usize>
+    selected: Option<usize>,
+    tab_menu: Vec<SheetTab>
 }
 
 impl TabState {
@@ -24,5 +25,9 @@ impl TabState {
     }
 }
 
+#[derive(Clone)]
 enum SheetTab {
+    Details,
+    Features,
+    Spells
 }

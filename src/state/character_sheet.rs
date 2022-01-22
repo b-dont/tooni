@@ -18,16 +18,16 @@ use tui::{
 
 pub struct CharacterSheet {
     current_character: Character,
-    current_tab: TabState,
+    tabs: TabState,
 }
 
 impl CharacterSheet {
     pub fn new(current_character: Character) -> Result<CharacterSheet> {
-        let mut current_tab = TabState::default();
-        current_tab.select(Some(0))?;
+        let mut tabs = TabState::default();
+        tabs.select(Some(0))?;
         Ok(CharacterSheet {
             current_character,
-            current_tab,
+            tabs,
         })
     }
 }

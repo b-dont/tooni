@@ -1,4 +1,5 @@
 use crate::character::{Character, SavedCharacter};
+use crossterm::ExecutableCommand;
 use once_cell::sync::OnceCell;
 use rusqlite::{params, Connection, Result};
 
@@ -28,13 +29,13 @@ impl Database {
     pub fn create_character_table(&self) -> Result<()> {
         self.get_connection()?.execute(
             "CREATE TABLE IF NOT EXISTS characters (
+                id INTEGER PRIMARY KEY
                 name TEXT NOT NULL,
                 race TEXT NOT NULL,
                 class TEXT NOT NULL,
                 background TEXT NOT NULL,
                 alignment TEXT NOT NULL,
                 xp INTEGER,
-                id INTEGER PRIMARY KEY
             )",
             [],
         )?;
@@ -48,19 +49,21 @@ impl Database {
     // id element, the database will automatically assign this value as
     // n + 1, where n = the highest id that exists in the database.
     pub fn save_character(&self, character: &Character) -> Result<()> {
-        self.get_connection()?.execute(
-            "REPLACE INTO characters (name, race, class, background, alignment, xp, id)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-            params![
-                character.name,
-                character.race,
-                character.class,
-                character.background,
-                character.alignment,
-                character.xp,
-                character.id
-            ],
-        )?;
+        let mut stm = self
+            .get_connection()?
+            .prepare(
+            "REPLACE INTO characters (id, name, race, class, background, alignment, xp)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)")?;
+
+        stm.execute([
+            character.id,
+            character.name,
+            character.race,
+            character.class,
+            character.background,
+            character.alignment,
+            character.xp
+        ]);
 
         Ok(())
     }
@@ -77,13 +80,13 @@ impl Database {
 
         let queried_character = stmt.query_row(params![id], |row| {
             Ok(Character {
-                name: row.get(0)?,
-                race: row.get(1)?,
-                class: row.get(2)?,
-                background: row.get(3)?,
-                alignment: row.get(4)?,
-                xp: row.get(5)?,
-                id: row.get(6)?,
+                id: row.get(0)?,
+                name: row.get(1)?,
+                race: row.get(2)?,
+                class: row.get(3)?,
+                background: row.get(4)?,
+                alignment: row.get(5)?,
+                xp: row.get(6)?,
             })
         })?;
 
@@ -93,8 +96,11 @@ impl Database {
     // Deletes a SQLite row that matches the id element of the Character
     // struct argument.
     pub fn delete_character(&self, character: &Character) -> Result<()> {
-        self.get_connection()?
-            .execute("DELETE FROM characters WHERE id=?1", params![character.id])?;
+        let mut stmt = self
+            .get_connection()?
+            .prepare("DELETE FROM characters WHERE id=?1")?;
+
+        stmt.execute([character.id]);
 
         Ok(())
     }
@@ -109,13 +115,13 @@ impl Database {
         let mut stmt = conn.prepare("SELECT * FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(Character {
-                name: row.get(0)?,
-                race: row.get(1)?,
-                class: row.get(2)?,
-                background: row.get(3)?,
-                alignment: row.get(4)?,
-                xp: row.get(5)?,
-                id: row.get(6)?,
+                id: row.get(0)?,
+                name: row.get(1)?,
+                race: row.get(2)?,
+                class: row.get(3)?,
+                background: row.get(4)?,
+                alignment: row.get(5)?,
+                xp: row.get(6)?,
             })
         })?;
         characters.into_iter().collect()
@@ -123,13 +129,13 @@ impl Database {
 
     pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
         let conn = self.get_connection()?;
-        let mut stmt = conn.prepare("SELECT name, race, class, id FROM characters")?;
+        let mut stmt = conn.prepare("SELECT id, name, race, class FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(SavedCharacter {
-                name: row.get(0)?,
-                race: row.get(1)?,
-                class: row.get(2)?,
-                id: row.get(3)?,
+                id: row.get(0)?,
+                name: row.get(1)?,
+                race: row.get(2)?,
+                class: row.get(3)?,
             })
         })?;
         characters.into_iter().collect()
