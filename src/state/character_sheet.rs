@@ -6,13 +6,19 @@ use crate::state::{
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use std::io::Stdout;
-use tui::widgets::{Block, Borders};
 use tui::{
     backend::CrosstermBackend,
     layout::{Constraint, Layout},
     style::{Color, Modifier, Style},
     text::{Span, Spans},
-    widgets::{Paragraph, Tabs},
+    widgets::{
+        Row,
+        Block,
+        Borders,
+        Tabs,
+        Table,
+        Cell
+    },
     Terminal,
 };
 
@@ -58,10 +64,10 @@ impl State for CharacterSheet {
                 .direction(tui::layout::Direction::Vertical)
                 .constraints(
                     [
-                        Constraint::Percentage(15),
+                        Constraint::Percentage(20),
+                        Constraint::Percentage(20),
                         Constraint::Length(1),
-                        Constraint::Length(1),
-                        Constraint::Percentage(80),
+                        Constraint::Percentage(55),
                     ]
                     .as_ref(),
                 )
@@ -71,38 +77,45 @@ impl State for CharacterSheet {
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD);
 
-            let character_info = vec![
-                Spans::from(vec![
-                    Span::styled("Name: ", key_style),
-                    Span::raw(self.current_character.name.as_str()),
+            let details_table = Table::new(vec![
+                Row::new(vec![
+                    Cell::from(Spans::from(vec![
+                        Span::styled("Name: ", key_style),
+                        Span::raw(self.current_character.name.as_str()),
+                    ])),
+                    Cell::from(Spans::from(vec![
+                        Span::styled("Alignment: ", key_style),
+                        Span::raw(self.current_character.alignment.as_str()),
+                    ])),
                 ]),
-                Spans::from(vec![
-                    Span::styled("Race: ", key_style),
-                    Span::raw(self.current_character.race.as_str()),
-                ]),
-                Spans::from(vec![
-                    Span::styled("Class: ", key_style),
-                    Span::raw(self.current_character.class.as_str()),
-                ]),
-                Spans::from(vec![
-                    Span::styled("Background: ", key_style),
-                    Span::raw(self.current_character.background.as_str()),
-                ]),
-                Spans::from(vec![
-                    Span::styled("Alignment: ", key_style),
-                    Span::raw(self.current_character.alignment.as_str()),
-                ]),
-                Spans::from(vec![
-                    Span::styled("Experience: ", key_style),
-                    Span::raw(self.current_character.xp.to_string()),
-                ]),
-            ];
 
-            let details = Paragraph::new(character_info)
-                .alignment(tui::layout::Alignment::Left)
-                .wrap(tui::widgets::Wrap { trim: true });
+                Row::new(vec![
+                    Cell::from(Spans::from(vec![
+                        Span::styled("Race: ", key_style),
+                        Span::raw(self.current_character.race.as_str()),
+                    ])),
+                    Cell::from(Spans::from(vec![
+                        Span::styled("Experience: ", key_style),
+                        Span::raw(self.current_character.xp.to_string()),
+                    ])),
+                ]),
 
-            f.render_widget(details, chunks[0]);
+                Row::new(vec![
+                     Cell::from(Spans::from(vec![
+                        Span::styled("Class: ", key_style),
+                        Span::raw(self.current_character.class.as_str()),
+                    ])),
+                ]),
+
+                Row::new(vec![
+                    Cell::from(Spans::from(vec![
+                        Span::styled("Background: ", key_style),
+                        Span::raw(self.current_character.background.as_str()),
+                    ])),
+                ]),
+
+            ]).block(Block::default())
+              .widths(&[Constraint::Percentage(10), Constraint::Percentage(10), Constraint::Percentage(10)]);
 
             let tab_titles = CharacterSheetTab::get_all_tab_strings()
                 .into_iter()
@@ -120,10 +133,10 @@ impl State for CharacterSheet {
                 .border_type(tui::widgets::BorderType::Rounded)
                 .style(Style::default());
 
+            f.render_widget(details_table, chunks[0]);
             f.render_widget(tabs, chunks[2]);
             f.render_widget(tab_area, chunks[3]);
-            self.current_tab
-                .display_tab(f, chunks[3], &self.current_character);
+            self.current_tab.display_tab(f, chunks[3], &self.current_character);
         })?;
         Ok(())
     }

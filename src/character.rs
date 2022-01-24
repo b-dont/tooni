@@ -1,5 +1,4 @@
 #[derive(Default, Clone)]
-
 // The character struct is used by both the database interface
 // and the TUI interface to save and render character data.
 // Each of the struct's elements is public and represents a piece of
@@ -33,7 +32,6 @@ impl Character {
 }
 
 #[derive(Default, Clone)]
-
 // A SavedCharacter is a lightweight character representation
 // that holds only the most basic information. This is used
 // by the SelectScreen state to display a menu of all currently-saved
