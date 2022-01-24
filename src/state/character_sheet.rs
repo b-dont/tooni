@@ -1,14 +1,12 @@
-use crate::state::app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::Character;
-use anyhow::Result;
-use crossterm::{
-    cursor,
-    event::{KeyCode, KeyEvent},
-    execute,
+use crate::state::{
+    app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*},
+    tabs::CharacterSheetTab,
 };
-use tui::widgets::{Borders, Block};
-use enum_iterator::IntoEnumIterator;
+use anyhow::Result;
+use crossterm::event::{KeyCode, KeyEvent};
 use std::io::Stdout;
+use tui::widgets::{Block, Borders};
 use tui::{
     backend::CrosstermBackend,
     layout::{Constraint, Layout},
@@ -18,42 +16,26 @@ use tui::{
     Terminal,
 };
 
-#[derive(Clone, Copy, IntoEnumIterator)]
-enum CharacterSheetTab {
-    Stats,
-    Features,
-    Spells
-}
-
-impl CharacterSheetTab {
-    pub fn tab_name(tab: &CharacterSheetTab) -> String {
-        match tab {
-            &Self::Stats => "Stats".to_string(),
-            &Self::Features => "Features".to_string(),
-            &Self::Spells => "Spells".to_string()
-        }
-    }
-}
-
 pub struct CharacterSheet {
     current_character: Character,
-    current_tab: Option<CharacterSheetTab>,
+    current_tab: CharacterSheetTab,
     index: usize,
     all_tabs: Vec<CharacterSheetTab>,
 }
 
 impl CharacterSheet {
-    pub fn new(current_character: Character) -> Result<CharacterSheet> {
-        Ok(CharacterSheet {
+    pub fn new(current_character: Character) -> CharacterSheet {
+        CharacterSheet {
             current_character,
-            current_tab: None,
+            current_tab: CharacterSheetTab::Stats,
             index: 0,
-            all_tabs: CharacterSheetTab::into_enum_iter().collect()
-        })
+            all_tabs: CharacterSheetTab::get_all_tabs(),
+        }
     }
 
     pub fn next(&mut self) {
         self.index = (self.index + 1) % self.all_tabs.len();
+        self.current_tab = self.all_tabs[self.index];
     }
 
     pub fn previous(&mut self) {
@@ -62,6 +44,7 @@ impl CharacterSheet {
         } else {
             self.index = self.all_tabs.len() - 1;
         }
+        self.current_tab = self.all_tabs[self.index];
     }
 }
 
@@ -73,38 +56,56 @@ impl State for CharacterSheet {
         terminal.draw(|f| {
             let chunks = Layout::default()
                 .direction(tui::layout::Direction::Vertical)
-                .margin(1)
                 .constraints(
                     [
-                        Constraint::Percentage(10),
-                        Constraint::Percentage(5),
-                        Constraint::Percentage(85),
+                        Constraint::Percentage(15),
+                        Constraint::Length(1),
+                        Constraint::Length(1),
+                        Constraint::Percentage(80),
                     ]
                     .as_ref(),
                 )
                 .split(f.size());
 
-            let character_details = vec![Spans::from(vec![Span::styled(
-                format!(
-                    "{} {} {}",
-                    self.current_character.name,
-                    self.current_character.race,
-                    self.current_character.class
-                ),
-                Style::default()
-                    .add_modifier(Modifier::BOLD)
-                    .fg(Color::Green),
-            )])];
+            let key_style = Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD);
 
-            let details = Paragraph::new(character_details)
-                .alignment(tui::layout::Alignment::Center)
+            let character_info = vec![
+                Spans::from(vec![
+                    Span::styled("Name: ", key_style),
+                    Span::raw(self.current_character.name.as_str()),
+                ]),
+                Spans::from(vec![
+                    Span::styled("Race: ", key_style),
+                    Span::raw(self.current_character.race.as_str()),
+                ]),
+                Spans::from(vec![
+                    Span::styled("Class: ", key_style),
+                    Span::raw(self.current_character.class.as_str()),
+                ]),
+                Spans::from(vec![
+                    Span::styled("Background: ", key_style),
+                    Span::raw(self.current_character.background.as_str()),
+                ]),
+                Spans::from(vec![
+                    Span::styled("Alignment: ", key_style),
+                    Span::raw(self.current_character.alignment.as_str()),
+                ]),
+                Spans::from(vec![
+                    Span::styled("Experience: ", key_style),
+                    Span::raw(self.current_character.xp.to_string()),
+                ]),
+            ];
+
+            let details = Paragraph::new(character_info)
+                .alignment(tui::layout::Alignment::Left)
                 .wrap(tui::widgets::Wrap { trim: true });
- 
-           f.render_widget(details, chunks[0]);
 
-           let tab_titles = vec!["Stats", "Features", "Spells"]
-                .iter()
-                .cloned()
+            f.render_widget(details, chunks[0]);
+
+            let tab_titles = CharacterSheetTab::get_all_tab_strings()
+                .into_iter()
                 .map(Spans::from)
                 .collect();
 
@@ -114,16 +115,15 @@ impl State for CharacterSheet {
                 .highlight_style(Style::default().fg(Color::Green))
                 .divider("|");
 
-           f.render_widget(tabs, chunks[1]);
+            let tab_area = Block::default()
+                .borders(Borders::ALL)
+                .border_type(tui::widgets::BorderType::Rounded)
+                .style(Style::default());
 
-           self.current_tab = Some(self.all_tabs[self.index]);
-           let current_tab_display = match self.index {
-               0 => {},
-               1 => {},
-               2 => {},
-               _ => {}
-           };
-
+            f.render_widget(tabs, chunks[2]);
+            f.render_widget(tab_area, chunks[3]);
+            self.current_tab
+                .display_tab(f, chunks[3], &self.current_character);
         })?;
         Ok(())
     }
@@ -141,11 +141,11 @@ impl State for CharacterSheet {
             KeyCode::Tab => {
                 self.next();
                 Ok(Input)
-            },
+            }
             KeyCode::BackTab => {
                 self.previous();
                 Ok(Input)
-            },
+            }
             _ => Ok(Input),
         }
     }

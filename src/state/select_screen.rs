@@ -1,5 +1,5 @@
-use crate::state::app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use crate::character::SavedCharacter;
+use crate::state::app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*};
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use std::io::Stdout;

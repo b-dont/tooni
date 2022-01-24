@@ -1,7 +1,7 @@
 use crate::{
     character::{Character, SavedCharacter},
     database::Database,
-    state::{select_screen, character_sheet}
+    state::{character_sheet, select_screen},
 };
 use anyhow::Result;
 use crossterm::event::{read, Event, KeyEvent};
@@ -93,7 +93,7 @@ impl App {
                 // blank Character struct instead (this scinario should never happen).
                 self.state = Some(Box::new(character_sheet::CharacterSheet::new(
                     self.current_character.clone().unwrap_or(Character::new()),
-                )?));
+                )));
             }
         }
         Ok(())

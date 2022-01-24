@@ -48,14 +48,12 @@ impl Database {
     // id element, the database will automatically assign this value as
     // n + 1, where n = the highest id that exists in the database.
     pub fn save_character(&self, character: &Character) -> Result<()> {
-        let mut stm = self
-            .get_connection()?
-            .prepare(
+        let mut stm = self.get_connection()?.prepare(
             "REPLACE INTO characters (id, name, race, class, background, alignment, xp)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)")?;
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+        )?;
 
-        stm.execute(
-            params![
+        stm.execute(params![
             character.id,
             character.name,
             character.race,
@@ -63,7 +61,7 @@ impl Database {
             character.background,
             character.alignment,
             character.xp
-            ])?;
+        ])?;
 
         Ok(())
     }
