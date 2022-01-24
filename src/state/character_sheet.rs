@@ -1,8 +1,9 @@
-use crate::character::Character;
-use crate::state::{
+use crate::{
+    character::character::Character,
+    state::{
     app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*},
     tabs::CharacterSheetTab,
-};
+}};
 use anyhow::Result;
 use crossterm::event::{KeyCode, KeyEvent};
 use std::io::Stdout;

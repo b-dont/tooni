@@ -1,4 +1,4 @@
-use crate::character::{Character, SavedCharacter};
+use crate::{character::character::SavedCharacter, Character};
 use once_cell::sync::OnceCell;
 use rusqlite::{params, Connection, Result};
 

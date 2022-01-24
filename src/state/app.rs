@@ -1,7 +1,8 @@
 use crate::{
-    character::{Character, SavedCharacter},
-    database::Database,
+    Character, 
+    Database,
     state::{character_sheet, select_screen},
+    character::character::SavedCharacter
 };
 use anyhow::Result;
 use crossterm::event::{read, Event, KeyEvent};
