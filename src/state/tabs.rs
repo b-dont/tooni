@@ -1,4 +1,4 @@
-use crate::character::character::Character;
+use crate::Character;
 use core::fmt;
 use enum_iterator::IntoEnumIterator;
 use std::io::Stdout;

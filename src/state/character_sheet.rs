@@ -1,5 +1,5 @@
 use crate::{
-    character::character::Character,
+    Character,
     state::{
     app::{HandleKeyboardInput, HandleKeyboardInput::*, State, States::*},
     tabs::CharacterSheetTab,

@@ -1,4 +1,4 @@
-use crate::{character::character::Character, database::database::Database, state::app::App};
+use crate::{data::character::Character, data::database::Database, state::app::App};
 use anyhow::Result;
 use crossterm::{
     cursor, queue,
@@ -6,9 +6,8 @@ use crossterm::{
 };
 use std::io::{stdout, Write};
 
-mod character;
-mod database;
 mod state;
+mod data;
 
 fn main() -> Result<()> {
     let mut stdout = stdout();
