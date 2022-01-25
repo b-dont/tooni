@@ -13,7 +13,7 @@ pub struct Database {
 impl Database {
     pub fn new() -> Self {
         Self {
-            path: "characters.sqlite3".to_string(),
+            path: "data.sqlite3".to_string(),
             connection: OnceCell::new(),
         }
     }

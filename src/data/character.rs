@@ -1,3 +1,12 @@
+use std::collections::HashMap;
+use crate::data::{
+    spells::Spell,
+    items::Item,
+    race::Race,
+    class::Class,
+    background::Background,
+};
+
 #[derive(Default, Clone)]
 // The character struct is used by both the database interface
 // and the TUI interface to save and render character data.
@@ -18,10 +27,22 @@
 pub struct Character {
     pub id: Option<u64>,
     pub name: String,
-    pub race: String,
-    pub class: String,
-    pub background: String,
+    pub race: Race,
+    pub class: Class,
+    pub background: Background,
     pub alignment: String,
+    pub stats: HashMap<String, u8>,
+    pub proficiencies: HashMap<String, bool>,
+    pub proficiency_bonus: u8,
+    pub languages: Vec<String>,
+    pub equipment: Vec<Item>,
+    pub spells: Vec<Spell>,
+    pub speed: u8,
+    pub gender: String,
+    pub height: u8,
+    pub weight: u8,
+    pub age: u8,
+    pub level: u8,
     pub xp: u64,
 }
 

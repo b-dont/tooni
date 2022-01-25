@@ -40,12 +40,12 @@ impl CharacterSheet {
         }
     }
 
-    pub fn next(&mut self) {
+    fn next(&mut self) {
         self.index = (self.index + 1) % self.all_tabs.len();
         self.current_tab = self.all_tabs[self.index];
     }
 
-    pub fn previous(&mut self) {
+    fn previous(&mut self) {
         if self.index > 0 {
             self.index -= 1;
         } else {
