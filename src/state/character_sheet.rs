@@ -18,16 +18,16 @@ use tui::{
 
 pub struct CharacterSheet {
     current_character: Character,
-    current_tab: TabState,
+    tabs: TabState,
 }
 
 impl CharacterSheet {
     pub fn new(current_character: Character) -> Result<CharacterSheet> {
-        let mut current_tab = TabState::default();
-        current_tab.select(Some(0))?;
+        let mut tabs = TabState::default();
+        tabs.select(Some(0))?;
         Ok(CharacterSheet {
             current_character,
-            current_tab,
+            tabs 
         })
     }
 }
@@ -57,7 +57,7 @@ impl State for CharacterSheet {
                 .map(Spans::from)
                 .collect();
 
-            let tabs = Tabs::new(tab_titles)
+            let all_tabs = Tabs::new(tab_titles)
                 .style(Style::default().fg(Color::Gray))
                 .highlight_style(Style::default().fg(Color::Green))
                 .divider("|");
@@ -79,7 +79,7 @@ impl State for CharacterSheet {
                 .wrap(tui::widgets::Wrap { trim: true });
 
             f.render_widget(details, chunks[0]);
-            f.render_widget(tabs, chunks[1]);
+            f.render_widget(all_tabs, chunks[1]);
         })?;
         Ok(())
     }
