@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone)]
 pub struct Background {
+    pub name: String,
     pub skill_proficiencies: Vec<String>,
     pub languages: Vec<String>,
     pub starting_equipment: Vec<String>,

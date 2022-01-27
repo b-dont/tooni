@@ -38,7 +38,90 @@ impl Database {
             )",
             [],
         )?;
+        Ok(())
+    }
 
+    pub fn create_spells_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS spells (
+                name TEXT NOT NULL PRIMARY KEY,
+                school TEXT NOT NULL,
+                level INTEGER,
+                casting_time INTEGER,
+                range INTEGER,
+                components TEXT NOT NULL,
+                duration INTEGER,
+                description TEXT NOT NULL
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_items_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS items (
+                name TEXT NOT NULL PRIMARY KEY,
+                class TEXT NOT NULL,
+                cost INTEGER,
+                damage INTEGER,
+                weight INTEGER,
+                properties TEXT NOT NULL
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_backgrounds_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS backgrounds (
+                name TEXT NOT NULL PRIMARY KEY,
+                skill_prof TEXT NOT NULL,
+                languages TEXT NOT NULL,
+                starting_equipment TEXT NOT NULL,
+                features TEXT NOT NULL,
+                personality_trait TEXT NOT NULL,
+                ideal TEXT NOT NULL,
+                bond TEXT NOT NULL,
+                flaw TEXT NOT NULL
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_classes_table(&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS classes (
+                name TEXT NOT NULL PRIMARY KEY,
+                features TEXT NOT NULL,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                tool_prof TEXT NOT NULL,
+                saving_throws TEXT NOT NULL,
+                hit_dice INTEGER,
+                spells_known INTEGER,
+                spell_slots INTEGER,
+                spell_slot_level INTEGER
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_races_table(&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS races (
+                name TEXT NOT NULL PRIMARY KEY,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                features TEXT NOT NULL
+            )", 
+            []
+        )?;
         Ok(())
     }
 
