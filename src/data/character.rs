@@ -1,5 +1,13 @@
-#[derive(Default, Clone)]
+use std::collections::HashMap;
+use crate::data::{
+    spells::Spell,
+    items::Item,
+    race::Race,
+    class::Class,
+    background::Background,
+};
 
+#[derive(Default, Clone)]
 // The character struct is used by both the database interface
 // and the TUI interface to save and render character data.
 // Each of the struct's elements is public and represents a piece of
@@ -17,13 +25,25 @@
 // that are made in to the character the CharacterScreen state are
 // saved dynamically to the struct (at least that's the plan).
 pub struct Character {
+    pub id: Option<u64>,
     pub name: String,
-    pub race: String,
-    pub class: String,
-    pub background: String,
+    pub race: Race,
+    pub class: Class,
+    pub background: Background,
     pub alignment: String,
-    pub xp: u8,
-    pub id: Option<u8>,
+    pub stats: HashMap<String, u8>,
+    pub proficiencies: HashMap<String, bool>,
+    pub proficiency_bonus: u8,
+    pub languages: Vec<String>,
+    pub equipment: Vec<Item>,
+    pub spells: Vec<Spell>,
+    pub speed: u8,
+    pub gender: String,
+    pub height: u8,
+    pub weight: u8,
+    pub age: u8,
+    pub level: u8,
+    pub xp: u64,
 }
 
 impl Character {
@@ -33,16 +53,15 @@ impl Character {
 }
 
 #[derive(Default, Clone)]
-
 // A SavedCharacter is a lightweight character representation
 // that holds only the most basic information. This is used
 // by the SelectScreen state to display a menu of all currently-saved
 // characters in the database.
 pub struct SavedCharacter {
+    pub id: Option<u64>,
     pub name: String,
     pub race: String,
     pub class: String,
-    pub id: Option<u8>,
 }
 
 impl SavedCharacter {
