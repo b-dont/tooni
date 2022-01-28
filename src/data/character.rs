@@ -36,7 +36,7 @@ pub struct Character {
     pub proficiency_bonus: u8,
     pub languages: Vec<String>,
     pub equipment: Vec<Item>,
-    pub spells: Vec<Spell>,
+    pub spells: Option<Vec<Spell>>,
     pub speed: u8,
     pub gender: String,
     pub height: u8,
