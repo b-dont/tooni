@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 #[derive(Default, Debug, Clone)]
 pub struct Class {
+    pub id: Option<u64>,
     pub name: String,
+    pub languages: Vec<String>,
     pub features: HashMap<String, String>,
     pub skill_proficiencies: Vec<String>,
     pub armor_proficiencies: Vec<String>,

@@ -23,6 +23,17 @@ impl Database {
             .get_or_try_init(|| Connection::open(&self.path))
     }
 
+    pub fn create_tables(&self) -> Result<()> {
+        self.create_character_table();
+        self.create_spells_table();
+        self.create_items_table();
+        self.create_backgrounds_table();
+        self.create_classes_table();
+        self.create_races_table();
+
+        Ok(())
+    }
+
     // Create a character table in the SQLite database.
     // Each column represents an element of the character sheet.
     pub fn create_character_table(&self) -> Result<()> {
@@ -30,13 +41,182 @@ impl Database {
             "CREATE TABLE IF NOT EXISTS characters (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
-                race TEXT NOT NULL,
-                class TEXT NOT NULL,
-                background TEXT NOT NULL,
+                raceconfigid INTEGER,
+                FOREIGN KEY(raceconfigid) REFERENCES raceconfigs(id),
+                classconfigid INTEGER,
+                FOREIGN KEY(classconfigid) REFERENCES classconfigs(id),
+                backgroundconfigid INTEGER,
+                FOREIGN KEY(backgroundconfigid) REFERENCES backgroundconfigs(id),
                 alignment TEXT NOT NULL,
-                xp INTEGER
+                stats INTEGER,
+                FOREIGN KEY(stats) REFERENCES statsconfigs(id),
+
+                proficiencies !TODO,
+
+                proficiency_bonus INTEGER,
+
+                languages !TODO,
+                equipment !TODO,
+                spells !TODO,
+
+                speed INTEGER,
+                gender TEXT NOT NULL,
+                height INTEGER,
+                weight INTEGER,
+                age INTEGER,
+                level INTEGER,
+                xp INTEGER,
             )",
             [],
+        )?;
+        Ok(())
+    }
+
+    pub fn create_stats_table(&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS statsconfigs (
+                id INTEGER PRIMARY KEY,
+                str INTEGER,
+                dex INTEGER,
+                con INTEGER,
+                int INTEGER,
+                wis INTEGER,
+                cha INTEGER
+            )", 
+            []
+        )?;
+
+        Ok(())
+    }
+
+    pub fn create_spells_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS spells (
+                name TEXT NOT NULL PRIMARY KEY,
+                school TEXT NOT NULL,
+                level INTEGER,
+                casting_time INTEGER,
+                range INTEGER,
+                components TEXT NOT NULL,
+                duration INTEGER,
+                description TEXT NOT NULL
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_items_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS items (
+                name TEXT NOT NULL PRIMARY KEY,
+                class TEXT NOT NULL,
+                cost INTEGER,
+                damage INTEGER,
+                weight INTEGER,
+                properties TEXT NOT NULL
+            )", 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn create_backgrounds_table (&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS backgrounds (
+                name TEXT NOT NULL PRIMARY KEY,
+                skill_prof TEXT NOT NULL,
+                languages TEXT NOT NULL,
+                starting_equipment TEXT NOT NULL,
+                features TEXT NOT NULL,
+                personality_trait TEXT NOT NULL,
+                ideal TEXT NOT NULL,
+                bond TEXT NOT NULL,
+                flaw TEXT NOT NULL
+            )", 
+            []
+        )?;
+
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS backgroundconfigs (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                skill_prof TEXT NOT NULL,
+                languages TEXT NOT NULL,
+                starting_equipment TEXT NOT NULL,
+                features TEXT NOT NULL,
+                personality_trait TEXT NOT NULL,
+                ideal TEXT NOT NULL,
+                bond TEXT NOT NULL,
+                flaw TEXT NOT NULL
+            )", 
+            []
+        )?;
+
+        Ok(())
+    }
+
+    pub fn create_classes_table(&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS classes (
+                name TEXT NOT NULL PRIMARY KEY,
+                features TEXT NOT NULL,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                tool_prof TEXT NOT NULL,
+                saving_throws TEXT NOT NULL,
+                hit_dice INTEGER,
+                spells_known INTEGER,
+                spell_slots INTEGER,
+                spell_slot_level INTEGER
+            )", 
+            []
+        )?;
+
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS classconfigs (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                features TEXT NOT NULL,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                tool_prof TEXT NOT NULL,
+                saving_throws TEXT NOT NULL,
+                hit_dice INTEGER,
+                spells_known INTEGER,
+                spell_slots INTEGER,
+                spell_slot_level INTEGER
+            )", 
+            []
+        )?;
+
+        Ok(())
+    }
+
+    pub fn create_races_table(&self) -> Result<()> {
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS races (
+                name TEXT NOT NULL PRIMARY KEY,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                features TEXT NOT NULL
+            )", 
+            []
+        )?;
+
+        self.get_connection()?.execute(
+            "CREATE TABLE IF NOT EXISTS raceconfigs (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                skill_prof TEXT NOT NULL,
+                armor_prof TEXT NOT NULL,
+                weapon_prof TEXT NOT NULL,
+                features TEXT NOT NULL
+            )", 
+            []
         )?;
 
         Ok(())

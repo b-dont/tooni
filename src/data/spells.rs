@@ -1,5 +1,6 @@
 #[derive(Default, Debug, Clone)]
 pub struct Spell {
+    pub id: Option<u64>,
     pub name: String,
     pub school: String,
     pub level: u8,
