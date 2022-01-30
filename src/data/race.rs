@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use crate::data::spells::Spell;
 
 #[derive(Default, Debug, Clone)]
 pub struct Race {
@@ -10,5 +9,4 @@ pub struct Race {
     pub armor_proficiencies: Option<Vec<String>>,
     pub weapon_proficiencies: Option<Vec<String>>,
     pub features: HashMap<String, String>,
-    pub spells: Option<Vec<Spell>>,
 }

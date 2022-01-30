@@ -25,7 +25,7 @@ use crate::data::{
 // that are made in to the character the CharacterScreen state are
 // saved dynamically to the struct (at least that's the plan).
 pub struct Character {
-    pub id: Option<u64>,
+    pub id: Option<i64>,
     pub name: String,
     pub race: Race,
     pub class: Class,
@@ -34,6 +34,8 @@ pub struct Character {
     pub stats: HashMap<String, u8>,
     pub proficiencies: HashMap<String, bool>,
     pub proficiency_bonus: u8,
+    pub passive_perception: u8,
+    pub inspiration: bool,
     pub languages: Vec<String>,
     pub equipment: Vec<Item>,
     pub spells: Option<Vec<Spell>>,
@@ -42,6 +44,10 @@ pub struct Character {
     pub height: u8,
     pub weight: u8,
     pub age: u8,
+    pub armor_class: u8,
+    pub initiative: u8,
+    pub hit_points: u16,
+    pub temp_hit_points: u16,
     pub level: u8,
     pub xp: u64,
 }
