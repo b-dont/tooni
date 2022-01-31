@@ -7,17 +7,14 @@ use super::language::Language;
 // This struct and its impls represent
 // all needed interaction with the SQLite database.
 //
-// TODO: Change all u8 to i64
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
-    path: String,
     connection: Connection
 }
 
 impl Database {
     pub fn new() -> Result<Self> {
         Ok(Self {
-            path: "data.sqlite3".to_string(),
             connection: Connection::open("data.sqlite3")?,
         })
     }
@@ -93,7 +90,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_character_languages(&self, id: i64, langs: &Vec<Language>) -> Result<()> {
+    pub fn save_character_languages(&self, id: Option<i64>, langs: &Vec<Language>) -> Result<()> {
         let mut stmt = self.connection.prepare(
             "REPLACE INTO character_languages (
                 character,
@@ -135,7 +132,7 @@ impl Database {
                name,
                description
                FROM languages WHERE id=?1
-               ")?;
+            ")?;
 
        let queried_lang = stmt.query_row(params![id], |row| {
            Ok(Language {
@@ -171,7 +168,7 @@ impl Database {
     // id element, the database will automatically assign this value as
     // n + 1, where n = the highest id that exists in the database.
     pub fn save_character(&self, character: &Character) -> Result<()> {
-        let mut stm = self.connection.prepare(
+        let mut stmt = self.connection.prepare(
             "REPLACE INTO characters (
             id, 
             name, 
@@ -194,7 +191,7 @@ impl Database {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
         )?;
 
-        stm.execute(params![
+        stmt.execute(params![
             character.id,
             character.name,
             character.alignment,
@@ -214,6 +211,8 @@ impl Database {
             character.level,
             character.xp
         ])?;
+
+        self.save_character_languages(character.id, &character.languages)?;
 
         Ok(())
     }
@@ -303,6 +302,7 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
+                languages: Vec::new(),
                 speed: row.get(6)?, 
                 gender: row.get(7)?, 
                 height: row.get(8)?, 

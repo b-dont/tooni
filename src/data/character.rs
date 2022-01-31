@@ -108,6 +108,7 @@ impl Character {
             proficiency_bonus: 2, 
             passive_perception: 12, 
             inspiration: false, 
+            languages: Vec::new(),
             speed: 30, 
             gender: "Male".to_string(), 
             height: 6, 
@@ -130,6 +131,7 @@ impl Character {
             proficiency_bonus: 2, 
             passive_perception: 12, 
             inspiration: false, 
+            languages: Vec::new(),
             speed: 30, 
             gender: "Female".to_string(), 
             height: 6, 
@@ -151,7 +153,7 @@ impl Character {
 // by the SelectScreen state to display a menu of all currently-saved
 // characters in the database.
 pub struct SavedCharacter {
-    pub id: Option<u64>,
+    pub id: Option<i64>,
     pub name: String,
     pub race: String,
     pub class: String,
