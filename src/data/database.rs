@@ -52,7 +52,6 @@ impl Database {
                 proficiency_bonus INTEGER,
                 passive_perception INTEGER,
                 inspiration INTEGER,
-                languages INTEGER REFERENCES character_languages(character),
                 speed INTEGER,
                 gender TEXT NOT NULL,
                 height INTEGER,
@@ -81,8 +80,8 @@ impl Database {
 
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS character_languages (
-                character INTEGER NOT NULL REFERENCES character(id),
-                language INTEGER NOT NULL REFERENCES languages(id),
+                character INTEGER REFERENCES character(id),
+                language INTEGER REFERENCES languages(id),
                 PRIMARY KEY (character, language)
             )", 
             []
@@ -121,6 +120,22 @@ impl Database {
             lang.description
         ])?;
         Ok(())
+    }
+
+    pub fn load_characer_languages(&self, id: Option<i64>) -> Result<Vec<Language>> {
+        let mut stmt = self.connection.prepare(
+            "SELECT
+            language
+            FROM character_languages WHERE character=?1
+            "
+        )?;
+
+        let character_languages = stmt.query_map([], |row| {
+            self.load_language(row.get(0)?)
+        })?;
+
+        character_languages.into_iter().collect()
+
     }
 
     pub fn load_language(&self, id: i64) -> Result<Language> {
@@ -169,6 +184,7 @@ impl Database {
     // n + 1, where n = the highest id that exists in the database.
     pub fn save_character(&self, character: &Character) -> Result<()> {
         let mut stmt = self.connection.prepare(
+            // Change to SQLite UPDATE statement
             "REPLACE INTO characters (
             id, 
             name, 
@@ -176,7 +192,6 @@ impl Database {
             proficiency_bonus, 
             passive_perception, 
             inspiration, 
-            languages,
             speed, 
             gender, 
             height, 
@@ -188,7 +203,7 @@ impl Database {
             temp_hit_points, 
             level, 
             xp)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)"
         )?;
 
         stmt.execute(params![
@@ -198,7 +213,6 @@ impl Database {
             character.proficiency_bonus,
             character.passive_perception,
             character.inspiration,
-            character.id,
             character.speed,
             character.gender,
             character.height,
@@ -222,31 +236,28 @@ impl Database {
     // will need to handle this error instead of panicing. This kind of
     // error shouldn't happen, as a user will never call this function with
     // any kind of "custom" id argument.
-    pub fn load_character(&self, id: u64) -> Result<Character> {
+    pub fn load_character(&self, id: i64) -> Result<Character> {
         let mut stmt = self
             .connection
             .prepare("SELECT 
-                characters.id,
-                characters.name,
-                characters.alignment,
-                characters.proficiency_bonus,
-                characters.passive_perception,
-                characters.inspiration,
-                characters.languages,
-                characters.speed,
-                characters.gender,
-                characters.height,
-                characters.weight,
-                characters.age,
-                characters.armor_class,
-                characters.initiative,
-                characters.hit_points,
-                characters.temp_hit_points,
-                characters.level,
-                characters.xp,
-                character_languages.language
+                id,
+                name,
+                alignment,
+                proficiency_bonus,
+                passive_perception,
+                inspiration,
+                speed,
+                gender,
+                height,
+                weight,
+                age,
+                armor_class,
+                initiative,
+                hit_points,
+                temp_hit_points,
+                level,
+                xp,
                 FROM characters 
-                INNER JOIN character_languages ON characters.languages = character_languages.language
                 WHERE id=?1")?;
 
         let queried_character = stmt.query_row(params![id], |row| {
@@ -257,7 +268,7 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                languages: Vec::new(),
+                languages: self.load_characer_languages(Some(id))?,
                 speed: row.get(6)?, 
                 gender: row.get(7)?, 
                 height: row.get(8)?, 
@@ -293,7 +304,25 @@ impl Database {
     // This is used only for the `select_screen()` function to display all
     // currently saved characters in the database.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
-        let mut stmt = self.connection.prepare("SELECT * FROM characters")?;
+        let mut stmt = self.connection.prepare("SELECT 
+            id,
+            name,
+            alignment,
+            proficiency_bonus,
+            passive_perception,
+            inspiration,
+            speed,
+            gender,
+            height,
+            weight,
+            age,
+            armor_class,
+            initiative,
+            hit_points,
+            temp_hit_points,
+            level,
+            xp
+            FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(Character {
                 id: row.get(0)?,
@@ -302,18 +331,18 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                languages: Vec::new(),
-                speed: row.get(6)?, 
-                gender: row.get(7)?, 
-                height: row.get(8)?, 
-                weight: row.get(9)?, 
-                age: row.get(10)?, 
-                armor_class: row.get(11)?, 
-                initiative: row.get(12)?, 
-                hit_points: row.get(13)?, 
-                temp_hit_points: row.get(14)?, 
-                level: row.get(15)?, 
-                xp: row.get(16)?,
+                languages: self.load_characer_languages(Some(row.get(0)?))?,
+                speed: row.get(7)?, 
+                gender: row.get(8)?, 
+                height: row.get(9)?, 
+                weight: row.get(10)?, 
+                age: row.get(11)?, 
+                armor_class: row.get(12)?, 
+                initiative: row.get(13)?, 
+                hit_points: row.get(14)?, 
+                temp_hit_points: row.get(15)?, 
+                level: row.get(16)?, 
+                xp: row.get(17)?,
             })
         })?;
         characters.into_iter().collect()
@@ -369,6 +398,7 @@ impl Database {
 //        Ok(())
 //    }
 //
+//    TODO: This can just be held in the character table
 //    pub fn create_stats_table(&self) -> Result<()> {
 //        self.connection.execute(
 //            "CREATE TABLE IF NOT EXISTS statsconfigs (

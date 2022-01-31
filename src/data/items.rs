@@ -1,4 +1,5 @@
 #[derive(Default, Debug, Clone)]
+// Enum for item class.
 pub struct Item {
    pub id: Option<i64>,
    pub name: String,

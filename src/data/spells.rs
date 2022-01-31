@@ -1,4 +1,5 @@
 #[derive(Default, Debug, Clone)]
+// Enum for school
 pub struct Spell {
     pub id: Option<i64>,
     pub name: String,

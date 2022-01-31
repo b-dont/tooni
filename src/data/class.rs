@@ -1,5 +1,6 @@
 use crate::data::{language::Language, feature::Feature};
 
+// Enum for saving_throws stats
 #[derive(Default, Debug, Clone)]
 pub struct Class {
     pub id: Option<i64>,

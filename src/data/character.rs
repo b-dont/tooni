@@ -13,19 +13,10 @@ use crate::data::{
 // The character struct is used by both the database interface
 // and the TUI interface to save and render character data.
 // Each of the struct's elements is public and represents a piece of
-// character data. The only impl is `new()` which will call `default()`.
+// character data.
 //
-// TODO: As of right now, there has been no need for additional impls
-// on this struct. This may change with additional features.
-// The struct does not currently contain all needed elements of data,
-// and consideration is needed for possible enums or additional structs
-// for data such as race, class, background, and others.
-
-// Character is a full, struct representation of a D&D character.
-// This struct is used by the CharacterScreen state to display and
-// interact with all elements of the saved character. Any changes
-// that are made in to the character the CharacterScreen state are
-// saved dynamically to the struct (at least that's the plan).
+// TODO: Change alignment, stats, gender to Enums; impl Default;
+// TODO: Consider sets instead of Vecs for data structures
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
@@ -63,6 +54,7 @@ impl fmt::Display for Character {
            {}
            {}
            {}
+           {:#?}
            {}
            {}
            {}
@@ -80,6 +72,7 @@ impl fmt::Display for Character {
            self.proficiency_bonus,
            self.passive_perception,
            self.inspiration,
+           self.languages,
            self.speed,
            self.gender,
            self.height,
@@ -101,7 +94,7 @@ impl Character {
     }
 
     pub fn test_character_frank() -> Self {
-        Character { 
+        let mut frank = Character { 
             id: None, 
             name: "Frank".to_string(), 
             alignment: "Neutral".to_string(), 
@@ -120,11 +113,13 @@ impl Character {
             temp_hit_points: 0, 
             level: 1, 
             xp: 0 
-        }
+        };
+
+        frank
     }
 
     pub fn test_character_kevin() -> Self {
-        Character { 
+        let mut kevin = Character { 
             id: None, 
             name: "Kevin".to_string(), 
             alignment: "Evil".to_string(), 
@@ -143,7 +138,9 @@ impl Character {
             temp_hit_points: 0, 
             level: 1, 
             xp: 0 
-        }
+        };
+
+        kevin
     }
 }
 
