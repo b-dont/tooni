@@ -6,3 +6,4 @@ pub mod background;
 pub mod items;
 pub mod spells;
 pub mod language;
+pub mod feature;

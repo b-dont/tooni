@@ -93,7 +93,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_character_language(&self, id: i64, langs: &Vec<Language>) -> Result<()> {
+    pub fn save_character_languages(&self, id: i64, langs: &Vec<Language>) -> Result<()> {
         let mut stmt = self.connection.prepare(
             "REPLACE INTO character_languages (
                 character,
@@ -201,6 +201,7 @@ impl Database {
             character.proficiency_bonus,
             character.passive_perception,
             character.inspiration,
+            character.id,
             character.speed,
             character.gender,
             character.height,
@@ -257,6 +258,7 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
+                languages: Vec::new(),
                 speed: row.get(6)?, 
                 gender: row.get(7)?, 
                 height: row.get(8)?, 

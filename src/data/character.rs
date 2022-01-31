@@ -6,7 +6,7 @@ use crate::data::{
     race::Race,
     class::Class,
     background::Background,
-    language::Language
+    language::Language,
 };
 
 #[derive(Default, Clone)]
@@ -58,22 +58,22 @@ impl fmt::Display for Character {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
        writeln!(f, "
            {:#?}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n
-           {}\n", 
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}
+           {}", 
            self.id,
            self.name,
            self.alignment,
