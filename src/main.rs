@@ -1,4 +1,4 @@
-use crate::{data::character::Character, data::database::Database, state::app::App};
+use crate::{data::character::Character, data::database::Database, /* state::app::App*/};
 use anyhow::Result;
 use crossterm::{
     cursor, queue,
@@ -6,30 +6,31 @@ use crossterm::{
 };
 use std::io::{stdout, Write};
 
-mod state;
+// mod state;
 mod data;
 
 fn main() -> Result<()> {
-    let mut stdout = stdout();
-    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
-    enable_raw_mode()?;
+//    let mut stdout = stdout();
+//    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
+//    enable_raw_mode()?;
 
     // Instantiate the SQLite database struct
-    let db = Database::new();
+    let db = Database::new()?;
+
     // Instantiate state machine
-    let mut app = App::new(db)?;
+//    let mut app = App::new(db)?;
 
     // Display the first state
-    app.display_screen()?;
+//    app.display_screen()?;
 
     // This is effectively the main program loop; listens
     // for any user input from crossterm KeyEvent, MouseEvent, or Resize.
-    app.handle_input()?;
+//    app.handle_input()?;
 
     // If handle_input is broken, we exit the application;
     // disable raw mode and clean up stdout.
-    disable_raw_mode()?;
-    queue!(stdout, LeaveAlternateScreen)?;
-    stdout.flush()?;
+//    disable_raw_mode()?;
+//    queue!(stdout, LeaveAlternateScreen)?;
+//    stdout.flush()?;
     Ok(())
 }
