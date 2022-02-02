@@ -1,5 +1,6 @@
 use crate::{data::character::SavedCharacter, Character};
 use rusqlite::{params, Connection, Result};
+use std::{collections::HashMap, slice::SliceIndex};
 
 use super::language::Language;
 
@@ -9,7 +10,7 @@ use super::language::Language;
 //
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
-    connection: Connection
+    connection: Connection,
 }
 
 impl Database {
@@ -22,24 +23,23 @@ impl Database {
     pub fn create_tables(&self) -> Result<()> {
         self.create_character_table()?;
         self.create_languages_tables()?;
-//        self.create_spells_table();
-//        self.create_items_table();
-//        self.create_backgrounds_table();
-//        self.create_classes_table();
-//        self.create_races_table();
-//        self.create_stats_table();
+        //        self.create_spells_table();
+        //        self.create_items_table();
+        //        self.create_backgrounds_table();
+        //        self.create_classes_table();
+        //        self.create_races_table();
+        //        self.create_stats_table();
 
         Ok(())
     }
 
-//                race INTEGER REFERENCES raceconfigs(id),
-//                class INTEGER REFERENCES classconfigs(id),
-//                background INTEGER REFERENCES backgroundconfigs(id),
-//                stats INTEGER REFERENCES statsconfigs(id),
-//                proficiencies INTEGER REFERENCES proficiency_savingthrows_configs(id),
-//                equipment !TODO,
-//                spells !TODO,
-
+    //                race INTEGER REFERENCES raceconfigs(id),
+    //                class INTEGER REFERENCES classconfigs(id),
+    //                background INTEGER REFERENCES backgroundconfigs(id),
+    //                stats INTEGER REFERENCES statsconfigs(id),
+    //                proficiencies INTEGER REFERENCES proficiency_savingthrows_configs(id),
+    //                equipment !TODO,
+    //                spells !TODO,
 
     // Create a character table in the SQLite database.
     // Each column represents an element of the character sheet.
@@ -62,7 +62,13 @@ impl Database {
                 hit_points INTEGER,
                 temp_hit_points INTEGER,
                 level INTEGER,
-                xp INTEGER
+                xp INTEGER,
+                str INTEGER,
+                dex INTEGER,
+                con INTEGER,
+                int INTEGER,
+                wis INTEGER,
+                cha INTEGER
             )",
             [],
         )?;
@@ -83,7 +89,7 @@ impl Database {
                 character INTEGER REFERENCES character(id),
                 language INTEGER REFERENCES languages(id),
                 PRIMARY KEY (character, language)
-            )", 
+            )",
             []
         )?;
         Ok(())
@@ -95,7 +101,7 @@ impl Database {
                 character,
                 language
             )
-            VALUES (?1, ?2)"
+            VALUES (?1, ?2)",
         )?;
 
         for lang in langs {
@@ -111,14 +117,10 @@ impl Database {
             name,
             description
             )
-            VALUES (?1, ?2, ?3)"
+            VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![
-            lang.id,
-            lang.name,
-            lang.description
-        ])?;
+        stmt.execute(params![lang.id, lang.name, lang.description])?;
         Ok(())
     }
 
@@ -127,45 +129,38 @@ impl Database {
             "SELECT
             language
             FROM character_languages WHERE character=?1
-            "
+            ",
         )?;
 
-        let character_languages = stmt.query_map([id], |row| {
-            self.load_language(row.get(0)?)
-        })?;
+        let character_languages = stmt.query_map([id], |row| self.load_language(row.get(0)?))?;
 
         character_languages.into_iter().collect()
-
     }
 
     pub fn load_language(&self, id: i64) -> Result<Language> {
-       let mut stmt = self
-           .connection
-           .prepare("
+        let mut stmt = self.connection.prepare(
+            "
                SELECT
                id,
                name,
                description
                FROM languages WHERE id=?1
-            ")?;
+            ",
+        )?;
 
-       let queried_lang = stmt.query_row(params![id], |row| {
-           Ok(Language {
-               id: row.get(0)?,
-               name: row.get(1)?,
-               description: row.get(2)?,
-           })
-       })?;
+        let queried_lang = stmt.query_row(params![id], |row| {
+            Ok(Language {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                description: row.get(2)?,
+            })
+        })?;
 
-       Ok(queried_lang)
+        Ok(queried_lang)
     }
 
     pub fn get_all_languages(&self) -> Result<Vec<Language>> {
-        let mut stmt = self
-            .connection
-            .prepare(
-                "SELECT * FROM languages"
-            )?;
+        let mut stmt = self.connection.prepare("SELECT * FROM languages")?;
 
         let languages = stmt.query_map([], |row| {
             Ok(Language {
@@ -202,8 +197,15 @@ impl Database {
             hit_points, 
             temp_hit_points, 
             level, 
-            xp)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)"
+            xp,
+            str,
+            dex,
+            con,
+            int,
+            wis,
+            cha
+            )
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)"
         )?;
 
         stmt.execute(params![
@@ -223,7 +225,13 @@ impl Database {
             character.hit_points,
             character.temp_hit_points,
             character.level,
-            character.xp
+            character.xp,
+            character.stats.get("str"),
+            character.stats.get("dex"),
+            character.stats.get("con"),
+            character.stats.get("int"),
+            character.stats.get("wis"),
+            character.stats.get("cha")
         ])?;
 
         self.save_character_languages(character.id, &character.languages)?;
@@ -237,9 +245,8 @@ impl Database {
     // error shouldn't happen, as a user will never call this function with
     // any kind of "custom" id argument.
     pub fn load_character(&self, id: i64) -> Result<Character> {
-        let mut stmt = self
-            .connection
-            .prepare("SELECT 
+        let mut stmt = self.connection.prepare(
+            "SELECT 
                 id,
                 name,
                 alignment,
@@ -257,31 +264,47 @@ impl Database {
                 temp_hit_points,
                 level,
                 xp,
+                str,
+                dex,
+                con,
+                int,
+                wis,
+                cha,
                 FROM characters 
-                WHERE id=?1")?;
+                WHERE id=?1",
+        )?;
 
         let queried_character = stmt.query_row(params![id], |row| {
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 alignment: row.get(2)?,
+                stats: HashMap::from([
+                    ("str".to_string(), row.get(18)?),
+                    ("dex".to_string(), row.get(19)?),
+                    ("con".to_string(), row.get(20)?),
+                    ("int".to_string(), row.get(21)?),
+                    ("wis".to_string(), row.get(22)?),
+                    ("cha".to_string(), row.get(23)?),
+                ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                speed: row.get(6)?, 
-                gender: row.get(7)?, 
-                height: row.get(8)?, 
-                weight: row.get(9)?, 
-                age: row.get(10)?, 
-                armor_class: row.get(11)?, 
-                initiative: row.get(12)?, 
-                hit_points: row.get(13)?, 
-                temp_hit_points: row.get(14)?, 
-                level: row.get(15)?, 
+                speed: row.get(6)?,
+                gender: row.get(7)?,
+                height: row.get(8)?,
+                weight: row.get(9)?,
+                age: row.get(10)?,
+                armor_class: row.get(11)?,
+                initiative: row.get(12)?,
+                hit_points: row.get(13)?,
+                temp_hit_points: row.get(14)?,
+                level: row.get(15)?,
                 xp: row.get(16)?,
                 languages: self.load_characer_languages(Some(row.get(0)?))?,
             })
         })?;
+
         Ok(queried_character)
     }
 
@@ -303,7 +326,8 @@ impl Database {
     // This is used only for the `select_screen()` function to display all
     // currently saved characters in the database.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
-        let mut stmt = self.connection.prepare("SELECT 
+        let mut stmt = self.connection.prepare(
+            "SELECT 
             id,
             name,
             alignment,
@@ -320,35 +344,53 @@ impl Database {
             hit_points,
             temp_hit_points,
             level,
-            xp
-            FROM characters")?;
+            xp,
+            str,
+            dex,
+            con,
+            int,
+            wis,
+            cha
+            FROM characters",
+        )?;
+
         let characters = stmt.query_map([], |row| {
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 alignment: row.get(2)?,
+                stats: HashMap::from([
+                    ("str".to_string(), row.get(17)?),
+                    ("dex".to_string(), row.get(18)?),
+                    ("con".to_string(), row.get(19)?),
+                    ("int".to_string(), row.get(20)?),
+                    ("wis".to_string(), row.get(21)?),
+                    ("cha".to_string(), row.get(22)?),
+                ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                languages: self.load_characer_languages(Some(row.get(0)?))?,
-                speed: row.get(6)?, 
-                gender: row.get(7)?, 
-                height: row.get(8)?, 
-                weight: row.get(9)?, 
-                age: row.get(10)?, 
-                armor_class: row.get(11)?, 
-                initiative: row.get(12)?, 
-                hit_points: row.get(13)?, 
-                temp_hit_points: row.get(14)?, 
-                level: row.get(15)?, 
+                speed: row.get(6)?,
+                gender: row.get(7)?,
+                height: row.get(8)?,
+                weight: row.get(9)?,
+                age: row.get(10)?,
+                armor_class: row.get(11)?,
+                initiative: row.get(12)?,
+                hit_points: row.get(13)?,
+                temp_hit_points: row.get(14)?,
+                level: row.get(15)?,
                 xp: row.get(16)?,
+                languages: self.load_characer_languages(Some(row.get(0)?))?,
             })
         })?;
         characters.into_iter().collect()
     }
 
     pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
-        let mut stmt = self.connection.prepare("SELECT id, name, race, class FROM characters")?;
+        let mut stmt = self
+            .connection
+            .prepare("SELECT id, name, race, class FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(SavedCharacter {
                 id: row.get(0)?,
@@ -390,7 +432,7 @@ impl Database {
 //                sleight_of_hand INTEGER,
 //                stealth INTEGER,
 //                survival INTEGER
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -408,7 +450,7 @@ impl Database {
 //                int INTEGER,
 //                wis INTEGER,
 //                cha INTEGER
-//            )", 
+//            )",
 //            []
 //        )?;
 //        Ok(())
@@ -425,7 +467,7 @@ impl Database {
 //                components TEXT NOT NULL,
 //                duration INTEGER,
 //                description TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //        Ok(())
@@ -440,7 +482,7 @@ impl Database {
 //                damage INTEGER,
 //                weight INTEGER,
 //                properties TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //        Ok(())
@@ -458,7 +500,7 @@ impl Database {
 //                ideal TEXT NOT NULL,
 //                bond TEXT NOT NULL,
 //                flaw TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -474,7 +516,7 @@ impl Database {
 //                ideal TEXT NOT NULL,
 //                bond TEXT NOT NULL,
 //                flaw TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -495,7 +537,7 @@ impl Database {
 //                spells_known INTEGER,
 //                spell_slots INTEGER,
 //                spell_slot_level INTEGER
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -513,7 +555,7 @@ impl Database {
 //                spells_known INTEGER,
 //                spell_slots INTEGER,
 //                spell_slot_level INTEGER
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -528,7 +570,7 @@ impl Database {
 //                armor_prof TEXT NOT NULL,
 //                weapon_prof TEXT NOT NULL,
 //                features TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //
@@ -540,7 +582,7 @@ impl Database {
 //                armor_prof TEXT NOT NULL,
 //                weapon_prof TEXT NOT NULL,
 //                features TEXT NOT NULL
-//            )", 
+//            )",
 //            []
 //        )?;
 //

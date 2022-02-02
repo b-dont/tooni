@@ -1,13 +1,9 @@
+use crate::data::{
+    background::Background, class::Class, items::Item, language::Language, race::Race,
+    spells::Spell,
+};
 use std::collections::HashMap;
 use std::fmt;
-use crate::data::{
-    spells::Spell,
-    items::Item,
-    race::Race,
-    class::Class,
-    background::Background,
-    language::Language,
-};
 
 #[derive(Default, Clone)]
 // The character struct is used by both the database interface
@@ -20,18 +16,18 @@ use crate::data::{
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
-//    pub race: Race,
-//    pub class: Class,
-//    pub background: Background,
+    //    pub race: Race,
+    //    pub class: Class,
+    //    pub background: Background,
     pub alignment: String,
-//    pub stats: HashMap<String, u8>,
-//    pub proficiencies: HashMap<String, bool>,
+    pub stats: HashMap<String, u8>,
+    //    pub proficiencies: HashMap<String, bool>,
     pub proficiency_bonus: u8,
     pub passive_perception: u8,
     pub inspiration: bool,
     pub languages: Vec<Language>,
-//    pub equipment: Vec<Item>,
-//    pub spells: Option<Vec<Spell>>,
+    //    pub equipment: Vec<Item>,
+    //    pub spells: Option<Vec<Spell>>,
     pub speed: u8,
     pub gender: String,
     pub height: u8,
@@ -47,42 +43,52 @@ pub struct Character {
 
 impl fmt::Display for Character {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-       writeln!(f, "
-           {:#?}\n
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}
-           {}", 
-           self.id,
-           self.name,
-           self.alignment,
-           self.proficiency_bonus,
-           self.passive_perception,
-           self.inspiration,
-           self.speed,
-           self.gender,
-           self.height,
-           self.weight,
-           self.age,
-           self.armor_class,
-           self.initiative,
-           self.hit_points,
-           self.temp_hit_points,
-           self.level,
-           self.xp,
-           )
+        writeln!(
+            f,
+            "
+           ID: {:#?}\n
+           Name: {}
+           Alignment: {}
+           Prof Bonus: {}
+           Passive Perception: {}
+           Inspiration: {}
+           Speed: {}
+           Gender: {}
+           Height: {}
+           Weight: {}
+           Age: {}
+           AC: {}
+           Initiative: {}
+           HP: {}
+           Temp HP: {}
+           Lvl: {}
+           XP: {}
+           STR: {:#?} | DEX: {:#?} | CON: {:#?} | INT: {:#?} | WIS: {:#?} | CHA: {:#?}
+           ",
+            self.id,
+            self.name,
+            self.alignment,
+            self.proficiency_bonus,
+            self.passive_perception,
+            self.inspiration,
+            self.speed,
+            self.gender,
+            self.height,
+            self.weight,
+            self.age,
+            self.armor_class,
+            self.initiative,
+            self.hit_points,
+            self.temp_hit_points,
+            self.level,
+            self.xp,
+            self.stats.get("str"),
+            self.stats.get("dex"),
+            self.stats.get("con"),
+            self.stats.get("int"),
+            self.stats.get("wis"),
+            self.stats.get("cha")
+        )
     }
 }
 
@@ -92,53 +98,73 @@ impl Character {
     }
 
     pub fn test_character_frank() -> Self {
-        let mut frank = Character { 
-            id: None, 
-            name: "Frank".to_string(), 
-            alignment: "Neutral".to_string(), 
-            proficiency_bonus: 2, 
-            passive_perception: 12, 
-            inspiration: false, 
+        Character {
+            id: None,
+            name: "Frank".to_string(),
+            alignment: "Neutral".to_string(),
+            stats: HashMap::from([
+                ("str".to_string(), 12),
+                ("dex".to_string(), 12),
+                ("con".to_string(), 12),
+                ("int".to_string(), 12),
+                ("wis".to_string(), 12),
+                ("cha".to_string(), 12),
+            ]),
+            proficiency_bonus: 2,
+            passive_perception: 12,
+            inspiration: false,
             languages: Vec::new(),
-            speed: 30, 
-            gender: "Male".to_string(), 
-            height: 6, 
-            weight: 100, 
-            age: 30, 
-            armor_class: 13, 
-            initiative: 3, 
-            hit_points: 10, 
-            temp_hit_points: 0, 
-            level: 1, 
-            xp: 0 
-        };
-
-        frank
+            speed: 30,
+            gender: "Male".to_string(),
+            height: 6,
+            weight: 100,
+            age: 30,
+            armor_class: 13,
+            initiative: 3,
+            hit_points: 10,
+            temp_hit_points: 0,
+            level: 1,
+            xp: 0,
+        }
     }
 
     pub fn test_character_kevin() -> Self {
-        let mut kevin = Character { 
-            id: None, 
-            name: "Kevin".to_string(), 
-            alignment: "Evil".to_string(), 
-            proficiency_bonus: 2, 
-            passive_perception: 12, 
-            inspiration: false, 
+        Character {
+            id: None,
+            name: "Kevin".to_string(),
+            alignment: "Evil".to_string(),
+            stats: HashMap::from([
+                ("str".to_string(), 20),
+                ("dex".to_string(), 20),
+                ("con".to_string(), 20),
+                ("int".to_string(), 20),
+                ("wis".to_string(), 20),
+                ("cha".to_string(), 20),
+            ]),
+            proficiency_bonus: 2,
+            passive_perception: 12,
+            inspiration: false,
             languages: Vec::new(),
-            speed: 30, 
-            gender: "Female".to_string(), 
-            height: 6, 
-            weight: 100, 
-            age: 30, 
-            armor_class: 13, 
-            initiative: 3, 
-            hit_points: 10, 
-            temp_hit_points: 0, 
-            level: 1, 
-            xp: 0 
-        };
+            speed: 30,
+            gender: "Female".to_string(),
+            height: 7,
+            weight: 200,
+            age: 35,
+            armor_class: 23,
+            initiative: 4,
+            hit_points: 20,
+            temp_hit_points: 1,
+            level: 1,
+            xp: 0,
+        }
+    }
 
-        kevin
+    pub fn print_character(&self) {
+        println!("{}", self);
+
+        for lang in &self.languages {
+            println!("{}", lang);
+        }
     }
 }
 

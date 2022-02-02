@@ -1,4 +1,4 @@
-use crate::data::{language::Language, items::Item, feature::Feature};
+use crate::data::{feature::Feature, items::Item, language::Language};
 
 #[derive(Default, Debug, Clone)]
 pub struct Background {

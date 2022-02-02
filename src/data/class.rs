@@ -1,4 +1,4 @@
-use crate::data::{language::Language, feature::Feature};
+use crate::data::{feature::Feature, language::Language};
 
 // Enum for saving_throws stats
 #[derive(Default, Debug, Clone)]
