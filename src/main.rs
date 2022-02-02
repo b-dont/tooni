@@ -60,11 +60,27 @@ fn main() -> Result<()> {
 //    db.save_character(&frank)?;
 //    db.save_character(&kevin)?;
 
-    let all_characters = db.get_all_characters()?;
+    let mut all_characters = db.get_all_characters()?;
 
-    for character in all_characters {
-        println!("{}", character);
+//    all_characters[0].languages.push(all_languages[0].clone());
+//    all_characters[0].languages.push(all_languages[1].clone());
+//    all_characters[1].languages.push(all_languages[2].clone());
+//    all_characters[1].languages.push(all_languages[3].clone());
+
+//    for character in &all_characters {
+//        println!("{}", character);
+//    }
+
+    for character in &all_characters {
+        for lang in &character.languages {
+            println!("{}", lang);
+        }
     }
+
+//
+//    for lang in &all_languages {
+//        println!("{}", lang);
+//    }
 
     // Instantiate state machine
 //    let mut app = App::new(db)?;

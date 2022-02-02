@@ -268,7 +268,7 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                languages: self.load_characer_languages(Some(id))?,
+                languages: self.load_characer_languages(Some(row.get(0)?))?,
                 speed: row.get(6)?, 
                 gender: row.get(7)?, 
                 height: row.get(8)?, 
@@ -282,7 +282,6 @@ impl Database {
                 xp: row.get(16)?,
             })
         })?;
-
         Ok(queried_character)
     }
 
@@ -304,7 +303,25 @@ impl Database {
     // This is used only for the `select_screen()` function to display all
     // currently saved characters in the database.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
-        let mut stmt = self.connection.prepare("SELECT * FROM characters")?;
+        let mut stmt = self.connection.prepare("SELECT 
+            id,
+            name,
+            alignment,
+            proficiency_bonus,
+            passive_perception,
+            inspiration,
+            speed,
+            gender,
+            height,
+            weight,
+            age,
+            armor_class,
+            initiative,
+            hit_points,
+            temp_hit_points,
+            level,
+            xp
+            FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(Character {
                 id: row.get(0)?,
@@ -314,17 +331,17 @@ impl Database {
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
                 languages: self.load_characer_languages(Some(row.get(0)?))?,
-                speed: row.get(7)?, 
-                gender: row.get(8)?, 
-                height: row.get(9)?, 
-                weight: row.get(10)?, 
-                age: row.get(11)?, 
-                armor_class: row.get(12)?, 
-                initiative: row.get(13)?, 
-                hit_points: row.get(14)?, 
-                temp_hit_points: row.get(15)?, 
-                level: row.get(16)?, 
-                xp: row.get(17)?,
+                speed: row.get(6)?, 
+                gender: row.get(7)?, 
+                height: row.get(8)?, 
+                weight: row.get(9)?, 
+                age: row.get(10)?, 
+                armor_class: row.get(11)?, 
+                initiative: row.get(12)?, 
+                hit_points: row.get(13)?, 
+                temp_hit_points: row.get(14)?, 
+                level: row.get(15)?, 
+                xp: row.get(16)?,
             })
         })?;
         characters.into_iter().collect()

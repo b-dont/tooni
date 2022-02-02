@@ -54,7 +54,6 @@ impl fmt::Display for Character {
            {}
            {}
            {}
-           {:#?}
            {}
            {}
            {}
@@ -72,7 +71,6 @@ impl fmt::Display for Character {
            self.proficiency_bonus,
            self.passive_perception,
            self.inspiration,
-           self.languages,
            self.speed,
            self.gender,
            self.height,
