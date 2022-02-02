@@ -268,7 +268,6 @@ impl Database {
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
-                languages: self.load_characer_languages(Some(row.get(0)?))?,
                 speed: row.get(6)?, 
                 gender: row.get(7)?, 
                 height: row.get(8)?, 
@@ -280,6 +279,7 @@ impl Database {
                 temp_hit_points: row.get(14)?, 
                 level: row.get(15)?, 
                 xp: row.get(16)?,
+                languages: self.load_characer_languages(Some(row.get(0)?))?,
             })
         })?;
         Ok(queried_character)
