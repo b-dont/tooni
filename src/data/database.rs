@@ -323,8 +323,8 @@ impl Database {
     // Queries the SQLite DB and creates an iterator of all rows in the DB,
     // we then instantiate a Character struct with each row of data and push it
     // to a vector, which is returned.
-    // This is used only for the `select_screen()` function to display all
-    // currently saved characters in the database.
+    // Currently unused; keeping here for any poss features that may utilize all
+    // saved characters in the future.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
         let mut stmt = self.connection.prepare(
             "SELECT 
@@ -386,7 +386,14 @@ impl Database {
         })?;
         characters.into_iter().collect()
     }
-
+    
+    // Queires the SQLite DB and creates an iterator of all rows.
+    // Like get_all_characters, a lighter "SavedCharacter" struct is instantiated
+    // for row. A Vec of these structs is returned to the caller. 
+    // This is now called for the SelectScreen of the App to display all saved
+    // characters. However, these SavedCharacter structs are much lighter than 
+    // their Character counterparts, containing only the information displayed to the
+    // terminal, and their corresponding ids to load from the DB.
     pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
         let mut stmt = self
             .connection
