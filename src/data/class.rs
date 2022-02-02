@@ -1,11 +1,12 @@
-use std::collections::HashMap;
+use crate::data::{language::Language, feature::Feature};
 
+// Enum for saving_throws stats
 #[derive(Default, Debug, Clone)]
 pub struct Class {
-    pub id: Option<u64>,
+    pub id: Option<i64>,
     pub name: String,
-    pub languages: Vec<String>,
-    pub features: HashMap<String, String>,
+    pub languages: Vec<Language>,
+    pub features: Vec<Feature>,
     pub skill_proficiencies: Vec<String>,
     pub armor_proficiencies: Vec<String>,
     pub weapon_proficiencies: Vec<String>,
