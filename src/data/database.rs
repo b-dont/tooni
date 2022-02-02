@@ -130,7 +130,7 @@ impl Database {
             "
         )?;
 
-        let character_languages = stmt.query_map([], |row| {
+        let character_languages = stmt.query_map([id], |row| {
             self.load_language(row.get(0)?)
         })?;
 
@@ -304,25 +304,7 @@ impl Database {
     // This is used only for the `select_screen()` function to display all
     // currently saved characters in the database.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
-        let mut stmt = self.connection.prepare("SELECT 
-            id,
-            name,
-            alignment,
-            proficiency_bonus,
-            passive_perception,
-            inspiration,
-            speed,
-            gender,
-            height,
-            weight,
-            age,
-            armor_class,
-            initiative,
-            hit_points,
-            temp_hit_points,
-            level,
-            xp
-            FROM characters")?;
+        let mut stmt = self.connection.prepare("SELECT * FROM characters")?;
         let characters = stmt.query_map([], |row| {
             Ok(Character {
                 id: row.get(0)?,
