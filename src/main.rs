@@ -14,7 +14,6 @@ fn main() -> Result<()> {
 //    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
 //    enable_raw_mode()?;
 
-    // testing
     // Instantiate the SQLite database struct
     let db = Database::new()?;
     db.create_tables()?;
