@@ -28,7 +28,7 @@ pub struct Character {
     pub inspiration: bool,
     pub languages: Vec<Language>,
     //    pub equipment: Vec<Item>,
-    //    pub spells: Option<Vec<Spell>>,
+    //    pub spells: Vec<Spell>,
     pub speed: u8,
     pub gender: String,
     pub height: u8,
@@ -204,13 +204,13 @@ impl Character {
     pub fn print_character(&self) {
         println!("{}", self);
 
-        //        for lang in &self.languages {
-        //            println!("{}", lang);
-        //        }
-        //
-        //        for prof in &self.proficiencies {
-        //            println!("{}", prof);
-        //        }
+        for lang in &self.languages {
+            println!("{}", lang);
+        }
+
+        for prof in &self.proficiencies {
+            println!("{}", prof);
+        }
     }
 }
 

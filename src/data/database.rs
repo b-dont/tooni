@@ -28,14 +28,6 @@ impl Database {
         Ok(())
     }
 
-    //                race INTEGER REFERENCES raceconfigs(id),
-    //                class INTEGER REFERENCES classconfigs(id),
-    //                background INTEGER REFERENCES backgroundconfigs(id),
-    //                stats INTEGER REFERENCES statsconfigs(id),
-    //                proficiencies INTEGER REFERENCES proficiency_savingthrows_configs(id),
-    //                equipment !TODO,
-    //                spells !TODO,
-
     // Create a character table in the SQLite database.
     // Each column represents an element of the character sheet.
     pub fn create_character_table(&self) -> Result<()> {
@@ -110,7 +102,7 @@ impl Database {
         )?;
 
         for prof in profs {
-            stmt.execute(params![Some(id), prof.id])?;
+            stmt.execute(params![id, prof.id])?;
         }
         Ok(())
     }
@@ -129,16 +121,17 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_characer_proficiencies(&self, id: Option<i64>) -> Result<Vec<Proficiency>> {
+    pub fn load_characer_proficiencies(&self, id: i64) -> Result<Vec<Proficiency>> {
         let mut stmt = self.connection.prepare(
             "SELECT
+            character,
             proficiency 
             FROM character_proficiencies WHERE character=?1
             ",
         )?;
 
         let character_proficiencies =
-            stmt.query_map([id], |row| self.load_proficiency(row.get(0)?))?;
+            stmt.query_map([id], |row| self.load_proficiency(row.get(1)?))?;
 
         character_proficiencies.into_iter().collect()
     }
@@ -208,7 +201,7 @@ impl Database {
         )?;
 
         for lang in langs {
-            stmt.execute(params![Some(id), lang.id])?;
+            stmt.execute(params![id, lang.id])?;
         }
         Ok(())
     }
@@ -227,15 +220,17 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_characer_languages(&self, id: Option<i64>) -> Result<Vec<Language>> {
+    pub fn load_characer_languages(&self, id: i64) -> Result<Vec<Language>> {
         let mut stmt = self.connection.prepare(
             "SELECT
+            character,
             language
             FROM character_languages WHERE character=?1
             ",
         )?;
 
-        let character_languages = stmt.query_map([id], |row| self.load_language(row.get(0)?))?;
+        let character_languages = stmt.query_map([id], |row| 
+            self.load_language(row.get(1)?))?;
 
         character_languages.into_iter().collect()
     }
@@ -461,8 +456,8 @@ impl Database {
                 temp_hit_points: row.get(14)?,
                 level: row.get(15)?,
                 xp: row.get(16)?,
-                languages: self.load_characer_languages(Some(row.get(0)?))?,
-                proficiencies: self.load_characer_proficiencies(Some(row.get(0)?))?,
+                languages: self.load_characer_languages(row.get(0)?)?,
+                proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
             })
         })?;
 
@@ -556,8 +551,8 @@ impl Database {
                     ("wis".to_string(), row.get(27)?),
                     ("cha".to_string(), row.get(28)?),
                 ]),
-                languages: self.load_characer_languages(Some(row.get(0)?))?,
-                proficiencies: self.load_characer_proficiencies(Some(row.get(0)?))?,
+                languages: self.load_characer_languages(row.get(0)?)?,
+                proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
             })
         })?;
         characters.into_iter().collect()

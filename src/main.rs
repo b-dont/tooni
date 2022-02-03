@@ -124,7 +124,20 @@ fn main() -> Result<()> {
 //    db.save_character(&kevin)?;
 
 //    let all_characters = db.get_all_characters()?;
+
+//    all_characters[0].proficiencies.push(all_proficiencies[0].clone());
+//    all_characters[0].proficiencies.push(all_proficiencies[1].clone());
+//    all_characters[1].proficiencies.push(all_proficiencies[2].clone());
+//    all_characters[1].proficiencies.push(all_proficiencies[3].clone());
 //
+//    all_characters[0].languages.push(all_languages[0].clone());
+//    all_characters[0].languages.push(all_languages[1].clone());
+//    all_characters[1].languages.push(all_languages[2].clone());
+//    all_characters[1].languages.push(all_languages[3].clone());
+//
+//    db.save_character(&all_characters[0].clone())?;
+//    db.save_character(&all_characters[1].clone())?;
+
 //    for character in &all_characters {
 //        character.print_character();
 //    }
