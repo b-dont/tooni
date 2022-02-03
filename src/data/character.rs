@@ -12,7 +12,10 @@ use std::fmt;
 // character data.
 //
 // TODO: Change alignment, stats, gender to Enums; impl Default;
+// TODO: Also need to change "class" for proficiencies, items, features to Enums.
+// TODO: Spell schools need to be Enums.
 // TODO: Consider sets instead of Vecs for data structures
+//
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
@@ -27,7 +30,7 @@ pub struct Character {
     pub passive_perception: u8,
     pub inspiration: bool,
     pub languages: Vec<Language>,
-    //    pub equipment: Vec<Item>,
+    pub invintory: Vec<Item>,
     //    pub spells: Vec<Spell>,
     pub speed: u8,
     pub gender: String,
@@ -78,8 +81,6 @@ impl fmt::Display for Character {
            INT: {:#?} | 
            WIS: {:#?} | 
            CHA: {:#?}
-           Languages: {:#?}
-           Proficiencies: {:#?}
            ",
             self.id,
             self.name,
@@ -110,8 +111,6 @@ impl fmt::Display for Character {
             self.saving_throws.get("int"),
             self.saving_throws.get("wis"),
             self.saving_throws.get("cha"),
-            self.languages,
-            self.proficiencies
         )
     }
 }
@@ -147,6 +146,7 @@ impl Character {
             inspiration: false,
             languages: Vec::new(),
             proficiencies: Vec::new(),
+            invintory: Vec::new(),
             speed: 30,
             gender: "Male".to_string(),
             height: 6,
@@ -187,6 +187,7 @@ impl Character {
             inspiration: false,
             languages: Vec::new(),
             proficiencies: Vec::new(),
+            invintory: Vec::new(),
             speed: 30,
             gender: "Female".to_string(),
             height: 7,
@@ -210,6 +211,10 @@ impl Character {
 
         for prof in &self.proficiencies {
             println!("{}", prof);
+        }
+
+        for item in &self.invintory {
+            println!("{}", item);
         }
     }
 }

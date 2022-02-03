@@ -1,8 +1,8 @@
 use crate::{data::character::SavedCharacter, Character};
 use rusqlite::{params, Connection, Result};
-use std::{collections::HashMap, slice::SliceIndex};
+use std::collections::HashMap;
 
-use super::{language::Language, proficiency::Proficiency};
+use super::{language::Language, proficiency::Proficiency, items::Item};
 
 // Database interface.
 // This struct and its impls represent
@@ -67,6 +67,153 @@ impl Database {
         )?;
         Ok(())
     }
+
+    pub fn create_item_tables(&self) -> Result<()> {
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS items (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                class TEXT NOT NULL,
+                quantity INTEGER,
+                value INTEGER,
+                weight INTEGER,
+                properties TEXT NOT NULL,
+                description TEXT NOT NULL
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS character_invintory (
+                character INTEGER REFERENCES characters(id),
+                item INTEGER REFERENCES items(id),
+                PRIMARY KEY (character, item)
+            )",
+            [],
+        )?;
+        Ok(())
+    }
+
+    pub fn save_character_invintory(
+        &self,
+        id: Option<i64>,
+        items: &Vec<Item>,
+    ) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "REPLACE INTO character_invintory (
+                character,
+                item 
+            )
+            VALUES (?1, ?2)",
+        )?;
+
+        for item in items {
+            stmt.execute(params![id, item.id])?;
+        }
+        Ok(())
+    }
+
+    pub fn save_item(&self, item: Item) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "REPLACE INTO items (
+            id,
+            name,
+            class,
+            quantity,
+            value,
+            weight,
+            properties,
+            description
+            )
+            VALUES (
+                ?1, 
+                ?2, 
+                ?3, 
+                ?4, 
+                ?5 
+                ?6
+                ?7
+                ?8
+                )",
+        )?;
+
+        stmt.execute(params![
+            item.id, 
+            item.name, 
+            item.class,
+            item.quantity,
+            item.value,
+            item.weight,
+            item.properties,
+            item.description
+        ])?;
+        Ok(())
+    }
+
+    pub fn load_character_invintory(&self, id: i64) -> Result<Vec<Item>> {
+        let mut stmt = self.connection.prepare(
+            "SELECT
+            character,
+            item
+            FROM character_invintory WHERE character=?1
+            ",
+        )?;
+
+        let invintory =
+            stmt.query_map([id], |row| self.load_item(row.get(1)?))?;
+
+        invintory.into_iter().collect()
+    }
+
+    pub fn load_item(&self, id: i64) -> Result<Item> {
+        let mut stmt = self.connection.prepare(
+            "
+               SELECT
+               id,
+               name,
+               class,
+               quantity,
+               value,
+               weight,
+               properties,
+               description
+               FROM items WHERE id=?1
+            ",
+        )?;
+
+        let queried_item = stmt.query_row(params![id], |row| {
+            Ok(Item {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                class: row.get(2)?,
+                quantity: row.get(3)?,
+                value: row.get(4)?,
+                weight: row.get(5)?, 
+                properties: row.get(6)?,
+                description: row.get(7)?,
+            })
+        })?;
+
+        Ok(queried_item)
+    }
+
+    pub fn get_all_items(&self) -> Result<Vec<Item>> {
+        let mut stmt = self.connection.prepare("SELECT * FROM items")?;
+
+        let items = stmt.query_map([], |row| {
+            Ok(Item {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                class: row.get(2)?,
+                quantity: row.get(3)?,
+                value: row.get(4)?,
+                weight: row.get(5)?, 
+                properties: row.get(6)?,
+                description: row.get(7)?,
+            })
+        })?;
+        items.into_iter().collect()
+    }
+
 
     pub fn create_proficiencies_tables(&self) -> Result<()> {
         self.connection.execute(
@@ -376,6 +523,7 @@ impl Database {
 
         self.save_character_languages(character.id, &character.languages)?;
         self.save_character_proficiencies(character.id, &character.proficiencies)?;
+        self.save_character_invintory(character.id, &character.invintory)?;
 
         Ok(())
     }
@@ -458,6 +606,7 @@ impl Database {
                 xp: row.get(16)?,
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
+                invintory: self.load_character_invintory(row.get(0)?)?
             })
         })?;
 
@@ -553,6 +702,7 @@ impl Database {
                 ]),
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
+                invintory: self.load_character_invintory(row.get(0)?)?
             })
         })?;
         characters.into_iter().collect()
