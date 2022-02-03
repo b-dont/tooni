@@ -1,4 +1,4 @@
-use::std::fmt;
+use ::std::fmt;
 
 #[derive(Default, Debug, Clone)]
 // Enum for item class.
@@ -25,8 +25,8 @@ impl fmt::Display for Item {
             Weight: {},
             Properties: {},
             Description: {}",
-            self.id, 
-            self.name, 
+            self.id,
+            self.name,
             self.class,
             self.quantity,
             self.value,

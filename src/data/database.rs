@@ -2,7 +2,7 @@ use crate::{data::character::SavedCharacter, Character};
 use rusqlite::{params, Connection, Result};
 use std::collections::HashMap;
 
-use super::{language::Language, proficiency::Proficiency, items::Item};
+use super::{items::Item, language::Language, proficiency::Proficiency};
 
 // Database interface.
 // This struct and its impls represent
@@ -94,11 +94,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_character_invintory(
-        &self,
-        id: Option<i64>,
-        items: &Vec<Item>,
-    ) -> Result<()> {
+    pub fn save_character_invintory(&self, id: Option<i64>, items: &Vec<Item>) -> Result<()> {
         let mut stmt = self.connection.prepare(
             "REPLACE INTO character_invintory (
                 character,
@@ -130,16 +126,16 @@ impl Database {
                 ?2, 
                 ?3, 
                 ?4, 
-                ?5 
-                ?6
-                ?7
+                ?5, 
+                ?6,
+                ?7,
                 ?8
                 )",
         )?;
 
         stmt.execute(params![
-            item.id, 
-            item.name, 
+            item.id,
+            item.name,
             item.class,
             item.quantity,
             item.value,
@@ -159,8 +155,7 @@ impl Database {
             ",
         )?;
 
-        let invintory =
-            stmt.query_map([id], |row| self.load_item(row.get(1)?))?;
+        let invintory = stmt.query_map([id], |row| self.load_item(row.get(1)?))?;
 
         invintory.into_iter().collect()
     }
@@ -188,7 +183,7 @@ impl Database {
                 class: row.get(2)?,
                 quantity: row.get(3)?,
                 value: row.get(4)?,
-                weight: row.get(5)?, 
+                weight: row.get(5)?,
                 properties: row.get(6)?,
                 description: row.get(7)?,
             })
@@ -207,14 +202,13 @@ impl Database {
                 class: row.get(2)?,
                 quantity: row.get(3)?,
                 value: row.get(4)?,
-                weight: row.get(5)?, 
+                weight: row.get(5)?,
                 properties: row.get(6)?,
                 description: row.get(7)?,
             })
         })?;
         items.into_iter().collect()
     }
-
 
     pub fn create_proficiencies_tables(&self) -> Result<()> {
         self.connection.execute(
@@ -377,8 +371,7 @@ impl Database {
             ",
         )?;
 
-        let character_languages = stmt.query_map([id], |row| 
-            self.load_language(row.get(1)?))?;
+        let character_languages = stmt.query_map([id], |row| self.load_language(row.get(1)?))?;
 
         character_languages.into_iter().collect()
     }
@@ -607,7 +600,7 @@ impl Database {
                 xp: row.get(16)?,
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
-                invintory: self.load_character_invintory(row.get(0)?)?
+                invintory: self.load_character_invintory(row.get(0)?)?,
             })
         })?;
 
@@ -617,11 +610,29 @@ impl Database {
     // Deletes a SQLite row that matches the id element of the Character
     // struct argument.
     pub fn delete_character(&self, character: &Character) -> Result<()> {
-        let mut stmt = self
+        let mut languages_stmt = self
+            .connection
+            .prepare("DELETE FROM character_languages WHERE character=?1")?;
+
+        languages_stmt.execute([character.id])?;
+
+        let mut proficiencies_stmt = self
+            .connection
+            .prepare("DELETE FROM character_proficiencies WHERE character=?1")?;
+
+        proficiencies_stmt.execute([character.id])?;
+
+        let mut invintory_stmt = self
+            .connection
+            .prepare("DELETE FROM character_invintory WHERE character=?1")?;
+
+        invintory_stmt.execute([character.id])?;
+
+        let mut character_stmt = self
             .connection
             .prepare("DELETE FROM characters WHERE id=?1")?;
 
-        stmt.execute([character.id])?;
+        character_stmt.execute([character.id])?;
 
         Ok(())
     }
@@ -703,7 +714,7 @@ impl Database {
                 ]),
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
-                invintory: self.load_character_invintory(row.get(0)?)?
+                invintory: self.load_character_invintory(row.get(0)?)?,
             })
         })?;
         characters.into_iter().collect()
