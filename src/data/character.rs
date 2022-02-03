@@ -31,7 +31,7 @@ pub struct Character {
     pub inspiration: bool,
     pub languages: Vec<Language>,
     pub invintory: Vec<Item>,
-    //    pub spells: Vec<Spell>,
+    pub spells: Vec<Spell>,
     pub speed: u8,
     pub gender: String,
     pub height: u8,
@@ -144,9 +144,6 @@ impl Character {
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
-            languages: Vec::new(),
-            proficiencies: Vec::new(),
-            invintory: Vec::new(),
             speed: 30,
             gender: "Male".to_string(),
             height: 6,
@@ -158,6 +155,10 @@ impl Character {
             temp_hit_points: 0,
             level: 1,
             xp: 0,
+            languages: Vec::new(),
+            proficiencies: Vec::new(),
+            invintory: Vec::new(),
+            spells: Vec::new(),
         }
     }
 
@@ -185,9 +186,6 @@ impl Character {
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
-            languages: Vec::new(),
-            proficiencies: Vec::new(),
-            invintory: Vec::new(),
             speed: 30,
             gender: "Female".to_string(),
             height: 7,
@@ -199,6 +197,10 @@ impl Character {
             temp_hit_points: 1,
             level: 1,
             xp: 0,
+            languages: Vec::new(),
+            proficiencies: Vec::new(),
+            invintory: Vec::new(),
+            spells: Vec::new(),
         }
     }
 
@@ -215,6 +217,9 @@ impl Character {
 
         for item in &self.invintory {
             println!("{}", item);
+        }
+        for spell in &self.spells {
+            println!("{}", spell);
         }
     }
 }
