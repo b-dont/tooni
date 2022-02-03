@@ -5,5 +5,6 @@ pub mod database;
 pub mod feature;
 pub mod items;
 pub mod language;
+pub mod proficiency;
 pub mod race;
 pub mod spells;

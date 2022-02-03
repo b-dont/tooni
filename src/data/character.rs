@@ -1,6 +1,6 @@
 use crate::data::{
-    background::Background, class::Class, items::Item, language::Language, race::Race,
-    spells::Spell,
+    background::Background, class::Class, items::Item, language::Language,
+    proficiency::Proficiency, race::Race, spells::Spell,
 };
 use std::collections::HashMap;
 use std::fmt;
@@ -16,19 +16,19 @@ use std::fmt;
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
-//    pub race: Race,
-//    pub class: Class,
-//    pub background: Background,
+    //    pub race: Race,
+    //    pub class: Class,
+    //    pub background: Background,
     pub alignment: String,
     pub stats: HashMap<String, u8>,
-//    pub proficiencies: HashMap<String, bool>,
+    pub proficiencies: Vec<Proficiency>,
     pub saving_throws: HashMap<String, bool>,
     pub proficiency_bonus: u8,
     pub passive_perception: u8,
     pub inspiration: bool,
     pub languages: Vec<Language>,
-//    pub equipment: Vec<Item>,
-//    pub spells: Option<Vec<Spell>>,
+    //    pub equipment: Vec<Item>,
+    //    pub spells: Option<Vec<Spell>>,
     pub speed: u8,
     pub gender: String,
     pub height: u8,
@@ -64,7 +64,22 @@ impl fmt::Display for Character {
            Temp HP: {}
            Lvl: {}
            XP: {}
-           STR: {:#?} | DEX: {:#?} | CON: {:#?} | INT: {:#?} | WIS: {:#?} | CHA: {:#?}
+           Stats:
+           STR: {:#?} | 
+           DEX: {:#?} | 
+           CON: {:#?} | 
+           INT: {:#?} | 
+           WIS: {:#?} | 
+           CHA: {:#?}
+           Saving Throws:
+           STR: {:#?} | 
+           DEX: {:#?} | 
+           CON: {:#?} | 
+           INT: {:#?} | 
+           WIS: {:#?} | 
+           CHA: {:#?}
+           Languages: {:#?}
+           Proficiencies: {:#?}
            ",
             self.id,
             self.name,
@@ -88,7 +103,15 @@ impl fmt::Display for Character {
             self.stats.get("con"),
             self.stats.get("int"),
             self.stats.get("wis"),
-            self.stats.get("cha")
+            self.stats.get("cha"),
+            self.saving_throws.get("str"),
+            self.saving_throws.get("dex"),
+            self.saving_throws.get("con"),
+            self.saving_throws.get("int"),
+            self.saving_throws.get("wis"),
+            self.saving_throws.get("cha"),
+            self.languages,
+            self.proficiencies
         )
     }
 }
@@ -117,12 +140,13 @@ impl Character {
                 ("con".to_string(), true),
                 ("int".to_string(), false),
                 ("wis".to_string(), true),
-                ("cha".to_string(), false)
+                ("cha".to_string(), false),
             ]),
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
             languages: Vec::new(),
+            proficiencies: Vec::new(),
             speed: 30,
             gender: "Male".to_string(),
             height: 6,
@@ -156,12 +180,13 @@ impl Character {
                 ("con".to_string(), false),
                 ("int".to_string(), true),
                 ("wis".to_string(), false),
-                ("cha".to_string(), true)
+                ("cha".to_string(), true),
             ]),
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
             languages: Vec::new(),
+            proficiencies: Vec::new(),
             speed: 30,
             gender: "Female".to_string(),
             height: 7,
@@ -179,9 +204,13 @@ impl Character {
     pub fn print_character(&self) {
         println!("{}", self);
 
-        for lang in &self.languages {
-            println!("{}", lang);
-        }
+        //        for lang in &self.languages {
+        //            println!("{}", lang);
+        //        }
+        //
+        //        for prof in &self.proficiencies {
+        //            println!("{}", prof);
+        //        }
     }
 }
 
