@@ -24,6 +24,7 @@ impl Database {
         self.create_character_table()?;
         self.create_languages_tables()?;
         self.create_proficiencies_tables()?;
+        self.create_item_tables()?;
 
         Ok(())
     }
