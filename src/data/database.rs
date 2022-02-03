@@ -68,7 +68,13 @@ impl Database {
                 con INTEGER,
                 int INTEGER,
                 wis INTEGER,
-                cha INTEGER
+                cha INTEGER,
+                str_saving_throw,
+                dex_saving_throw,
+                con_saving_throw,
+                int_saving_throw,
+                wis_saving_throw,
+                cha_saving_throw
             )",
             [],
         )?;
@@ -203,9 +209,46 @@ impl Database {
             con,
             int,
             wis,
-            cha
+            cha,
+            str_saving_throw,
+            dex_saving_throw,
+            con_saving_throw,
+            int_saving_throw,
+            wis_saving_throw,
+            cha_saving_throw
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)"
+            VALUES (
+                ?1, 
+                ?2, 
+                ?3, 
+                ?4, 
+                ?5, 
+                ?6, 
+                ?7, 
+                ?8, 
+                ?9, 
+                ?10, 
+                ?11, 
+                ?12, 
+                ?13, 
+                ?14, 
+                ?15, 
+                ?16, 
+                ?17, 
+                ?18, 
+                ?19, 
+                ?20, 
+                ?21, 
+                ?22, 
+                ?23,
+                ?24, 
+                ?25, 
+                ?26, 
+                ?27, 
+                ?28, 
+                ?29, 
+                ?30
+                    )"
         )?;
 
         stmt.execute(params![
@@ -231,7 +274,13 @@ impl Database {
             character.stats.get("con"),
             character.stats.get("int"),
             character.stats.get("wis"),
-            character.stats.get("cha")
+            character.stats.get("cha"),
+            character.saving_throws.get("str"),
+            character.saving_throws.get("dex"),
+            character.saving_throws.get("con"),
+            character.saving_throws.get("int"),
+            character.saving_throws.get("wis"),
+            character.saving_throws.get("cha")
         ])?;
 
         self.save_character_languages(character.id, &character.languages)?;
@@ -270,6 +319,12 @@ impl Database {
                 int,
                 wis,
                 cha,
+                str_saving_throw,
+                dex_saving_throw,
+                con_saving_throw,
+                int_saving_throw,
+                wis_saving_throw,
+                cha_saving_throw
                 FROM characters 
                 WHERE id=?1",
         )?;
@@ -285,7 +340,15 @@ impl Database {
                     ("con".to_string(), row.get(20)?),
                     ("int".to_string(), row.get(21)?),
                     ("wis".to_string(), row.get(22)?),
-                    ("cha".to_string(), row.get(23)?),
+                    ("cha".to_string(), row.get(23)?)
+                ]),
+                saving_throws: HashMap::from([
+                    ("str".to_string(), row.get(24)?),
+                    ("dex".to_string(), row.get(25)?),
+                    ("con".to_string(), row.get(26)?),
+                    ("int".to_string(), row.get(27)?),
+                    ("wis".to_string(), row.get(28)?),
+                    ("cha".to_string(), row.get(29)?)
                 ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
@@ -350,7 +413,13 @@ impl Database {
             con,
             int,
             wis,
-            cha
+            cha,
+            str_saving_throw,
+            dex_saving_throw,
+            con_saving_throw,
+            int_saving_throw,
+            wis_saving_throw,
+            cha_saving_throw
             FROM characters",
         )?;
 
@@ -366,6 +435,14 @@ impl Database {
                     ("int".to_string(), row.get(20)?),
                     ("wis".to_string(), row.get(21)?),
                     ("cha".to_string(), row.get(22)?),
+                ]),
+                saving_throws: HashMap::from([
+                    ("str".to_string(), row.get(24)?),
+                    ("dex".to_string(), row.get(25)?),
+                    ("con".to_string(), row.get(26)?),
+                    ("int".to_string(), row.get(27)?),
+                    ("wis".to_string(), row.get(28)?),
+                    ("cha".to_string(), row.get(29)?)
                 ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
@@ -410,58 +487,6 @@ impl Database {
     }
 }
 
-//    pub fn create_proficiencies_savingthrows_table(&self) -> Result<()> {
-//        self.connection.execute(
-//            "CREATE TABLE IF NOT EXISTS proficiency_savingthrows_configs (
-//                id INTEGER PRIMARY KEY,
-//                str INTEGER,
-//                dex INTEGER,
-//                con INTEGER,
-//                int INTEGER,
-//                wis INTEGER,
-//                cha INTEGER,
-//                inspiration INTEGER,
-//                acrobatics INTEGER,
-//                animal_handling INTEGER,
-//                arcana INTEGER,
-//                athletics INTEGER,
-//                deception INTEGER,
-//                history INTEGER,
-//                insight INTEGER,
-//                intimidation INTEGER,
-//                investigation INTEGER,
-//                medicine INTEGER,
-//                nature INTEGER,
-//                perception INTEGER,
-//                performance INTEGER,
-//                persuasion INTEGER,
-//                religion INTEGER,
-//                sleight_of_hand INTEGER,
-//                stealth INTEGER,
-//                survival INTEGER
-//            )",
-//            []
-//        )?;
-//
-//        Ok(())
-//    }
-//
-//    TODO: This can just be held in the character table
-//    pub fn create_stats_table(&self) -> Result<()> {
-//        self.connection.execute(
-//            "CREATE TABLE IF NOT EXISTS statsconfigs (
-//                id INTEGER PRIMARY KEY,
-//                str INTEGER,
-//                dex INTEGER,
-//                con INTEGER,
-//                int INTEGER,
-//                wis INTEGER,
-//                cha INTEGER
-//            )",
-//            []
-//        )?;
-//        Ok(())
-//    }
 //
 //    pub fn create_spells_table (&self) -> Result<()> {
 //        self.connection.execute(
