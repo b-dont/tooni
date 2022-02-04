@@ -436,7 +436,12 @@ impl Database {
         )?;
 
         let queried_prof = stmt.query_row(params![id], |row| {
-            Ok(Proficiency::new(row.get(0)?, row.get(1)?, ProficiencyClass::from_str(row.get(2)?).unwrap()))
+            let prof_class: String = row.get(2)?;
+            Ok(Proficiency {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                class: ProficiencyClass::from_str(&prof_class).unwrap(),
+            })                    
         })?;
 
         Ok(queried_prof)
@@ -446,7 +451,12 @@ impl Database {
         let mut stmt = self.connection.prepare("SELECT * FROM proficiencies")?;
 
         let profs = stmt.query_map([], |row| {
-            Ok(Proficiency::new(row.get(0)?, row.get(1)?, row.get(2)?))
+            let prof_class: String = row.get(2)?;
+            Ok(Proficiency {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                class: ProficiencyClass::from_str(&prof_class).unwrap(),
+            })                    
         })?;
         profs.into_iter().collect()
     }
