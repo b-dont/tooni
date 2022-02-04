@@ -1,8 +1,11 @@
 use crate::{data::character::SavedCharacter, Character};
 use rusqlite::{params, Connection, Result};
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    str::FromStr,    
+};
 
-use super::{spells::Spell, items::Item, language::Language, proficiency::Proficiency};
+use super::{spells::Spell, items::Item, language::Language, proficiency::{Proficiency, ProficiencyClass}};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -433,7 +436,7 @@ impl Database {
         )?;
 
         let queried_prof = stmt.query_row(params![id], |row| {
-            Ok(Proficiency::new(row.get(0)?, row.get(1)?, row.get(2)?))
+            Ok(Proficiency::new(row.get(0)?, row.get(1)?, ProficiencyClass::from_str(row.get(2)?).unwrap()))
         })?;
 
         Ok(queried_prof)

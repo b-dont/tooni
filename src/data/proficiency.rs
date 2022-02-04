@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, str::FromStr};
 
 #[derive(Clone)]
 pub enum ProficiencyClass {
@@ -11,6 +11,19 @@ pub enum ProficiencyClass {
 impl Default for ProficiencyClass {
     fn default() -> Self {
         ProficiencyClass::Skill
+    }
+}
+
+impl FromStr for ProficiencyClass {
+    type Err = ();
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input {
+            "Skill" => Ok(ProficiencyClass::Skill),
+            "Armor" => Ok(ProficiencyClass::Armor),
+            "Weapon" => Ok(ProficiencyClass::Weapon),
+            "Tool" => Ok(ProficiencyClass::Tool),
+            _ => Err(()),
+        }
     }
 }
 
@@ -50,15 +63,7 @@ impl Proficiency {
         Self {
             id: Some(id),
             name,
-            class: {
-                match class.to_string().as_str() {
-                    "Skill" => ProficiencyClass::Skill,
-                    "Armor" => ProficiencyClass::Armor,
-                    "Weapon" => ProficiencyClass::Weapon,
-                    "Tool" => ProficiencyClass::Tool,
-                    _ => {panic!("Uknown variant {}", class)}
-                }
-            }
+            class
         }
     }
 }
