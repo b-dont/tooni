@@ -4,10 +4,6 @@ use std::collections::HashMap;
 
 use super::{spells::Spell, items::Item, language::Language, proficiency::Proficiency};
 
-// Database interface.
-// This struct and its impls represent
-// all needed interaction with the SQLite database.
-//
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
     connection: Connection,
@@ -30,8 +26,6 @@ impl Database {
         Ok(())
     }
 
-    // Create a character table in the SQLite database.
-    // Each column represents an element of the character sheet.
     pub fn create_character_table(&self) -> Result<()> {
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS characters (
@@ -560,14 +554,9 @@ impl Database {
         languages.into_iter().collect()
     }
 
-    // Saves a Character struct to the database. Each of the struct's
-    // elements represents a column in the SQLite database.
-    // When a character struct is saved with a "None" value for its
-    // id element, the database will automatically assign this value as
-    // n + 1, where n = the highest id that exists in the database.
     pub fn save_character(&self, character: &Character) -> Result<()> {
         let mut stmt = self.connection.prepare(
-            // Change to SQLite UPDATE statement
+            // TODO: Change to SQLite UPDATE statement
             "REPLACE INTO characters (
             id, 
             name, 
@@ -671,11 +660,6 @@ impl Database {
         Ok(())
     }
 
-    // Loads a character row from the database that matches the given id.
-    // TODO: I think this code will panic if an invalid ID is given;
-    // will need to handle this error instead of panicing. This kind of
-    // error shouldn't happen, as a user will never call this function with
-    // any kind of "custom" id argument.
     pub fn load_character(&self, id: i64) -> Result<Character> {
         let mut stmt = self.connection.prepare(
             "SELECT 
@@ -757,8 +741,6 @@ impl Database {
         Ok(queried_character)
     }
 
-    // Deletes a SQLite row that matches the id element of the Character
-    // struct argument.
     pub fn delete_character(&self, character: &Character) -> Result<()> {
         let mut languages_stmt = self
             .connection
@@ -787,11 +769,6 @@ impl Database {
         Ok(())
     }
 
-    // Queries the SQLite DB and creates an iterator of all rows in the DB,
-    // we then instantiate a Character struct with each row of data and push it
-    // to a vector, which is returned.
-    // Currently unused; keeping here for any poss features that may utilize all
-    // saved characters in the future.
     pub fn get_all_characters(&self) -> Result<Vec<Character>> {
         let mut stmt = self.connection.prepare(
             "SELECT 
@@ -871,13 +848,6 @@ impl Database {
         characters.into_iter().collect()
     }
 
-    // Queires the SQLite DB and creates an iterator of all rows.
-    // Like get_all_characters, a lighter "SavedCharacter" struct is instantiated
-    // for row. A Vec of these structs is returned to the caller.
-    // This is now called for the SelectScreen of the App to display all saved
-    // characters. However, these SavedCharacter structs are much lighter than
-    // their Character counterparts, containing only the information displayed to the
-    // terminal, and their corresponding ids to load from the DB.
     pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
         let mut stmt = self
             .connection

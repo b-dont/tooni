@@ -6,33 +6,36 @@ use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Default, Clone)]
-// The character struct is used by both the database interface
-// and the TUI interface to save and render character data.
-// Each of the struct's elements is public and represents a piece of
-// character data.
-//
-// TODO: Change alignment, stats, gender to Enums; impl Default;
-// TODO: Also need to change "class" for proficiencies, items, features to Enums.
-// TODO: Spell schools need to be Enums.
 // TODO: Consider sets instead of Vecs for data structures
-//
+// like languages, proficiencies, ect. 
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
     //    pub race: Race,
     //    pub class: Class,
     //    pub background: Background,
+    // TODO: Change to Enum:
     pub alignment: String,
+    // TODO: Change keys to Enum:
+    // Can change values to tuple to
+    // hold the Stat value and bonus value
     pub stats: HashMap<String, u8>,
     pub proficiencies: Vec<Proficiency>,
+    // TODO: Keys here will share stats Enum:
     pub saving_throws: HashMap<String, bool>,
+    // TODO: This value should be calculated automatically 
+    // via the experience table 
     pub proficiency_bonus: u8,
+    // TODO: Should also be calculated automatically
+    // from appropriate stats values
     pub passive_perception: u8,
     pub inspiration: bool,
     pub languages: Vec<Language>,
     pub invintory: Vec<Item>,
     pub spells: Vec<Spell>,
+    // TODO: Calculated from Race and/or class 
     pub speed: u8,
+    // TODO: Change to Enum
     pub gender: String,
     pub height: u8,
     pub weight: u8,
@@ -41,6 +44,9 @@ pub struct Character {
     pub initiative: u8,
     pub hit_points: u16,
     pub temp_hit_points: u16,
+    // TODO: The xp value can be adjusted manually by the user,
+    // level can auto adjust from xp value via the experience 
+    // table.
     pub level: u8,
     pub xp: u64,
 }
@@ -228,7 +234,9 @@ impl Character {
 // A SavedCharacter is a lightweight character representation
 // that holds only the most basic information. This is used
 // by the SelectScreen state to display a menu of all currently-saved
-// characters in the database.
+// characters in the database, so we don't have to enstantiate
+// an entire Character struct for each saved character when
+// at the SelectScreen.
 pub struct SavedCharacter {
     pub id: Option<i64>,
     pub name: String,

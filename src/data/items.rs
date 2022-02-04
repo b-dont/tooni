@@ -1,10 +1,12 @@
 use ::std::fmt;
 
 #[derive(Default, Debug, Clone)]
-// Enum for item class.
+// TODO: Need a "rarity" element; also Enum
 pub struct Item {
     pub id: Option<i64>,
     pub name: String,
+    // TODO: Change class from String to Enum;
+    // Armor, Weapon, Potion, ect.
     pub class: String,
     pub quantity: u16,
     pub value: u16,

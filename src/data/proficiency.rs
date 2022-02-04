@@ -4,6 +4,8 @@ use std::fmt;
 pub struct Proficiency {
     pub id: Option<i64>,
     pub name: String,
+    // TODO: Change class to Enum;
+    // Skill, Armor, Weapon, Tool, ect.
     pub class: String,
 }
 
