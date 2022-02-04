@@ -6,7 +6,6 @@ pub enum ProficiencyClass {
     Armor,
     Weapon,
     Tool,
-    None
 }
 
 impl Default for ProficiencyClass {
@@ -22,19 +21,6 @@ impl fmt::Display for ProficiencyClass {
             &ProficiencyClass::Armor => write!(f, "Armor"),
             &ProficiencyClass::Weapon=> write!(f, "Weapon"),
             &ProficiencyClass::Tool=> write!(f, "Tool"),
-            &ProficiencyClass::None => write!(f, ""),
-        }
-    }
-}
-
-impl ProficiencyClass {
-    pub fn get_string(&self) -> String {
-        match self {
-            &ProficiencyClass::Skill => "Skill".to_string(),
-            &ProficiencyClass::Armor => "Armor".to_string(),
-            &ProficiencyClass::Weapon => "Weapon".to_string(),
-            &ProficiencyClass::Tool => "Tool".to_string(),
-            &ProficiencyClass::None => "".to_string()
         }
     }
 }
@@ -60,17 +46,17 @@ impl fmt::Display for Proficiency {
 
 impl Proficiency {
 
-    pub fn new(id: i64, name: String, class: String) -> Self {
+    pub fn new(id: i64, name: String, class: ProficiencyClass) -> Self {
         Self {
             id: Some(id),
             name,
             class: {
-                match class.as_str() {
+                match class.to_string().as_str() {
                     "Skill" => ProficiencyClass::Skill,
                     "Armor" => ProficiencyClass::Armor,
                     "Weapon" => ProficiencyClass::Weapon,
                     "Tool" => ProficiencyClass::Tool,
-                    _ => ProficiencyClass::None
+                    _ => {panic!("Uknown variant {}", class)}
                 }
             }
         }

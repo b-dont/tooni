@@ -402,7 +402,7 @@ impl Database {
             VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![prof.id, prof.name, prof.class.get_string()])?;
+        stmt.execute(params![prof.id, prof.name, prof.class.to_string()])?;
         Ok(())
     }
 
