@@ -1,6 +1,6 @@
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Clone)]
 pub struct Background {
     pub id: Option<i64>,
     pub name: String,

@@ -2,7 +2,7 @@ use crate::data::{feature::Feature, language::Language, proficiency::Proficiency
 use std::collections::HashMap;
 
 // Enum for saving_throws stats
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Clone)]
 pub struct Class {
     pub id: Option<i64>,
     pub name: String,

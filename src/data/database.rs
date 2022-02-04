@@ -402,7 +402,7 @@ impl Database {
             VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![prof.id, prof.name, prof.class])?;
+        stmt.execute(params![prof.id, prof.name, prof.class.get_string()])?;
         Ok(())
     }
 
@@ -433,11 +433,7 @@ impl Database {
         )?;
 
         let queried_prof = stmt.query_row(params![id], |row| {
-            Ok(Proficiency {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                class: row.get(2)?,
-            })
+            Ok(Proficiency::new(row.get(0)?, row.get(1)?, row.get(2)?))
         })?;
 
         Ok(queried_prof)
@@ -447,11 +443,7 @@ impl Database {
         let mut stmt = self.connection.prepare("SELECT * FROM proficiencies")?;
 
         let profs = stmt.query_map([], |row| {
-            Ok(Proficiency {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                class: row.get(2)?,
-            })
+            Ok(Proficiency::new(row.get(0)?, row.get(1)?, row.get(2)?))
         })?;
         profs.into_iter().collect()
     }
