@@ -3,7 +3,10 @@ use rusqlite::{params, Connection, Result};
 use std::{collections::HashMap, str::FromStr};
 
 use super::{
-    items::Item,
+    items::{Item, ItemRarity},
+    alignments::Alignment,
+    gender::Gender,
+    stats::Stats::{STR, DEX, CON, INT, WIS, CHA},
     language::Language,
     proficiency::{Proficiency, ProficiencyClass},
     spells::Spell,
@@ -223,6 +226,7 @@ impl Database {
                 name TEXT NOT NULL,
                 class TEXT NOT NULL,
                 quantity INTEGER,
+                rarity TEXT NOT NULL,
                 value INTEGER,
                 weight INTEGER,
                 properties TEXT NOT NULL,
@@ -263,6 +267,7 @@ impl Database {
             name,
             class,
             quantity,
+            rarity,
             value,
             weight,
             properties,
@@ -276,7 +281,8 @@ impl Database {
                 ?5, 
                 ?6,
                 ?7,
-                ?8
+                ?8,
+                ?9
                 )",
         )?;
 
@@ -285,6 +291,7 @@ impl Database {
             item.name,
             item.class,
             item.quantity,
+            item.rarity.to_string(),
             item.value,
             item.weight,
             item.properties,
@@ -315,6 +322,7 @@ impl Database {
                name,
                class,
                quantity,
+               rarity,
                value,
                weight,
                properties,
@@ -324,15 +332,17 @@ impl Database {
         )?;
 
         let queried_item = stmt.query_row(params![id], |row| {
+            let item_rarity: String = row.get(4)?;
             Ok(Item {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: row.get(2)?,
                 quantity: row.get(3)?,
-                value: row.get(4)?,
-                weight: row.get(5)?,
-                properties: row.get(6)?,
-                description: row.get(7)?,
+                rarity: ItemRarity::from_str(&item_rarity).unwrap(),
+                value: row.get(5)?,
+                weight: row.get(6)?,
+                properties: row.get(7)?,
+                description: row.get(8)?,
             })
         })?;
 
@@ -343,15 +353,17 @@ impl Database {
         let mut stmt = self.connection.prepare("SELECT * FROM items")?;
 
         let items = stmt.query_map([], |row| {
+            let item_rarity: String = row.get(4)?;
             Ok(Item {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: row.get(2)?,
                 quantity: row.get(3)?,
-                value: row.get(4)?,
-                weight: row.get(5)?,
-                properties: row.get(6)?,
-                description: row.get(7)?,
+                rarity: ItemRarity::from_str(&item_rarity).unwrap(),
+                value: row.get(5)?,
+                weight: row.get(6)?,
+                properties: row.get(7)?,
+                description: row.get(8)?,
             })
         })?;
         items.into_iter().collect()
@@ -630,12 +642,12 @@ impl Database {
         stmt.execute(params![
             character.id,
             character.name,
-            character.alignment,
+            character.alignment.to_string(),
             character.proficiency_bonus,
             character.passive_perception,
             character.inspiration,
             character.speed,
-            character.gender,
+            character.gender.to_string(),
             character.height,
             character.weight,
             character.age,
@@ -645,18 +657,18 @@ impl Database {
             character.temp_hit_points,
             character.level,
             character.xp,
-            character.stats.get("str"),
-            character.stats.get("dex"),
-            character.stats.get("con"),
-            character.stats.get("int"),
-            character.stats.get("wis"),
-            character.stats.get("cha"),
-            character.saving_throws.get("str"),
-            character.saving_throws.get("dex"),
-            character.saving_throws.get("con"),
-            character.saving_throws.get("int"),
-            character.saving_throws.get("wis"),
-            character.saving_throws.get("cha")
+            character.stats.get(&STR),
+            character.stats.get(&DEX),
+            character.stats.get(&CON),
+            character.stats.get(&INT),
+            character.stats.get(&WIS),
+            character.stats.get(&CHA),
+            character.saving_throws.get(&STR),
+            character.saving_throws.get(&DEX),
+            character.saving_throws.get(&CON),
+            character.saving_throws.get(&INT),
+            character.saving_throws.get(&WIS),
+            character.saving_throws.get(&CHA),
         ])?;
 
         self.save_character_languages(character.id, &character.languages)?;
@@ -703,31 +715,33 @@ impl Database {
         )?;
 
         let queried_character = stmt.query_row(params![id], |row| {
+            let character_alignment: String = row.get(2)?;
+            let character_gender: String = row.get(7)?;
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                alignment: row.get(2)?,
+                alignment: Alignment::from_str(&character_alignment).unwrap(),
                 stats: HashMap::from([
-                    ("str".to_string(), row.get(18)?),
-                    ("dex".to_string(), row.get(19)?),
-                    ("con".to_string(), row.get(20)?),
-                    ("int".to_string(), row.get(21)?),
-                    ("wis".to_string(), row.get(22)?),
-                    ("cha".to_string(), row.get(23)?),
+                    (STR, row.get(18)?),
+                    (DEX, row.get(19)?),
+                    (CON, row.get(20)?),
+                    (INT, row.get(21)?),
+                    (WIS, row.get(22)?),
+                    (CHA, row.get(23)?),
                 ]),
                 saving_throws: HashMap::from([
-                    ("str".to_string(), row.get(24)?),
-                    ("dex".to_string(), row.get(25)?),
-                    ("con".to_string(), row.get(26)?),
-                    ("int".to_string(), row.get(27)?),
-                    ("wis".to_string(), row.get(28)?),
-                    ("cha".to_string(), row.get(29)?),
+                    (STR, row.get(24)?),
+                    (DEX, row.get(25)?),
+                    (CON, row.get(26)?),
+                    (INT, row.get(27)?),
+                    (WIS, row.get(28)?),
+                    (CHA, row.get(29)?),
                 ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
                 speed: row.get(6)?,
-                gender: row.get(7)?,
+                gender: Gender::from_str(&character_gender).unwrap(),
                 height: row.get(8)?,
                 weight: row.get(9)?,
                 age: row.get(10)?,
@@ -811,15 +825,33 @@ impl Database {
         )?;
 
         let characters = stmt.query_map([], |row| {
+            let character_alignment: String = row.get(2)?;
+            let character_gender: String = row.get(7)?;
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                alignment: row.get(2)?,
+                alignment: Alignment::from_str(&character_alignment).unwrap(),
+                stats: HashMap::from([
+                    (STR, row.get(18)?),
+                    (DEX, row.get(19)?),
+                    (CON, row.get(20)?),
+                    (INT, row.get(21)?),
+                    (WIS, row.get(22)?),
+                    (CHA, row.get(23)?),
+                ]),
+                saving_throws: HashMap::from([
+                    (STR, row.get(24)?),
+                    (DEX, row.get(25)?),
+                    (CON, row.get(26)?),
+                    (INT, row.get(27)?),
+                    (WIS, row.get(28)?),
+                    (CHA, row.get(29)?),
+                ]),
                 proficiency_bonus: row.get(3)?,
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
                 speed: row.get(6)?,
-                gender: row.get(7)?,
+                gender: Gender::from_str(&character_gender).unwrap(),
                 height: row.get(8)?,
                 weight: row.get(9)?,
                 age: row.get(10)?,
@@ -829,22 +861,6 @@ impl Database {
                 temp_hit_points: row.get(14)?,
                 level: row.get(15)?,
                 xp: row.get(16)?,
-                stats: HashMap::from([
-                    ("str".to_string(), row.get(17)?),
-                    ("dex".to_string(), row.get(18)?),
-                    ("con".to_string(), row.get(19)?),
-                    ("int".to_string(), row.get(20)?),
-                    ("wis".to_string(), row.get(21)?),
-                    ("cha".to_string(), row.get(22)?),
-                ]),
-                saving_throws: HashMap::from([
-                    ("str".to_string(), row.get(23)?),
-                    ("dex".to_string(), row.get(24)?),
-                    ("con".to_string(), row.get(25)?),
-                    ("int".to_string(), row.get(26)?),
-                    ("wis".to_string(), row.get(27)?),
-                    ("cha".to_string(), row.get(28)?),
-                ]),
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
                 invintory: self.load_character_invintory(row.get(0)?)?,

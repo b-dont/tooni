@@ -1,6 +1,18 @@
 use crate::data::{
-    background::Background, class::Class, items::Item, language::Language,
-    proficiency::Proficiency, race::Race, spells::Spell, alignments::Alignment,
+    items::Item, language::Language,
+    proficiency::Proficiency, spells::Spell, 
+    alignments::Alignment,
+    alignments::Alignment::{
+        LawfulGood,
+        NeutralGood,
+        ChaoticGood,
+        LawfulNeutral,
+        Neutral,
+        ChaoticNeutral,
+        LawfulEvil,
+        NeutralEvil,
+        ChaoticEvil,
+    },
     stats::Stats, gender::Gender,
     stats::Stats::{STR, DEX, CON, INT, WIS, CHA},
 };
@@ -127,7 +139,7 @@ impl Character {
         Character {
             id: None,
             name: "Frank".to_string(),
-            alignment: Alignment::Neutral,
+            alignment: Neutral,
             stats: HashMap::from([
                 (STR, 12),
                 (DEX, 12),
@@ -169,7 +181,7 @@ impl Character {
         Character {
             id: None,
             name: "Kevin".to_string(),
-            alignment: Alignment::LawfulGood,
+            alignment: LawfulGood,
             stats: HashMap::from([
                 (STR, 20),
                 (DEX, 20),
