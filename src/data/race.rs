@@ -1,12 +1,10 @@
-use crate::data::{feature::Feature, language::Language};
+use crate::data::{feature::Feature, language::Language, proficiency::Proficiency};
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Clone)]
 pub struct Race {
     pub id: Option<i64>,
     pub name: String,
     pub languages: Vec<Language>,
-    pub skill_proficiencies: Option<Vec<String>>,
-    pub armor_proficiencies: Option<Vec<String>>,
-    pub weapon_proficiencies: Option<Vec<String>>,
+    pub proficiencies: Vec<Proficiency>,
     pub features: Vec<Feature>,
 }

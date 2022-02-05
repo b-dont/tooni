@@ -3,13 +3,13 @@ use rusqlite::{params, Connection, Result};
 use std::{collections::HashMap, str::FromStr};
 
 use super::{
-    items::{Item, ItemRarity},
     alignments::Alignment,
     gender::Gender,
-    stats::Stats::{STR, DEX, CON, INT, WIS, CHA},
+    items::{Item, ItemRarity},
     language::Language,
     proficiency::{Proficiency, ProficiencyClass},
     spells::Spell,
+    stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
 };
 
 // TODO: Consider PRAGMA SQLite statement at connection open
@@ -54,18 +54,18 @@ impl Database {
                 temp_hit_points INTEGER,
                 level INTEGER,
                 xp INTEGER,
-                str INTEGER,
-                dex INTEGER,
-                con INTEGER,
-                int INTEGER,
-                wis INTEGER,
-                cha INTEGER,
-                str_saving_throw,
-                dex_saving_throw,
-                con_saving_throw,
-                int_saving_throw,
-                wis_saving_throw,
-                cha_saving_throw
+                STR INTEGER,
+                DEX INTEGER,
+                CON INTEGER,
+                INT INTEGER,
+                WIS INTEGER,
+                CHA INTEGER,
+                STR_saving_throw,
+                DEX_saving_throw,
+                CON_saving_throw,
+                INT_saving_throw,
+                WIS_saving_throw,
+                CHA_saving_throw
             )",
             [],
         )?;
@@ -162,7 +162,6 @@ impl Database {
         )?;
 
         let spells = stmt.query_map([id], |row| self.load_spell(row.get(1)?))?;
-
         spells.into_iter().collect()
     }
 
@@ -310,7 +309,6 @@ impl Database {
         )?;
 
         let invintory = stmt.query_map([id], |row| self.load_item(row.get(1)?))?;
-
         invintory.into_iter().collect()
     }
 
@@ -433,7 +431,6 @@ impl Database {
 
         let character_proficiencies =
             stmt.query_map([id], |row| self.load_proficiency(row.get(1)?))?;
-
         character_proficiencies.into_iter().collect()
     }
 
@@ -533,7 +530,6 @@ impl Database {
         )?;
 
         let character_languages = stmt.query_map([id], |row| self.load_language(row.get(1)?))?;
-
         character_languages.into_iter().collect()
     }
 
@@ -593,18 +589,18 @@ impl Database {
             temp_hit_points, 
             level, 
             xp,
-            str,
-            dex,
-            con,
-            int,
-            wis,
-            cha,
-            str_saving_throw,
-            dex_saving_throw,
-            con_saving_throw,
-            int_saving_throw,
-            wis_saving_throw,
-            cha_saving_throw
+            STR,
+            DEX,
+            CON,
+            INT,
+            WIS,
+            CHA,
+            STR_saving_throw,
+            DEX_saving_throw,
+            CON_saving_throw,
+            INT_saving_throw,
+            WIS_saving_throw,
+            CHA_saving_throw
             )
             VALUES (
                 ?1, 
@@ -698,18 +694,18 @@ impl Database {
                 temp_hit_points,
                 level,
                 xp,
-                str,
-                dex,
-                con,
-                int,
-                wis,
-                cha,
-                str_saving_throw,
-                dex_saving_throw,
-                con_saving_throw,
-                int_saving_throw,
-                wis_saving_throw,
-                cha_saving_throw
+                STR,
+                DEX,
+                CON,
+                INT,
+                WIS,
+                CHA,
+                STR_saving_throw,
+                DEX_saving_throw,
+                CON_saving_throw,
+                INT_saving_throw,
+                WIS_saving_throw,
+                CHA_saving_throw
                 FROM characters 
                 WHERE id=?1",
         )?;
@@ -809,18 +805,18 @@ impl Database {
             temp_hit_points,
             level,
             xp,
-            str,
-            dex,
-            con,
-            int,
-            wis,
-            cha,
-            str_saving_throw,
-            dex_saving_throw,
-            con_saving_throw,
-            int_saving_throw,
-            wis_saving_throw,
-            cha_saving_throw
+            STR,
+            DEX,
+            CON,
+            INT,
+            WIS,
+            CHA,
+            STR_saving_throw,
+            DEX_saving_throw,
+            CON_saving_throw,
+            INT_saving_throw,
+            WIS_saving_throw,
+            CHA_saving_throw
             FROM characters",
         )?;
 

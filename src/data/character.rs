@@ -1,27 +1,23 @@
 use crate::data::{
-    items::Item, language::Language,
-    proficiency::Proficiency, spells::Spell, 
     alignments::Alignment,
     alignments::Alignment::{
-        LawfulGood,
-        NeutralGood,
-        ChaoticGood,
-        LawfulNeutral,
-        Neutral,
-        ChaoticNeutral,
-        LawfulEvil,
-        NeutralEvil,
-        ChaoticEvil,
+        ChaoticEvil, ChaoticGood, ChaoticNeutral, LawfulEvil, LawfulGood, LawfulNeutral, Neutral,
+        NeutralEvil, NeutralGood,
     },
-    stats::Stats, gender::Gender,
-    stats::Stats::{STR, DEX, CON, INT, WIS, CHA},
+    gender::Gender,
+    items::Item,
+    language::Language,
+    proficiency::Proficiency,
+    spells::Spell,
+    stats::Stats,
+    stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
 };
 use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Default, Clone)]
 // TODO: Consider sets instead of Vecs for data structures
-// like languages, proficiencies, ect. 
+// like languages, proficiencies, ect.
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
@@ -32,8 +28,8 @@ pub struct Character {
     pub stats: HashMap<Stats, u8>,
     pub proficiencies: Vec<Proficiency>,
     pub saving_throws: HashMap<Stats, bool>,
-    // TODO: This value should be calculated automatically 
-    // via the experience table 
+    // TODO: This value should be calculated automatically
+    // via the experience table
     pub proficiency_bonus: u8,
     // TODO: Should also be calculated automatically
     // from appropriate stats values
@@ -42,7 +38,7 @@ pub struct Character {
     pub languages: Vec<Language>,
     pub invintory: Vec<Item>,
     pub spells: Vec<Spell>,
-    // TODO: Calculated from Race and/or class 
+    // TODO: Calculated from Race and/or class
     pub speed: u8,
     // TODO: Change to Enum
     pub gender: Gender,
@@ -54,7 +50,7 @@ pub struct Character {
     pub hit_points: u16,
     pub temp_hit_points: u16,
     // TODO: The xp value can be adjusted manually by the user,
-    // level can auto adjust from xp value via the experience 
+    // level can auto adjust from xp value via the experience
     // table.
     pub level: u8,
     pub xp: u64,
@@ -97,35 +93,35 @@ impl fmt::Display for Character {
            WIS: {:#?} | 
            CHA: {:#?}
            ",
-           self.id,
-           self.name,
-           self.alignment,
-           self.proficiency_bonus,
-           self.passive_perception,
-           self.inspiration,
-           self.speed,
-           self.gender,
-           self.height,
-           self.weight,
-           self.age,
-           self.armor_class,
-           self.initiative,
-           self.hit_points,
-           self.temp_hit_points,
-           self.level,
-           self.xp,
-           self.stats.get(&STR),
-           self.stats.get(&DEX),
-           self.stats.get(&CON),
-           self.stats.get(&INT),
-           self.stats.get(&WIS),
-           self.stats.get(&CHA),
-           self.saving_throws.get(&STR),
-           self.saving_throws.get(&DEX),
-           self.saving_throws.get(&CON),
-           self.saving_throws.get(&INT),
-           self.saving_throws.get(&WIS),
-           self.saving_throws.get(&CHA),
+            self.id,
+            self.name,
+            self.alignment,
+            self.proficiency_bonus,
+            self.passive_perception,
+            self.inspiration,
+            self.speed,
+            self.gender,
+            self.height,
+            self.weight,
+            self.age,
+            self.armor_class,
+            self.initiative,
+            self.hit_points,
+            self.temp_hit_points,
+            self.level,
+            self.xp,
+            self.stats.get(&STR),
+            self.stats.get(&DEX),
+            self.stats.get(&CON),
+            self.stats.get(&INT),
+            self.stats.get(&WIS),
+            self.stats.get(&CHA),
+            self.saving_throws.get(&STR),
+            self.saving_throws.get(&DEX),
+            self.saving_throws.get(&CON),
+            self.saving_throws.get(&INT),
+            self.saving_throws.get(&WIS),
+            self.saving_throws.get(&CHA),
         )
     }
 }
