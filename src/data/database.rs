@@ -1,11 +1,13 @@
 use crate::{data::character::SavedCharacter, Character};
 use rusqlite::{params, Connection, Result};
-use std::{
-    collections::HashMap,
-    str::FromStr,    
-};
+use std::{collections::HashMap, str::FromStr};
 
-use super::{spells::Spell, items::Item, language::Language, proficiency::{Proficiency, ProficiencyClass}};
+use super::{
+    items::Item,
+    language::Language,
+    proficiency::{Proficiency, ProficiencyClass},
+    spells::Spell,
+};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -188,7 +190,7 @@ impl Database {
                 range: row.get(5)?,
                 components: row.get(6)?,
                 duration: row.get(7)?,
-                description: row.get(8)?
+                description: row.get(8)?,
             })
         })?;
 
@@ -208,12 +210,11 @@ impl Database {
                 range: row.get(5)?,
                 components: row.get(6)?,
                 duration: row.get(7)?,
-                description: row.get(8)?
+                description: row.get(8)?,
             })
         })?;
         spells.into_iter().collect()
     }
-
 
     pub fn create_item_tables(&self) -> Result<()> {
         self.connection.execute(
@@ -441,7 +442,7 @@ impl Database {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: ProficiencyClass::from_str(&prof_class).unwrap(),
-            })                    
+            })
         })?;
 
         Ok(queried_prof)
@@ -456,7 +457,7 @@ impl Database {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: ProficiencyClass::from_str(&prof_class).unwrap(),
-            })                    
+            })
         })?;
         profs.into_iter().collect()
     }
@@ -739,7 +740,7 @@ impl Database {
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
                 invintory: self.load_character_invintory(row.get(0)?)?,
-                spells: self.load_character_spells(row.get(0)?)?
+                spells: self.load_character_spells(row.get(0)?)?,
             })
         })?;
 
@@ -847,7 +848,7 @@ impl Database {
                 languages: self.load_characer_languages(row.get(0)?)?,
                 proficiencies: self.load_characer_proficiencies(row.get(0)?)?,
                 invintory: self.load_character_invintory(row.get(0)?)?,
-                spells: self.load_character_spells(row.get(0)?)?
+                spells: self.load_character_spells(row.get(0)?)?,
             })
         })?;
         characters.into_iter().collect()

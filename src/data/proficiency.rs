@@ -32,8 +32,8 @@ impl fmt::Display for ProficiencyClass {
         match self {
             &ProficiencyClass::Skill => write!(f, "Skill"),
             &ProficiencyClass::Armor => write!(f, "Armor"),
-            &ProficiencyClass::Weapon=> write!(f, "Weapon"),
-            &ProficiencyClass::Tool=> write!(f, "Tool"),
+            &ProficiencyClass::Weapon => write!(f, "Weapon"),
+            &ProficiencyClass::Tool => write!(f, "Tool"),
         }
     }
 }
@@ -58,12 +58,11 @@ impl fmt::Display for Proficiency {
 }
 
 impl Proficiency {
-
     pub fn new(id: i64, name: String, class: ProficiencyClass) -> Self {
         Self {
             id: Some(id),
             name,
-            class
+            class,
         }
     }
 }

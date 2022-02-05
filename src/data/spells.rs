@@ -11,10 +11,10 @@ pub struct Spell {
     pub level: u8,
     pub casting_time: u8,
     pub range: u8,
-    // TODO: Spell components may need 
+    // TODO: Spell components may need
     // to be changed to a HashSet<String>
     // instead. Consider another junction
-    // table and DB methods to fetch 
+    // table and DB methods to fetch
     // components when building the
     // Spell struct.
     pub components: String,

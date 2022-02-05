@@ -1,6 +1,8 @@
 use crate::data::{
     background::Background, class::Class, items::Item, language::Language,
-    proficiency::Proficiency, race::Race, spells::Spell,
+    proficiency::Proficiency, race::Race, spells::Spell, alignments::Alignment,
+    stats::Stats, gender::Gender,
+    stats::Stats::{STR, DEX, CON, INT, WIS, CHA},
 };
 use std::collections::HashMap;
 use std::fmt;
@@ -14,15 +16,10 @@ pub struct Character {
     //    pub race: Race,
     //    pub class: Class,
     //    pub background: Background,
-    // TODO: Change to Enum:
-    pub alignment: String,
-    // TODO: Change keys to Enum:
-    // Can change values to tuple to
-    // hold the Stat value and bonus value
-    pub stats: HashMap<String, u8>,
+    pub alignment: Alignment,
+    pub stats: HashMap<Stats, u8>,
     pub proficiencies: Vec<Proficiency>,
-    // TODO: Keys here will share stats Enum:
-    pub saving_throws: HashMap<String, bool>,
+    pub saving_throws: HashMap<Stats, bool>,
     // TODO: This value should be calculated automatically 
     // via the experience table 
     pub proficiency_bonus: u8,
@@ -36,7 +33,7 @@ pub struct Character {
     // TODO: Calculated from Race and/or class 
     pub speed: u8,
     // TODO: Change to Enum
-    pub gender: String,
+    pub gender: Gender,
     pub height: u8,
     pub weight: u8,
     pub age: u8,
@@ -88,35 +85,35 @@ impl fmt::Display for Character {
            WIS: {:#?} | 
            CHA: {:#?}
            ",
-            self.id,
-            self.name,
-            self.alignment,
-            self.proficiency_bonus,
-            self.passive_perception,
-            self.inspiration,
-            self.speed,
-            self.gender,
-            self.height,
-            self.weight,
-            self.age,
-            self.armor_class,
-            self.initiative,
-            self.hit_points,
-            self.temp_hit_points,
-            self.level,
-            self.xp,
-            self.stats.get("str"),
-            self.stats.get("dex"),
-            self.stats.get("con"),
-            self.stats.get("int"),
-            self.stats.get("wis"),
-            self.stats.get("cha"),
-            self.saving_throws.get("str"),
-            self.saving_throws.get("dex"),
-            self.saving_throws.get("con"),
-            self.saving_throws.get("int"),
-            self.saving_throws.get("wis"),
-            self.saving_throws.get("cha"),
+           self.id,
+           self.name,
+           self.alignment,
+           self.proficiency_bonus,
+           self.passive_perception,
+           self.inspiration,
+           self.speed,
+           self.gender,
+           self.height,
+           self.weight,
+           self.age,
+           self.armor_class,
+           self.initiative,
+           self.hit_points,
+           self.temp_hit_points,
+           self.level,
+           self.xp,
+           self.stats.get(&STR),
+           self.stats.get(&DEX),
+           self.stats.get(&CON),
+           self.stats.get(&INT),
+           self.stats.get(&WIS),
+           self.stats.get(&CHA),
+           self.saving_throws.get(&STR),
+           self.saving_throws.get(&DEX),
+           self.saving_throws.get(&CON),
+           self.saving_throws.get(&INT),
+           self.saving_throws.get(&WIS),
+           self.saving_throws.get(&CHA),
         )
     }
 }
@@ -130,28 +127,28 @@ impl Character {
         Character {
             id: None,
             name: "Frank".to_string(),
-            alignment: "Neutral".to_string(),
+            alignment: Alignment::Neutral,
             stats: HashMap::from([
-                ("str".to_string(), 12),
-                ("dex".to_string(), 12),
-                ("con".to_string(), 12),
-                ("int".to_string(), 12),
-                ("wis".to_string(), 12),
-                ("cha".to_string(), 12),
+                (STR, 12),
+                (DEX, 12),
+                (CON, 12),
+                (INT, 12),
+                (WIS, 12),
+                (CHA, 12),
             ]),
             saving_throws: HashMap::from([
-                ("str".to_string(), true),
-                ("dex".to_string(), false),
-                ("con".to_string(), true),
-                ("int".to_string(), false),
-                ("wis".to_string(), true),
-                ("cha".to_string(), false),
+                (STR, true),
+                (DEX, false),
+                (CON, true),
+                (INT, false),
+                (WIS, true),
+                (CHA, false),
             ]),
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
             speed: 30,
-            gender: "Male".to_string(),
+            gender: Gender::Male,
             height: 6,
             weight: 100,
             age: 30,
@@ -172,28 +169,28 @@ impl Character {
         Character {
             id: None,
             name: "Kevin".to_string(),
-            alignment: "Evil".to_string(),
+            alignment: Alignment::LawfulGood,
             stats: HashMap::from([
-                ("str".to_string(), 20),
-                ("dex".to_string(), 20),
-                ("con".to_string(), 20),
-                ("int".to_string(), 20),
-                ("wis".to_string(), 20),
-                ("cha".to_string(), 20),
+                (STR, 20),
+                (DEX, 20),
+                (CON, 20),
+                (INT, 20),
+                (WIS, 20),
+                (CHA, 20),
             ]),
             saving_throws: HashMap::from([
-                ("str".to_string(), false),
-                ("dex".to_string(), true),
-                ("con".to_string(), false),
-                ("int".to_string(), true),
-                ("wis".to_string(), false),
-                ("cha".to_string(), true),
+                (STR, false),
+                (DEX, true),
+                (CON, false),
+                (INT, true),
+                (WIS, false),
+                (CHA, true),
             ]),
             proficiency_bonus: 2,
             passive_perception: 12,
             inspiration: false,
             speed: 30,
-            gender: "Female".to_string(),
+            gender: Gender::Female,
             height: 7,
             weight: 200,
             age: 35,
@@ -212,15 +209,12 @@ impl Character {
 
     pub fn print_character(&self) {
         println!("{}", self);
-
         for lang in &self.languages {
             println!("{}", lang);
         }
-
         for prof in &self.proficiencies {
             println!("{}", prof);
         }
-
         for item in &self.invintory {
             println!("{}", item);
         }
