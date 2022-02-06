@@ -1,15 +1,17 @@
 use crate::{
     data::{
-        character::SavedCharacter, 
-        background::Background, 
+        background::Background,
+        character::SavedCharacter,
         feature::Feature,
         items::Item,
         language::Language,
         proficiency::Proficiency,
         spells::Spell,
         stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
-    }, 
-    Character};
+        tables::{Table, JunctionTable}
+    },
+    Character,
+};
 use rusqlite::{params, Connection, Result};
 use std::collections::HashMap;
 
@@ -31,6 +33,8 @@ impl Database {
         self.create_proficiencies_tables()?;
         self.create_item_tables()?;
         self.create_spell_tables()?;
+        self.create_backgrounds_tables()?;
+        self.create_feature_tables()?;
 
         Ok(())
     }
@@ -40,8 +44,8 @@ impl Database {
             "CREATE TABLE IF NOT EXISTS backgrounds (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL
-            )", 
-            []
+            )",
+            [],
         )?;
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS background_profs (
@@ -64,16 +68,16 @@ impl Database {
                 background INTEGER REFERENCES backgrounds(id),
                 item INTEGER REFERENCES items(id),
                 PRIMARY KET (background, item)
-            )", 
-            []
+            )",
+            [],
         )?;
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS backgound_features (
                 background INTEGER REFERENCES backgrounds(id),
                 feature INTEGER REFERENCES features(id),
                 PRIMARY KEY (background, feature)
-            )", 
-            []
+            )",
+            [],
         )?;
         self.connection.execute(
             "CREATE TABLE IF NOT EXISTS background_personality_trait (
@@ -143,7 +147,7 @@ impl Database {
             "REPLACE INTO backgrounds (
                 id,
                 name
-            ) VALUES (?1, ?2)" 
+            ) VALUES (?1, ?2)",
         )?;
         stmt.execute(params![background.id, background.name])?;
 
@@ -170,18 +174,18 @@ impl Database {
                 temp_hit_points INTEGER,
                 level INTEGER,
                 xp INTEGER,
-                STR INTEGER,
-                DEX INTEGER,
-                CON INTEGER,
-                INT INTEGER,
-                WIS INTEGER,
-                CHA INTEGER,
-                STR_saving_throw,
-                DEX_saving_throw,
-                CON_saving_throw,
-                INT_saving_throw,
-                WIS_saving_throw,
-                CHA_saving_throw
+                str INTEGER,
+                dex INTEGER,
+                con INTEGER,
+                int INTEGER,
+                wis INTEGER,
+                cha INTEGER,
+                str_saving_throw INTEGER,
+                dex_saving_throw INTEGER,
+                con_saving_throw INTEGER,
+                int_saving_throw INTEGER,
+                wis_saving_throw INTEGER,
+                cha_saving_throw INTEGER
             )",
             [],
         )?;
@@ -209,11 +213,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_character_features(
-        &self,
-        id: Option<i64>,
-        features: &Vec<Feature>,
-    ) -> Result<()> {
+    pub fn save_character_features(&self, id: Option<i64>, features: &Vec<Feature>) -> Result<()> {
         let mut stmt = self.connection.prepare(
             "REPLACE INTO character_features(
                 character,
@@ -239,7 +239,11 @@ impl Database {
             VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![feature.id, feature.name, feature.class.map_or_else(String::new, |v| v.to_string())])?;
+        stmt.execute(params![
+            feature.id,
+            feature.name,
+            feature.class.map_or_else(String::new, |v| v.to_string())
+        ])?;
         Ok(())
     }
 
@@ -252,8 +256,7 @@ impl Database {
             ",
         )?;
 
-        let character_features =
-            stmt.query_map([id], |row| self.load_feature(row.get(1)?))?;
+        let character_features = stmt.query_map([id], |row| self.load_feature(row.get(1)?))?;
         character_features.into_iter().collect()
     }
 
@@ -636,7 +639,11 @@ impl Database {
             VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![prof.id, prof.name, prof.class.map_or_else(String::new, |v| v.to_string())])?;
+        stmt.execute(params![
+            prof.id,
+            prof.name,
+            prof.class.map_or_else(String::new, |v| v.to_string())
+        ])?;
         Ok(())
     }
 
@@ -807,49 +814,21 @@ impl Database {
             temp_hit_points, 
             level, 
             xp,
-            STR,
-            DEX,
-            CON,
-            INT,
-            WIS,
-            CHA,
-            STR_saving_throw,
-            DEX_saving_throw,
-            CON_saving_throw,
-            INT_saving_throw,
-            WIS_saving_throw,
-            CHA_saving_throw
+            str,
+            dex,
+            con,
+            int,
+            wis,
+            cha,
+            str_saving_throw,
+            dex_saving_throw,
+            con_saving_throw,
+            int_saving_throw,
+            wis_saving_throw,
+            cha_saving_throw
             )
             VALUES (
-                ?1, 
-                ?2, 
-                ?3, 
-                ?4, 
-                ?5, 
-                ?6, 
-                ?7, 
-                ?8, 
-                ?9, 
-                ?10, 
-                ?11, 
-                ?12, 
-                ?13, 
-                ?14, 
-                ?15, 
-                ?16, 
-                ?17, 
-                ?18, 
-                ?19, 
-                ?20, 
-                ?21, 
-                ?22, 
-                ?23,
-                ?24, 
-                ?25, 
-                ?26, 
-                ?27, 
-                ?28, 
-                ?29
+                ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, ?28, ?29
                     )",
         )?;
 
@@ -912,18 +891,18 @@ impl Database {
                 temp_hit_points,
                 level,
                 xp,
-                STR,
-                DEX,
-                CON,
-                INT,
-                WIS,
-                CHA,
-                STR_saving_throw,
-                DEX_saving_throw,
-                CON_saving_throw,
-                INT_saving_throw,
-                WIS_saving_throw,
-                CHA_saving_throw
+                str,
+                dex,
+                con,
+                int,
+                wis,
+                cha,
+                str_saving_throw,
+                dex_saving_throw,
+                con_saving_throw,
+                int_saving_throw,
+                wis_saving_throw,
+                cha_saving_throw
                 FROM characters 
                 WHERE id=?1",
         )?;
@@ -978,24 +957,21 @@ impl Database {
             .connection
             .prepare("DELETE FROM character_languages WHERE character=?1")?;
 
-        languages_stmt.execute([character.id])?;
-
         let mut proficiencies_stmt = self
             .connection
             .prepare("DELETE FROM character_proficiencies WHERE character=?1")?;
-
-        proficiencies_stmt.execute([character.id])?;
 
         let mut invintory_stmt = self
             .connection
             .prepare("DELETE FROM character_invintory WHERE character=?1")?;
 
-        invintory_stmt.execute([character.id])?;
-
         let mut character_stmt = self
             .connection
             .prepare("DELETE FROM characters WHERE id=?1")?;
 
+        invintory_stmt.execute([character.id])?;
+        proficiencies_stmt.execute([character.id])?;
+        languages_stmt.execute([character.id])?;
         character_stmt.execute([character.id])?;
 
         Ok(())
@@ -1021,18 +997,18 @@ impl Database {
             temp_hit_points,
             level,
             xp,
-            STR,
-            DEX,
-            CON,
-            INT,
-            WIS,
-            CHA,
-            STR_saving_throw,
-            DEX_saving_throw,
-            CON_saving_throw,
-            INT_saving_throw,
-            WIS_saving_throw,
-            CHA_saving_throw
+            str,
+            dex,
+            con,
+            int,
+            wis,
+            cha,
+            str_saving_throw,
+            dex_saving_throw,
+            con_saving_throw,
+            int_saving_throw,
+            wis_saving_throw,
+            cha_saving_throw
             FROM characters",
         )?;
 

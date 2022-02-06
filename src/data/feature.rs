@@ -13,7 +13,7 @@ pub enum FeatureClass {
 impl FromSql for FeatureClass {
     #[inline]
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<FeatureClass> {
-       Ok(FeatureClass::from_str(value.as_str()?).unwrap())
+        Ok(FeatureClass::from_str(value.as_str()?).unwrap())
     }
 }
 
@@ -49,4 +49,23 @@ pub struct Feature {
     pub class: Option<FeatureClass>,
     pub name: String,
     pub description: String,
+}
+
+impl fmt::Display for Feature {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "ID: {:#?}, 
+            Class: {:#?},
+            Name: {}, 
+            Description: {}",
+            self.id, self.class, self.name, self.description
+        )
+    }
+}
+
+impl Feature {
+    pub fn new() -> Self {
+        Self::default()
+    }
 }

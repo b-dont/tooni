@@ -1,7 +1,9 @@
-use std::{fmt, str::FromStr};
 use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
+use std::{fmt, str::FromStr};
 
 #[derive(Debug, Clone)]
+// TODO: Consider sub-class in the Enum
+// ie. Skill(Acrobatics), Armor(Medium), Weapon(Simple), Tool(DisguiseKit)
 pub enum ProficiencyClass {
     Skill,
     Armor,
@@ -12,7 +14,7 @@ pub enum ProficiencyClass {
 impl FromSql for ProficiencyClass {
     #[inline]
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<ProficiencyClass> {
-       Ok(ProficiencyClass::from_str(value.as_str()?).unwrap())
+        Ok(ProficiencyClass::from_str(value.as_str()?).unwrap())
     }
 }
 

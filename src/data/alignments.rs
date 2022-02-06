@@ -1,5 +1,5 @@
-use std::{fmt, str::FromStr};
 use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
+use std::{fmt, str::FromStr};
 
 #[derive(Clone)]
 pub enum Alignment {
@@ -17,7 +17,7 @@ pub enum Alignment {
 impl FromSql for Alignment {
     #[inline]
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<Alignment> {
-       Ok(Alignment::from_str(value.as_str()?).unwrap())
+        Ok(Alignment::from_str(value.as_str()?).unwrap())
     }
 }
 

@@ -25,22 +25,10 @@ use tui::{
 
 pub struct CharacterSheet {
     current_character: Character,
-<<<<<<< HEAD
     tabs: TabState,
-}
-
-impl CharacterSheet {
-    pub fn new(current_character: Character) -> Result<CharacterSheet> {
-        let mut tabs = TabState::default();
-        tabs.select(Some(0))?;
-        Ok(CharacterSheet {
-            current_character,
-            tabs 
-        })
-=======
-    current_tab: CharacterSheetTab,
-    index: usize,
-    all_tabs: Vec<CharacterSheetTab>,
+//    current_tab: CharacterSheetTab,
+//    index: usize,
+//    all_tabs: Vec<CharacterSheetTab>,
 }
 
 impl CharacterSheet {
@@ -65,7 +53,6 @@ impl CharacterSheet {
             self.index = self.all_tabs.len() - 1;
         }
         self.current_tab = self.all_tabs[self.index];
->>>>>>> b70f0494e196cc8828250f1a38525d2e9ec25621
     }
 }
 
@@ -137,17 +124,13 @@ impl State for CharacterSheet {
                 .map(Spans::from)
                 .collect();
 
-<<<<<<< HEAD
             let all_tabs = Tabs::new(tab_titles)
-=======
             let tabs = Tabs::new(tab_titles)
                 .select(self.index)
->>>>>>> b70f0494e196cc8828250f1a38525d2e9ec25621
                 .style(Style::default().fg(Color::Gray))
                 .highlight_style(Style::default().fg(Color::Green))
                 .divider("|");
 
-<<<<<<< HEAD
             let character_details = vec![Spans::from(vec![Span::styled(
                 format!(
                     "{} {} {}",
@@ -166,7 +149,6 @@ impl State for CharacterSheet {
 
             f.render_widget(details, chunks[0]);
             f.render_widget(all_tabs, chunks[1]);
-=======
             let tab_area = Block::default()
                 .borders(Borders::ALL)
                 .border_type(tui::widgets::BorderType::Rounded)
@@ -176,7 +158,6 @@ impl State for CharacterSheet {
             f.render_widget(tabs, chunks[2]);
             f.render_widget(tab_area, chunks[3]);
             self.current_tab.display_tab(f, chunks[3], &self.current_character);
->>>>>>> b70f0494e196cc8828250f1a38525d2e9ec25621
         })?;
         Ok(())
     }
