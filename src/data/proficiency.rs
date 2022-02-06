@@ -1,6 +1,7 @@
 use std::{fmt, str::FromStr};
+use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum ProficiencyClass {
     Skill,
     Armor,
@@ -8,9 +9,10 @@ pub enum ProficiencyClass {
     Tool,
 }
 
-impl Default for ProficiencyClass {
-    fn default() -> Self {
-        ProficiencyClass::Skill
+impl FromSql for ProficiencyClass {
+    #[inline]
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<ProficiencyClass> {
+       Ok(ProficiencyClass::from_str(value.as_str()?).unwrap())
     }
 }
 
@@ -41,17 +43,15 @@ impl fmt::Display for ProficiencyClass {
 #[derive(Default, Clone)]
 pub struct Proficiency {
     pub id: Option<i64>,
-    pub name: String,
-    // TODO: Change class to Enum;
-    // Skill, Armor, Weapon, Tool, ect.
-    pub class: ProficiencyClass,
+    pub name: Option<String>,
+    pub class: Option<ProficiencyClass>,
 }
 
 impl fmt::Display for Proficiency {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            "ID: {:#?}, Name: {}, Class: {}",
+            "ID: {:#?}, Name: {:#?}, Class: {:#?}",
             self.id, self.name, self.class
         )
     }
@@ -61,8 +61,8 @@ impl Proficiency {
     pub fn new(id: i64, name: String, class: ProficiencyClass) -> Self {
         Self {
             id: Some(id),
-            name,
-            class,
+            name: Some(name),
+            class: Some(class),
         }
     }
 }

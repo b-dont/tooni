@@ -1,16 +1,19 @@
 use ::std::{fmt, str::FromStr};
+use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
 
 #[derive(Debug, Clone)]
 pub enum FeatureClass {
     Background,
     Racial,
     Class,
+    Feat,
     Other,
 }
 
-impl Default for FeatureClass {
-    fn default() -> Self {
-        FeatureClass::Background
+impl FromSql for FeatureClass {
+    #[inline]
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<FeatureClass> {
+       Ok(FeatureClass::from_str(value.as_str()?).unwrap())
     }
 }
 
@@ -21,6 +24,7 @@ impl FromStr for FeatureClass {
             "Background" => Ok(FeatureClass::Background),
             "Racial" => Ok(FeatureClass::Racial),
             "Class" => Ok(FeatureClass::Class),
+            "Feat" => Ok(FeatureClass::Feat),
             "Other" => Ok(FeatureClass::Other),
             _ => Err(()),
         }
@@ -33,6 +37,7 @@ impl fmt::Display for FeatureClass {
             &FeatureClass::Background => write!(f, "Background"),
             &FeatureClass::Racial => write!(f, "Racial"),
             &FeatureClass::Class => write!(f, "Class"),
+            &FeatureClass::Feat => write!(f, "Feat"),
             &FeatureClass::Other => write!(f, "Other"),
         }
     }
@@ -40,8 +45,8 @@ impl fmt::Display for FeatureClass {
 
 #[derive(Default, Debug, Clone)]
 pub struct Feature {
-    id: Option<i64>,
-    class: FeatureClass,
-    name: String,
-    description: String,
+    pub id: Option<i64>,
+    pub class: Option<FeatureClass>,
+    pub name: String,
+    pub description: String,
 }

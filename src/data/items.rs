@@ -1,4 +1,5 @@
 use ::std::{fmt, str::FromStr};
+use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
 
 #[derive(Debug, Clone)]
 pub enum ItemRarity {
@@ -10,9 +11,10 @@ pub enum ItemRarity {
     Unknown,
 }
 
-impl Default for ItemRarity {
-    fn default() -> Self {
-        ItemRarity::Common
+impl FromSql for ItemRarity {
+    #[inline]
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<ItemRarity> {
+       Ok(ItemRarity::from_str(value.as_str()?).unwrap())
     }
 }
 
@@ -59,7 +61,7 @@ pub struct Item {
     // item when one is added.
     pub class: String,
     pub quantity: u16,
-    pub rarity: ItemRarity,
+    pub rarity: Option<ItemRarity>,
     pub value: u16,
     pub weight: u64,
     pub properties: String,
@@ -74,7 +76,7 @@ impl fmt::Display for Item {
             Name: {}, 
             Class: {},
             Quantity: {},
-            Rarity: {},
+            Rarity: {:#?},
             Value: {},
             Weight: {},
             Properties: {},

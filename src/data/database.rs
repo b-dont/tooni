@@ -1,16 +1,17 @@
-use crate::{data::character::SavedCharacter, Character};
+use crate::{
+    data::{
+        character::SavedCharacter, 
+        background::Background, 
+        feature::Feature,
+        items::Item,
+        language::Language,
+        proficiency::Proficiency,
+        spells::Spell,
+        stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
+    }, 
+    Character};
 use rusqlite::{params, Connection, Result};
-use std::{collections::HashMap, str::FromStr};
-
-use super::{
-    alignments::Alignment,
-    gender::Gender,
-    items::{Item, ItemRarity},
-    language::Language,
-    proficiency::{Proficiency, ProficiencyClass},
-    spells::Spell,
-    stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
-};
+use std::collections::HashMap;
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -30,6 +31,121 @@ impl Database {
         self.create_proficiencies_tables()?;
         self.create_item_tables()?;
         self.create_spell_tables()?;
+
+        Ok(())
+    }
+
+    pub fn create_backgrounds_tables(&self) -> Result<()> {
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS backgrounds (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
+            )", 
+            []
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_profs (
+                background INTEGER REFERENCES backgrounds(id),
+                proficiency INTEGER REFERENCES proficiencies(id),
+                PRIMARY KEY (background, proficiency)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_langs (
+                background INTEGER REFERENCES backgrounds(id),
+                language INTEGER REFERENCES languages(id),
+                PRIMARY KEY (background, proficiency)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NORT EXISTS background_starting_equipment (
+                background INTEGER REFERENCES backgrounds(id),
+                item INTEGER REFERENCES items(id),
+                PRIMARY KET (background, item)
+            )", 
+            []
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS backgound_features (
+                background INTEGER REFERENCES backgrounds(id),
+                feature INTEGER REFERENCES features(id),
+                PRIMARY KEY (background, feature)
+            )", 
+            []
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_personality_trait (
+                background INTEGER REFERENCES backgrounds(id),
+                personality_trait INTEGER REFERENCES personality_traits(id),
+                PRIMARY KEY (background, personality_trait)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS personality_trait (
+                id INTEGER PRIMARY KEY,
+                personality_trait TEXT NOT NULL
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_ideal (
+                background INTEGER REFERENCES backgrounds(id),
+                ideal INTEGER REFERENCES ideals(id),
+                PRIMARY KEY (background, ideal)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS ideals (
+                id INTEGER PRIMARY KEY,
+                ideal TEXT NOT NULL
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_bond (
+                background INTEGER REFERENCES backgrounds(id),
+                bond INTEGER REFERENCES bonds(id),
+                PRIMARY KEY (background, bond)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS bonds (
+                id INTEGER PRIMARY KEY,
+                bond TEXT NOT NULL
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS background_flaw (
+                background INTEGER REFERENCES backgrounds(id),
+                flaw INTEGER REFERENCES flaws(id),
+                PRIMARY KEY (background, flaw)
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS flaws (
+                id INTEGER PRIMARY KEY,
+                flaw TEXT NOT NULL
+            )",
+            [],
+        )?;
+        Ok(())
+    }
+
+    pub fn save_backgound(&self, background: Background) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "REPLACE INTO backgrounds (
+                id,
+                name
+            ) VALUES (?1, ?2)" 
+        )?;
+        stmt.execute(params![background.id, background.name])?;
 
         Ok(())
     }
@@ -70,6 +186,113 @@ impl Database {
             [],
         )?;
         Ok(())
+    }
+
+    pub fn create_feature_tables(&self) -> Result<()> {
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS features (
+                id INTEGER PRIMARY KEY,
+                class TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL
+            )",
+            [],
+        )?;
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS character_features (
+                character INTEGER REFERENCES characters(id),
+                feature INTEGER REFERENCES features(id),
+                PRIMARY KEY (character, feature)
+            )",
+            [],
+        )?;
+        Ok(())
+    }
+
+    pub fn save_character_features(
+        &self,
+        id: Option<i64>,
+        features: &Vec<Feature>,
+    ) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "REPLACE INTO character_features(
+                character,
+                feature
+            )
+            VALUES (?1, ?2)",
+        )?;
+
+        for feature in features {
+            stmt.execute(params![id, feature.id])?;
+        }
+        Ok(())
+    }
+
+    pub fn save_feature(&self, feature: Feature) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            "REPLACE INTO features (
+            id,
+            class,
+            name,
+            description
+            )
+            VALUES (?1, ?2, ?3)",
+        )?;
+
+        stmt.execute(params![feature.id, feature.name, feature.class.map_or_else(String::new, |v| v.to_string())])?;
+        Ok(())
+    }
+
+    pub fn load_characer_features(&self, id: i64) -> Result<Vec<Feature>> {
+        let mut stmt = self.connection.prepare(
+            "SELECT
+            character,
+            feature
+            FROM character_features WHERE character=?1
+            ",
+        )?;
+
+        let character_features =
+            stmt.query_map([id], |row| self.load_feature(row.get(1)?))?;
+        character_features.into_iter().collect()
+    }
+
+    pub fn load_feature(&self, id: i64) -> Result<Feature> {
+        let mut stmt = self.connection.prepare(
+            "
+               SELECT
+               id,
+               class,
+               name,
+               description
+               FROM features WHERE id=?1
+            ",
+        )?;
+
+        let queried_feature = stmt.query_row(params![id], |row| {
+            Ok(Feature {
+                id: row.get(0)?,
+                class: row.get(1)?,
+                name: row.get(2)?,
+                description: row.get(3)?,
+            })
+        })?;
+
+        Ok(queried_feature)
+    }
+
+    pub fn get_all_features(&self) -> Result<Vec<Feature>> {
+        let mut stmt = self.connection.prepare("SELECT * FROM features")?;
+
+        let features = stmt.query_map([], |row| {
+            Ok(Feature {
+                id: row.get(0)?,
+                class: row.get(1)?,
+                name: row.get(2)?,
+                description: row.get(3)?,
+            })
+        })?;
+        features.into_iter().collect()
     }
 
     pub fn create_spell_tables(&self) -> Result<()> {
@@ -290,7 +513,7 @@ impl Database {
             item.name,
             item.class,
             item.quantity,
-            item.rarity.to_string(),
+            item.rarity.map_or_else(String::new, |v| v.to_string()),
             item.value,
             item.weight,
             item.properties,
@@ -330,13 +553,12 @@ impl Database {
         )?;
 
         let queried_item = stmt.query_row(params![id], |row| {
-            let item_rarity: String = row.get(4)?;
             Ok(Item {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: row.get(2)?,
                 quantity: row.get(3)?,
-                rarity: ItemRarity::from_str(&item_rarity).unwrap(),
+                rarity: row.get(4)?,
                 value: row.get(5)?,
                 weight: row.get(6)?,
                 properties: row.get(7)?,
@@ -349,15 +571,13 @@ impl Database {
 
     pub fn get_all_items(&self) -> Result<Vec<Item>> {
         let mut stmt = self.connection.prepare("SELECT * FROM items")?;
-
         let items = stmt.query_map([], |row| {
-            let item_rarity: String = row.get(4)?;
             Ok(Item {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 class: row.get(2)?,
                 quantity: row.get(3)?,
-                rarity: ItemRarity::from_str(&item_rarity).unwrap(),
+                rarity: row.get(4)?,
                 value: row.get(5)?,
                 weight: row.get(6)?,
                 properties: row.get(7)?,
@@ -416,7 +636,7 @@ impl Database {
             VALUES (?1, ?2, ?3)",
         )?;
 
-        stmt.execute(params![prof.id, prof.name, prof.class.to_string()])?;
+        stmt.execute(params![prof.id, prof.name, prof.class.map_or_else(String::new, |v| v.to_string())])?;
         Ok(())
     }
 
@@ -446,11 +666,10 @@ impl Database {
         )?;
 
         let queried_prof = stmt.query_row(params![id], |row| {
-            let prof_class: String = row.get(2)?;
             Ok(Proficiency {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                class: ProficiencyClass::from_str(&prof_class).unwrap(),
+                class: row.get(2)?,
             })
         })?;
 
@@ -461,11 +680,10 @@ impl Database {
         let mut stmt = self.connection.prepare("SELECT * FROM proficiencies")?;
 
         let profs = stmt.query_map([], |row| {
-            let prof_class: String = row.get(2)?;
             Ok(Proficiency {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                class: ProficiencyClass::from_str(&prof_class).unwrap(),
+                class: row.get(2)?,
             })
         })?;
         profs.into_iter().collect()
@@ -711,12 +929,10 @@ impl Database {
         )?;
 
         let queried_character = stmt.query_row(params![id], |row| {
-            let character_alignment: String = row.get(2)?;
-            let character_gender: String = row.get(7)?;
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                alignment: Alignment::from_str(&character_alignment).unwrap(),
+                alignment: row.get(2)?,
                 stats: HashMap::from([
                     (STR, row.get(18)?),
                     (DEX, row.get(19)?),
@@ -737,7 +953,7 @@ impl Database {
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
                 speed: row.get(6)?,
-                gender: Gender::from_str(&character_gender).unwrap(),
+                gender: row.get(7)?,
                 height: row.get(8)?,
                 weight: row.get(9)?,
                 age: row.get(10)?,
@@ -821,12 +1037,10 @@ impl Database {
         )?;
 
         let characters = stmt.query_map([], |row| {
-            let character_alignment: String = row.get(2)?;
-            let character_gender: String = row.get(7)?;
             Ok(Character {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                alignment: Alignment::from_str(&character_alignment).unwrap(),
+                alignment: row.get(2)?,
                 stats: HashMap::from([
                     (STR, row.get(18)?),
                     (DEX, row.get(19)?),
@@ -847,7 +1061,7 @@ impl Database {
                 passive_perception: row.get(4)?,
                 inspiration: row.get(5)?,
                 speed: row.get(6)?,
-                gender: Gender::from_str(&character_gender).unwrap(),
+                gender: row.get(7)?,
                 height: row.get(8)?,
                 weight: row.get(9)?,
                 age: row.get(10)?,

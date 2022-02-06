@@ -4,7 +4,6 @@ use crate::data::{
         ChaoticEvil, ChaoticGood, ChaoticNeutral, LawfulEvil, LawfulGood, LawfulNeutral, Neutral,
         NeutralEvil, NeutralGood,
     },
-    gender::Gender,
     items::Item,
     language::Language,
     proficiency::Proficiency,
@@ -18,12 +17,18 @@ use std::fmt;
 #[derive(Default, Clone)]
 // TODO: Consider sets instead of Vecs for data structures
 // like languages, proficiencies, ect.
+// TODO: DON'T FORGET FEATS!
 pub struct Character {
     pub id: Option<i64>,
     pub name: String,
     //    pub race: Race,
     //    pub class: Class,
-    //    pub background: Background,
+    //    pub background: Option<String>,
+    //    pub personality_trait: String,
+    //    pub ideal: String,
+    //    pub bond: String,
+    //    pub flaw: String,
+    //    pub features: Vec<Feature>,
     pub alignment: Alignment,
     pub stats: HashMap<Stats, u8>,
     pub proficiencies: Vec<Proficiency>,
@@ -40,8 +45,7 @@ pub struct Character {
     pub spells: Vec<Spell>,
     // TODO: Calculated from Race and/or class
     pub speed: u8,
-    // TODO: Change to Enum
-    pub gender: Gender,
+    pub gender: String,
     pub height: u8,
     pub weight: u8,
     pub age: u8,
@@ -156,7 +160,7 @@ impl Character {
             passive_perception: 12,
             inspiration: false,
             speed: 30,
-            gender: Gender::Male,
+            gender: "Male".to_string(),
             height: 6,
             weight: 100,
             age: 30,
@@ -198,7 +202,7 @@ impl Character {
             passive_perception: 12,
             inspiration: false,
             speed: 30,
-            gender: Gender::Female,
+            gender: "Female".to_string(),
             height: 7,
             weight: 200,
             age: 35,
