@@ -1,5 +1,10 @@
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
 use std::fmt;
+use rusqlite::{
+    types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
+    Result,
+};
+use crate::data::character::Model;
 
 #[derive(Default, Clone)]
 pub struct Background {
@@ -26,6 +31,15 @@ impl fmt::Display for Background {
             ",
             self.id, self.name,
         )
+    }
+}
+
+impl Model for Background {
+    fn parameters(&self) -> Vec<Box<dyn ToSql>> {
+        let mut params: Vec<Box<dyn ToSql>> = Vec::new();
+        params.push(Box::new(self.id));
+        params.push(Box::new(self.name.clone()));
+        params
     }
 }
 
