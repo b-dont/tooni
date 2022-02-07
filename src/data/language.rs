@@ -1,6 +1,6 @@
-use std::fmt;
 use crate::data::character::Model;
 use rusqlite::ToSql;
+use std::fmt;
 
 #[derive(Default, Debug, Clone)]
 pub struct Language {

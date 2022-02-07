@@ -1,9 +1,9 @@
+use crate::data::character::Model;
 use rusqlite::{
+    types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
     Result,
-    types::{ToSql ,FromSql, FromSqlResult, ToSqlOutput, ValueRef}
 };
 use std::{fmt, str::FromStr};
-use crate::data::character::Model;
 
 #[derive(Debug, Clone)]
 // TODO: Consider sub-class in the Enum

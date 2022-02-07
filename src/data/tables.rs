@@ -1,11 +1,7 @@
-use rusqlite::{Row, Result};
-use crate::data::{
-    character::Model,
-    proficiency::Proficiency,
-    language::Language,
-};
+use crate::data::{character::Model, language::Language, proficiency::Proficiency};
+use rusqlite::{Result, Row};
 
-use super::{items::Item, feature::Feature};
+use super::{feature::Feature, items::Item};
 
 #[derive(Debug, Clone)]
 pub enum Table {
@@ -28,17 +24,19 @@ impl Table {
 
     pub fn columns(&self) -> String {
         match self {
-                &Table::ProficiencyTable => "
+            &Table::ProficiencyTable => "
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 class TEXT NOT NULL
-                ".to_string(),
-                &Table::LanguagesTable => "
+                "
+            .to_string(),
+            &Table::LanguagesTable => "
                 id INTEGER PRIMARY KEY,
                 name TEXT UNIQUE NOT NULL,
                 description TEXT UNIQUE NOT NULL
-                ".to_string(),
-                &Table::ItemsTable => "
+                "
+            .to_string(),
+            &Table::ItemsTable => "
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
                 class TEXT NOT NULL,
@@ -48,13 +46,15 @@ impl Table {
                 weight INTEGER,
                 properties TEXT NOT NULL,
                 description TEXT NOT NULL
-                ".to_string(),
-                &Table::FeaturesTable => "
+                "
+            .to_string(),
+            &Table::FeaturesTable => "
                 id INTEGER PRIMARY KEY,
                 class TEXT NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT NOT NULL
-                ".to_string(),
+                "
+            .to_string(),
         }
     }
 
@@ -62,7 +62,10 @@ impl Table {
         match self {
             &Table::ProficiencyTable => "id, name, class".to_string(),
             &Table::LanguagesTable => "id, name, description".to_string(),
-            &Table::ItemsTable => "id, name, class, quantity, rarity, value, weight, properties, description".to_string(),
+            &Table::ItemsTable => {
+                "id, name, class, quantity, rarity, value, weight, properties, description"
+                    .to_string()
+            }
             &Table::FeaturesTable => "id, class, name, description".to_string(),
         }
     }
@@ -70,7 +73,7 @@ impl Table {
     pub fn values(&self) -> String {
         match self {
             &Table::ProficiencyTable => "?1, ?2, ?3".to_string(),
-            &Table::LanguagesTable=> "?1, ?2, ?3".to_string(),
+            &Table::LanguagesTable => "?1, ?2, ?3".to_string(),
             &Table::ItemsTable => "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string(),
             &Table::FeaturesTable => "?1, ?2, ?3, ?4".to_string(),
         }
@@ -81,12 +84,12 @@ impl Table {
             &Table::ProficiencyTable => Ok(Box::new(Proficiency {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                class: row.get(2)?
+                class: row.get(2)?,
             })),
             &Table::LanguagesTable => Ok(Box::new(Language {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                description: row.get(2)?
+                description: row.get(2)?,
             })),
             &Table::ItemsTable => Ok(Box::new(Item {
                 id: row.get(0)?,
@@ -141,7 +144,7 @@ impl JunctionTable {
 
     pub fn values(&self) -> String {
         match self {
-            _ => "?1, ?2".to_string()
+            _ => "?1, ?2".to_string(),
         }
     }
 }

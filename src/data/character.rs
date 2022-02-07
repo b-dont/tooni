@@ -11,8 +11,8 @@ use crate::data::{
     stats::Stats,
     stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
 };
-use std::collections::HashMap;
 use rusqlite::ToSql;
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Default, Clone)]
@@ -157,6 +157,6 @@ impl SavedCharacter {
     }
 }
 
-pub trait Model : std::fmt::Display {
+pub trait Model: std::fmt::Display {
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
 }

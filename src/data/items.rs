@@ -1,10 +1,9 @@
+use crate::data::character::Model;
 use ::std::{fmt, str::FromStr};
 use rusqlite::{
+    types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
     Result,
-    types::{ToSql ,FromSql, FromSqlResult, ToSqlOutput, ValueRef}
 };
-use crate::data::character::Model;
-
 
 #[derive(Debug, Clone)]
 pub enum ItemRarity {

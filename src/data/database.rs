@@ -1,3 +1,4 @@
+use super::character::Model;
 use crate::{
     data::{
         background::Background,
@@ -8,13 +9,12 @@ use crate::{
         proficiency::Proficiency,
         spells::Spell,
         stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
-        tables::{Table, JunctionTable}
+        tables::{JunctionTable, Table},
     },
     Character,
 };
-use rusqlite::{params, Result, Connection, params_from_iter};
+use rusqlite::{params, params_from_iter, Connection, Result};
 use std::collections::HashMap;
-use super::character::Model;
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -30,40 +30,53 @@ impl Database {
 
     pub fn create_table(&self, table: Table) -> Result<()> {
         self.connection.execute(
-            format!("CREATE TABLE IF NOT EXISTS {} ({})", table.name(), table.columns()).as_str(), 
-            []
+            format!(
+                "CREATE TABLE IF NOT EXISTS {} ({})",
+                table.name(),
+                table.columns()
+            )
+            .as_str(),
+            [],
         )?;
         Ok(())
     }
 
-    pub fn save(&self, table: Table, modle: &dyn Model) -> Result<()> {
+    pub fn save(&self, table: Table, model: &dyn Model) -> Result<()> {
         let mut stmt = self.connection.prepare(
-            format!("REPLACE INTO {} ({}) VALUES ({})", table.name(), table.queries(), table.values()).as_str())?;
+            format!(
+                "REPLACE INTO {} ({}) VALUES ({})",
+                table.name(),
+                table.queries(),
+                table.values()
+            )
+            .as_str(),
+        )?;
 
-        stmt.execute(params_from_iter(modle.parameters().into_iter()))?;
+        stmt.execute(params_from_iter(model.parameters().into_iter()))?;
         Ok(())
     }
 
     pub fn load(&self, id: i64, table: Table) -> Result<Box<dyn Model>> {
         let mut stmt = self.connection.prepare(
-            format!("SELECT {} FROM {} WHERE id=?1", table.queries(), table.name()).as_str()
+            format!(
+                "SELECT {} FROM {} WHERE id=?1",
+                table.queries(),
+                table.name()
+            )
+            .as_str(),
         )?;
 
-        let queried_prof = stmt.query_row(params![id], |row| {
-            Ok(table.create_model(&row))
-        })?;
+        let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
 
-        queried_prof
+        queried_model
     }
 
     pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<dyn Model>>> {
-        let mut stmt = self.connection.prepare(
-            format!("SELECT {} FROM {}", table.queries(), table.name()).as_str()
-        )?;
+        let mut stmt = self
+            .connection
+            .prepare(format!("SELECT {} FROM {}", table.queries(), table.name()).as_str())?;
 
-        let all_models = stmt.query_map([], |row| {
-            Ok(table.create_model(&row)?)
-        })?;
+        let all_models = stmt.query_map([], |row| Ok(table.create_model(&row)?))?;
         all_models.into_iter().collect()
     }
 
