@@ -1,9 +1,5 @@
 use crate::data::{
     alignments::Alignment,
-    alignments::Alignment::{
-        ChaoticEvil, ChaoticGood, ChaoticNeutral, LawfulEvil, LawfulGood, LawfulNeutral, Neutral,
-        NeutralEvil, NeutralGood,
-    },
     items::Item,
     language::Language,
     proficiency::Proficiency,
