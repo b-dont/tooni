@@ -12,10 +12,6 @@ pub enum Table {
     LanguagesTable,
     ItemsTable,
     FeaturesTable,
-    PersonalityTraitsTable,
-    IdealsTable,
-    BondsTable,
-    FlawsTable,
     //    SpellsTable,
 }
 
@@ -27,10 +23,6 @@ impl Table {
             &Table::ItemsTable              => "items".to_string(),
             &Table::FeaturesTable           => "features".to_string(),
             &Table::BackgroundsTable        => "backgrounds".to_string(),
-            &Table::PersonalityTraitsTable  => "personality_traits".to_string(),
-            &Table::IdealsTable             => "ideals".to_string(),
-            &Table::BondsTable              => "bonds".to_string(),
-            &Table::FlawsTable              => "flaws".to_string(),
         }
     }
 
@@ -72,26 +64,6 @@ impl Table {
                 name TEXT NOT NULL
                 "
             .to_string(),
-            &Table::PersonalityTraitsTable => "
-                id INTEGER PRIMARY KEY,
-                description TEXT NOT NULL
-                "
-            .to_string(),
-            &Table::IdealsTable => "
-                id INTEGER PRIMARY KEY,
-                description TEXT NOT NULL
-                "
-            .to_string(),
-            &Table::BondsTable => "
-                id INTEGER PRIMARY KEY,
-                description TEXT NOT NULL
-                "
-            .to_string(),
-            &Table::FlawsTable => "
-                id INTEGER PRIMARY KEY,
-                description TEXT NOT NULL
-                "
-            .to_string(),
         }
     }
 
@@ -102,10 +74,6 @@ impl Table {
             &Table::ItemsTable              => "id, name, class, quantity, rarity, value, weight, properties, description".to_string(),
             &Table::FeaturesTable           => "id, class, name, description".to_string(),
             &Table::BackgroundsTable        => "id, name".to_string(),
-            &Table::PersonalityTraitsTable  => "id, description".to_string(),
-            &Table::IdealsTable             => "id, description".to_string(),
-            &Table::BondsTable              => "id, description".to_string(),
-            &Table::FlawsTable              => "id, description".to_string(),
         }
     }
 
@@ -116,10 +84,6 @@ impl Table {
             &Table::ItemsTable              => "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string(),
             &Table::FeaturesTable           => "?1, ?2, ?3, ?4".to_string(),
             &Table::BackgroundsTable        => "?1, ?2".to_string(),
-            &Table::PersonalityTraitsTable  => "?1, ?2".to_string(),
-            &Table::IdealsTable             => "?1, ?2".to_string(),
-            &Table::BondsTable              => "?1, ?2".to_string(),
-            &Table::FlawsTable              => "?1, ?2".to_string(),
         }
     }
 
@@ -164,17 +128,6 @@ impl Table {
                 bonds: Vec::new(),
                 flaws: Vec::new(),
             })),
-            _ => Ok(Box::new(Background::new()))
-        }
-    }
-
-    pub fn get_string(&self, row: &Row) -> Result<String> {
-        match self {
-            &Table::PersonalityTraitsTable  => Ok(row.get(1)?),
-            &Table::IdealsTable             => Ok(row.get(1)?),
-            &Table::BondsTable              => Ok(row.get(1)?),
-            &Table::FlawsTable              => Ok(row.get(1)?),
-            _ => Ok("".to_string()),
         }
     }
 }

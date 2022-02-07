@@ -56,6 +56,15 @@ impl Database {
         Ok(())
     }
 
+    pub fn save_to_junction(&self, junct: JunctionTable, object: i64, source: i64) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            format!("REPLACE INTO {} ({}, {}) VALUES ({})", junct.name(), junct.columns().0, junct.columns().1, junct.values()).as_str()
+        )?;
+
+        stmt.execute(params![object, source])?;
+        Ok(())
+    }
+
     pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {
         let mut stmt = self
             .connection
