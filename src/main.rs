@@ -7,6 +7,7 @@ use crate::data::{
 };
 use anyhow::Result;
 use data::tables::Table;
+use data::tables::Table::{ProficiencyTable, LanguagesTable};
 
 // use crossterm::{
 //     cursor, queue,
@@ -26,12 +27,12 @@ fn main() -> Result<()> {
     //    enable_raw_mode()?;
 
     let db = Database::new()?;
-    db.create_table(Table::ProficiencyTable)?;
-    let all_profs = db.get_all_rows(Table::ProficiencyTable)?;
-
-    for prof in all_profs {
-        println!("{}", prof);
-    }
+//    db.create_table(Table::LanguagesTable)?;
+//    let all_langs = db.get_all_rows(Table::LanguagesTable)?;
+//
+//    for langs in all_langs {
+//        println!("{}", langs);
+//    }
 //    let test_armor = Item {
 //        id: None,
 //        name: "Test Armor".to_string(),
@@ -116,14 +117,14 @@ fn main() -> Result<()> {
 //        class: Some(ProficiencyClass::Weapon),
 //    };
 //
-//    db.save_to_table(Table::ProficiencyTable, &medium_armor)?;
-//    db.save_to_table(Table::ProficiencyTable, &heavy_armor)?;
-//    db.save_to_table(Table::ProficiencyTable, &disguise_kit)?;
-//    db.save_to_table(Table::ProficiencyTable, &test_tools)?;
-//    db.save_to_table(Table::ProficiencyTable, &acrobatics)?;
-//    db.save_to_table(Table::ProficiencyTable, &history)?;
-//    db.save_to_table(Table::ProficiencyTable, &warhammer)?;
-//    db.save_to_table(Table::ProficiencyTable, &longbow)?;
+//    db.save(ProficiencyTable, &medium_armor)?;
+//    db.save(ProficiencyTable, &heavy_armor)?;
+//    db.save(ProficiencyTable, &disguise_kit)?;
+//    db.save(ProficiencyTable, &test_tools)?;
+//    db.save(ProficiencyTable, &acrobatics)?;
+//    db.save(ProficiencyTable, &history)?;
+//    db.save(ProficiencyTable, &warhammer)?;
+//    db.save(ProficiencyTable, &longbow)?;
 
 //    let common = Language {
 //        id: None,
@@ -149,6 +150,11 @@ fn main() -> Result<()> {
 //        description: "It's Infernal, duh".to_string(),
 //    };
 //
+//    db.save(LanguagesTable, &common)?;
+//    db.save(LanguagesTable, &elvish)?;
+//    db.save(LanguagesTable, &orcish)?;
+//    db.save(LanguagesTable, &infernal)?;
+
     // Instantiate state machine
     //    let mut app = App::new(db)?;
 

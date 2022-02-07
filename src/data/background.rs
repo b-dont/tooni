@@ -30,36 +30,6 @@ impl fmt::Display for Background {
 }
 
 impl Background {
-    pub fn print_background(&self) {
-        println!("{}", self);
-        for lang in &self.languages {
-            println!("{}", lang);
-        }
-        for prof in &self.proficiencies {
-            println!("{}", prof);
-        }
-        for item in &self.starting_equipment {
-            println!("{}", item);
-        }
-        for feature in &self.features {
-            println!("{}", feature);
-        }
-        for personality in &self.personality_traits {
-            println!("{}", personality);
-        }
-        for ideal in &self.ideals {
-            println!("{}", ideal);
-        }
-        for bond in &self.bonds {
-            println!("{}", bond);
-        }
-        for flaw in &self.flaws {
-            println!("{}", flaw);
-        }
-    }
-}
-
-impl Background {
     pub fn new() -> Self {
         Self::default()
     }

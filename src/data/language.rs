@@ -1,4 +1,6 @@
 use std::fmt;
+use crate::data::character::Model;
+use rusqlite::ToSql;
 
 #[derive(Default, Debug, Clone)]
 pub struct Language {
@@ -14,6 +16,16 @@ impl fmt::Display for Language {
             "ID: {:#?}, Name: {}, Description: {}",
             self.id, self.name, self.description
         )
+    }
+}
+
+impl Model for Language {
+    fn parameters(&self) -> Vec<Box<dyn ToSql>> {
+        let mut params: Vec<Box<dyn ToSql>> = Vec::new();
+        params.push(Box::new(self.id));
+        params.push(Box::new(self.name.clone()));
+        params.push(Box::new(self.description.clone()));
+        params
     }
 }
 

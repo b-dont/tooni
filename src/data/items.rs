@@ -1,5 +1,10 @@
 use ::std::{fmt, str::FromStr};
-use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
+use rusqlite::{
+    Result,
+    types::{ToSql ,FromSql, FromSqlResult, ToSqlOutput, ValueRef}
+};
+use crate::data::character::Model;
+
 
 #[derive(Debug, Clone)]
 pub enum ItemRarity {
@@ -14,6 +19,12 @@ pub enum ItemRarity {
 impl FromSql for ItemRarity {
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<ItemRarity> {
         Ok(ItemRarity::from_str(value.as_str()?).unwrap())
+    }
+}
+
+impl ToSql for ItemRarity {
+    fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+        Ok(ToSqlOutput::from(self.to_string()))
     }
 }
 
@@ -49,15 +60,6 @@ impl fmt::Display for ItemRarity {
 pub struct Item {
     pub id: Option<i64>,
     pub name: String,
-    // TODO: Tried making an Enum for "class",
-    // but it seems there are potnentially an
-    // unlimited number of item "classes";
-    // users can establish their own item class,
-    // and the D&D modules themselves have a very
-    // large number of "class" or "types" for items.
-    // For now, this will remain a String, and the user
-    // will be responsible for establishing the "class" of
-    // item when one is added.
     pub class: String,
     pub quantity: u16,
     pub rarity: Option<ItemRarity>,
@@ -90,6 +92,22 @@ impl fmt::Display for Item {
             self.properties,
             self.description
         )
+    }
+}
+
+impl Model for Item {
+    fn parameters(&self) -> Vec<Box<dyn ToSql>> {
+        let mut params: Vec<Box<dyn ToSql>> = Vec::new();
+        params.push(Box::new(self.id));
+        params.push(Box::new(self.name.clone()));
+        params.push(Box::new(self.class.clone()));
+        params.push(Box::new(self.quantity));
+        params.push(Box::new(self.rarity.clone()));
+        params.push(Box::new(self.value));
+        params.push(Box::new(self.weight));
+        params.push(Box::new(self.properties.clone()));
+        params.push(Box::new(self.description.clone()));
+        params
     }
 }
 

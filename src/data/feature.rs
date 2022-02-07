@@ -1,5 +1,9 @@
 use ::std::{fmt, str::FromStr};
-use rusqlite::types::{FromSql, FromSqlResult, ValueRef};
+use rusqlite::{
+    Result,
+    types::{ToSql ,FromSql, FromSqlResult, ToSqlOutput, ValueRef}
+};
+use crate::data::character::Model;
 
 #[derive(Debug, Clone)]
 pub enum FeatureClass {
@@ -14,6 +18,12 @@ impl FromSql for FeatureClass {
     #[inline]
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<FeatureClass> {
         Ok(FeatureClass::from_str(value.as_str()?).unwrap())
+    }
+}
+
+impl ToSql for FeatureClass {
+    fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+        Ok(ToSqlOutput::from(self.to_string()))
     }
 }
 
@@ -61,6 +71,17 @@ impl fmt::Display for Feature {
             Description: {}",
             self.id, self.class, self.name, self.description
         )
+    }
+}
+
+impl Model for Feature {
+    fn parameters(&self) -> Vec<Box<dyn ToSql>> {
+        let mut params: Vec<Box<dyn ToSql>> = Vec::new();
+        params.push(Box::new(self.id));
+        params.push(Box::new(self.class.clone()));
+        params.push(Box::new(self.name.clone()));
+        params.push(Box::new(self.description.clone()));
+        params
     }
 }
 
