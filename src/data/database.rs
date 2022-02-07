@@ -58,7 +58,7 @@ impl Database {
 
     pub fn load_from_table(&self, id: i64, table: Table) -> Result<Box<dyn Model>> {
         let mut stmt = self.connection.prepare(
-            format!("SELECT ({}) FROM {} WHERE id=?1", table.name(), table.columns()).as_str()
+            format!("SELECT ({}) FROM {} WHERE id=?1", table.table_columns(), table.name()).as_str()
         )?;
 
         let queried_prof = stmt.query_row(params![id], |row| {
