@@ -27,6 +27,7 @@ impl Database {
             .as_str(),
             [],
         )?;
+
         Ok(())
     }
 
@@ -48,6 +49,7 @@ impl Database {
             .as_str(),
             []
         )?;
+
         Ok(())
     }
 
@@ -64,6 +66,7 @@ impl Database {
         let mut stmt = self
             .connection
             .prepare(format!("DELETE FROM {} WHERE id=?1", table.name()).as_str())?;
+
         stmt.execute(params![id])?;
         Ok(())
     }
@@ -78,7 +81,7 @@ impl Database {
             )
             .as_str(),
         )?;
-
+        
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
         Ok(())
     }
@@ -94,7 +97,6 @@ impl Database {
         )?;
 
         let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
-
         queried_model
     }
 
