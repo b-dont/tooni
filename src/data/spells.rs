@@ -33,13 +33,13 @@ impl FromStr for School {
     type Err = ();
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input {
-            "Abjuration"    => Ok(School::Abjuration),
-            "Conjuration"   => Ok(School::Conjuration),  
-            "Divination"    => Ok(School::Divination),
-            "Enchantment"   => Ok(School::Enchantment),
-            "Evocation"     => Ok(School::Evocation),
-            "Illusion"      => Ok(School::Illusion),
-            "Necromancy"    => Ok(School::Necromancy),
+            "Abjuration" => Ok(School::Abjuration),
+            "Conjuration" => Ok(School::Conjuration),
+            "Divination" => Ok(School::Divination),
+            "Enchantment" => Ok(School::Enchantment),
+            "Evocation" => Ok(School::Evocation),
+            "Illusion" => Ok(School::Illusion),
+            "Necromancy" => Ok(School::Necromancy),
             "Transmutation" => Ok(School::Transmutation),
             _ => Err(()),
         }
@@ -49,14 +49,14 @@ impl FromStr for School {
 impl fmt::Display for School {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            &School::Abjuration     => write!(f, "Abjuration"),
-            &School::Conjuration    => write!(f, "Conjuration"),  
-            &School::Divination     => write!(f, "Divination"),
-            &School::Enchantment    => write!(f, "Enchantment"),
-            &School::Evocation      => write!(f, "Evocation"),
-            &School::Illusion       => write!(f, "Illusion"),
-            &School::Necromancy     => write!(f, "Necromancy"),
-            &School::Transmutation  => write!(f, "Transmutation"),
+            &School::Abjuration => write!(f, "Abjuration"),
+            &School::Conjuration => write!(f, "Conjuration"),
+            &School::Divination => write!(f, "Divination"),
+            &School::Enchantment => write!(f, "Enchantment"),
+            &School::Evocation => write!(f, "Evocation"),
+            &School::Illusion => write!(f, "Illusion"),
+            &School::Necromancy => write!(f, "Necromancy"),
+            &School::Transmutation => write!(f, "Transmutation"),
         }
     }
 }
@@ -116,7 +116,6 @@ impl Model for Spell {
         params
     }
 }
-
 
 impl Spell {
     pub fn new() -> Self {

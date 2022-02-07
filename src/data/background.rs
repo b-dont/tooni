@@ -1,10 +1,7 @@
-use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
-use std::fmt;
-use rusqlite::{
-    types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
-    Result,
-};
 use crate::data::character::Model;
+use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
+use rusqlite::ToSql;
+use std::fmt;
 
 #[derive(Default, Clone)]
 pub struct Background {
@@ -39,6 +36,20 @@ impl Model for Background {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
         params.push(Box::new(self.id));
         params.push(Box::new(self.name.clone()));
+
+        for pers_trait in &self.personality_traits {
+            params.push(Box::new(pers_trait.clone()));
+        }
+        for ideal in &self.ideals {
+            params.push(Box::new(ideal.clone()));
+        }
+        for bond in &self.bonds {
+            params.push(Box::new(bond.clone()));
+        }
+        for flaw in &self.flaws {
+            params.push(Box::new(flaw.clone()));
+        }
+
         params
     }
 }

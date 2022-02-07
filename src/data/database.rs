@@ -1,7 +1,7 @@
 use super::character::Model;
 use crate::data::{
-        character::SavedCharacter,
-        tables::{JunctionTable, Table},
+    character::SavedCharacter,
+    tables::{JunctionTable, Table},
 };
 use rusqlite::{params, params_from_iter, Connection, Result};
 
@@ -47,7 +47,7 @@ impl Database {
                 junct.columns().1,
             )
             .as_str(),
-            []
+            [],
         )?;
 
         Ok(())
@@ -55,7 +55,14 @@ impl Database {
 
     pub fn save_to_junction(&self, junct: JunctionTable, object: i64, source: i64) -> Result<()> {
         let mut stmt = self.connection.prepare(
-            format!("REPLACE INTO {} ({}, {}) VALUES ({})", junct.name(), junct.columns().0, junct.columns().1, junct.values()).as_str()
+            format!(
+                "REPLACE INTO {} ({}, {}) VALUES ({})",
+                junct.name(),
+                junct.columns().0,
+                junct.columns().1,
+                junct.values()
+            )
+            .as_str(),
         )?;
 
         stmt.execute(params![object, source])?;
@@ -81,7 +88,7 @@ impl Database {
             )
             .as_str(),
         )?;
-        
+
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
         Ok(())
     }
@@ -109,21 +116,20 @@ impl Database {
         all_models.into_iter().collect()
     }
 
-
-//    TODO: This method here will need to change, given the other db method and character struct
-//    changes.
-//    pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
-//        let mut stmt = self
-//            .connection
-//            .prepare("SELECT id, name, race, class FROM characters")?;
-//        let characters = stmt.query_map([], |row| {
-//            Ok(SavedCharacter {
-//                id: row.get(0)?,
-//                name: row.get(1)?,
-//                race: row.get(2)?,
-//                class: row.get(3)?,
-//            })
-//        })?;
-//        characters.into_iter().collect()
-//    }
+    //    TODO: This method here will need to change, given the other db method and character struct
+    //    changes.
+    //    pub fn list_all_characters(&self) -> Result<Vec<SavedCharacter>> {
+    //        let mut stmt = self
+    //            .connection
+    //            .prepare("SELECT id, name, race, class FROM characters")?;
+    //        let characters = stmt.query_map([], |row| {
+    //            Ok(SavedCharacter {
+    //                id: row.get(0)?,
+    //                name: row.get(1)?,
+    //                race: row.get(2)?,
+    //                class: row.get(3)?,
+    //            })
+    //        })?;
+    //        characters.into_iter().collect()
+    //    }
 }
