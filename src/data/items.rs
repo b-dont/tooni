@@ -12,7 +12,6 @@ pub enum ItemRarity {
 }
 
 impl FromSql for ItemRarity {
-    #[inline]
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<ItemRarity> {
         Ok(ItemRarity::from_str(value.as_str()?).unwrap())
     }

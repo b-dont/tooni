@@ -6,6 +6,7 @@ use crate::data::{
     proficiency::{Proficiency, ProficiencyClass},
 };
 use anyhow::Result;
+use data::tables::Table;
 
 // use crossterm::{
 //     cursor, queue,
@@ -25,211 +26,129 @@ fn main() -> Result<()> {
     //    enable_raw_mode()?;
 
     let db = Database::new()?;
-    db.create_tables()?;
+    db.create_table(Table::ProficiencyTable)?;
+    let all_profs = db.get_all_rows(Table::ProficiencyTable)?;
 
-    let test_armor = Item {
-        id: None,
-        name: "Test Armor".to_string(),
-        class: "Armor".to_string(),
-        quantity: 1,
-        rarity: Some(ItemRarity::Common),
-        value: 2,
-        weight: 10,
-        properties: "Test items don't have properties, silly".to_string(),
-        description: "It's pretty plain".to_string(),
-    };
+    for prof in all_profs {
+        println!("{}", prof);
+    }
+//    let test_armor = Item {
+//        id: None,
+//        name: "Test Armor".to_string(),
+//        class: "Armor".to_string(),
+//        quantity: 1,
+//        rarity: Some(ItemRarity::Common),
+//        value: 2,
+//        weight: 10,
+//        properties: "Test items don't have properties, silly".to_string(),
+//        description: "It's pretty plain".to_string(),
+//    };
+//
+//    let test_weapon = Item {
+//        id: None,
+//        name: "Test Weapon".to_string(),
+//        class: "Weapon".to_string(),
+//        quantity: 2,
+//        rarity: Some(ItemRarity::Uncommon),
+//        value: 4,
+//        weight: 12,
+//        properties: "Test items don't have properties, silly".to_string(),
+//        description: "It's pretty plain".to_string(),
+//    };
+//
+//    let test_potion = Item {
+//        id: None,
+//        name: "Test Potion".to_string(),
+//        class: "Potion".to_string(),
+//        quantity: 4,
+//        rarity: Some(ItemRarity::Rare),
+//        value: 10,
+//        weight: 2,
+//        properties: "Test items don't have properties, silly".to_string(),
+//        description: "It's pretty plain".to_string(),
+//    };
 
-    let test_weapon = Item {
-        id: None,
-        name: "Test Weapon".to_string(),
-        class: "Weapon".to_string(),
-        quantity: 2,
-        rarity: Some(ItemRarity::Uncommon),
-        value: 4,
-        weight: 12,
-        properties: "Test items don't have properties, silly".to_string(),
-        description: "It's pretty plain".to_string(),
-    };
+//    let medium_armor = Proficiency {
+//        id: None,
+//        name: Some("Medium Armor".to_string()),
+//        class: Some(ProficiencyClass::Armor),
+//    };
+//
+//    let heavy_armor = Proficiency {
+//        id: None,
+//        name: Some("Heavy Armor".to_string()),
+//        class: Some(ProficiencyClass::Armor),
+//    };
+//
+//    let disguise_kit = Proficiency {
+//        id: None,
+//        name: Some("Disguise Kit".to_string()),
+//        class: Some(ProficiencyClass::Tool),
+//    };
+//
+//    let test_tools = Proficiency {
+//        id: None,
+//        name: Some("Test Tools".to_string()),
+//        class: Some(ProficiencyClass::Tool),
+//    };
+//
+//    let acrobatics = Proficiency {
+//        id: None,
+//        name: Some("Acrobatics".to_string()),
+//        class: Some(ProficiencyClass::Skill),
+//    };
+//
+//    let history = Proficiency {
+//        id: None,
+//        name: Some("History".to_string()),
+//        class: Some(ProficiencyClass::Skill),
+//    };
+//
+//    let warhammer = Proficiency {
+//        id: None,
+//        name: Some("Warhammer".to_string()),
+//        class: Some(ProficiencyClass::Weapon),
+//    };
+//
+//    let longbow = Proficiency {
+//        id: None,
+//        name: Some("Longbow".to_string()),
+//        class: Some(ProficiencyClass::Weapon),
+//    };
+//
+//    db.save_to_table(Table::ProficiencyTable, &medium_armor)?;
+//    db.save_to_table(Table::ProficiencyTable, &heavy_armor)?;
+//    db.save_to_table(Table::ProficiencyTable, &disguise_kit)?;
+//    db.save_to_table(Table::ProficiencyTable, &test_tools)?;
+//    db.save_to_table(Table::ProficiencyTable, &acrobatics)?;
+//    db.save_to_table(Table::ProficiencyTable, &history)?;
+//    db.save_to_table(Table::ProficiencyTable, &warhammer)?;
+//    db.save_to_table(Table::ProficiencyTable, &longbow)?;
 
-    let test_potion = Item {
-        id: None,
-        name: "Test Potion".to_string(),
-        class: "Potion".to_string(),
-        quantity: 4,
-        rarity: Some(ItemRarity::Rare),
-        value: 10,
-        weight: 2,
-        properties: "Test items don't have properties, silly".to_string(),
-        description: "It's pretty plain".to_string(),
-    };
-
-    db.save_item(test_armor)?;
-    db.save_item(test_weapon)?;
-    db.save_item(test_potion)?;
-
-    let medium_armor = Proficiency {
-        id: None,
-        name: Some("Medium Armor".to_string()),
-        class: Some(ProficiencyClass::Armor),
-    };
-
-    let heavy_armor = Proficiency {
-        id: None,
-        name: Some("Heavy Armor".to_string()),
-        class: Some(ProficiencyClass::Armor),
-    };
-
-    let disguise_kit = Proficiency {
-        id: None,
-        name: Some("Disguise Kit".to_string()),
-        class: Some(ProficiencyClass::Tool),
-    };
-
-    let test_tools = Proficiency {
-        id: None,
-        name: Some("Test Tools".to_string()),
-        class: Some(ProficiencyClass::Tool),
-    };
-
-    let acrobatics = Proficiency {
-        id: None,
-        name: Some("Acrobatics".to_string()),
-        class: Some(ProficiencyClass::Skill),
-    };
-
-    let history = Proficiency {
-        id: None,
-        name: Some("History".to_string()),
-        class: Some(ProficiencyClass::Skill),
-    };
-
-    let warhammer = Proficiency {
-        id: None,
-        name: Some("Warhammer".to_string()),
-        class: Some(ProficiencyClass::Weapon),
-    };
-
-    let longbow = Proficiency {
-        id: None,
-        name: Some("Longbow".to_string()),
-        class: Some(ProficiencyClass::Weapon),
-    };
-
-    db.save_proficiency(medium_armor)?;
-    db.save_proficiency(heavy_armor)?;
-    db.save_proficiency(disguise_kit)?;
-    db.save_proficiency(test_tools)?;
-    db.save_proficiency(acrobatics)?;
-    db.save_proficiency(history)?;
-    db.save_proficiency(warhammer)?;
-    db.save_proficiency(longbow)?;
-
-    let common = Language {
-        id: None,
-        name: "Common".to_string(),
-        description: "It's Common, duh".to_string(),
-    };
-
-    let elvish = Language {
-        id: None,
-        name: "Elvish".to_string(),
-        description: "It's Elvish, duh".to_string(),
-    };
-
-    let orcish = Language {
-        id: None,
-        name: "Orcish".to_string(),
-        description: "It's Orcish, duh".to_string(),
-    };
-
-    let infernal = Language {
-        id: None,
-        name: "Infernal".to_string(),
-        description: "It's Infernal, duh".to_string(),
-    };
-
-    db.save_language(common)?;
-    db.save_language(elvish)?;
-    db.save_language(orcish)?;
-    db.save_language(infernal)?;
-
-    //    let frank = Character::test_character_frank();
-    //    let kevin = Character::test_character_kevin();
-    //
-    //    let all_languages = db.get_all_languages()?;
-    //    let all_proficiencies = db.get_all_proficiencies()?;
-    //    let all_items = db.get_all_items()?;
-    //
-    //    frank.proficiencies.push(all_proficiencies[0].clone());
-    //    frank.proficiencies.push(all_proficiencies[1].clone());
-    //    kevin.proficiencies.push(all_proficiencies[2].clone());
-    //    kevin.proficiencies.push(all_proficiencies[3].clone());
-    //
-    //    frank.languages.push(all_languages[0].clone());
-    //    frank.languages.push(all_languages[1].clone());
-    //    kevin.languages.push(all_languages[2].clone());
-    //    kevin.languages.push(all_languages[3].clone());
-
-    //    frank.invintory.push(all_items[0].clone());
-    //    frank.invintory.push(all_items[1].clone());
-    //    kevin.invintory.push(all_items[2].clone());
-    //    kevin.invintory.push(all_items[0].clone());
-
-    //    db.save_character(&frank)?;
-    //    db.save_character(&kevin)?;
-
-    //    let all_characters = db.get_all_characters()?;
-    //
-    //    for character in all_characters {
-    //        db.delete_character(&character)?;
-    //    }
-
-    //    all_characters[0].proficiencies.push(all_proficiencies[0].clone());
-    //    all_characters[0].proficiencies.push(all_proficiencies[1].clone());
-    //    all_characters[1].proficiencies.push(all_proficiencies[2].clone());
-    //    all_characters[1].proficiencies.push(all_proficiencies[3].clone());
-    //
-    //    all_characters[0].languages.push(all_languages[0].clone());
-    //    all_characters[0].languages.push(all_languages[1].clone());
-    //    all_characters[1].languages.push(all_languages[2].clone());
-    //    all_characters[1].languages.push(all_languages[3].clone());
-    //    all_characters[0].invintory.push(all_items[0].clone());
-    //    all_characters[0].invintory.push(all_items[1].clone());
-    //    all_characters[1].invintory.push(all_items[2].clone());
-    //    all_characters[1].invintory.push(all_items[0].clone());
-
-    //
-    //    db.save_character(&all_characters[0].clone())?;
-    //    db.save_character(&all_characters[1].clone())?;
-
-    //    for character in &all_characters {
-    //        character.print_character();
-    //    }
-
-    //    for lang in &all_languages {
-    //        println!("{}", lang);
-    //    }
-    //
-    //    for prof in &all_proficiencies {
-    //        println!("{}", prof);
-    //    }
-
-    //    for prof in &all_characters[0].proficiencies {
-    //        println!("{}", prof);
-    //    }
-    //
-    //    for prof in &all_characters[1].proficiencies {
-    //        println!("{}", prof);
-    //    }
-    //
-    //    for lang in &all_characters[0].languages {
-    //        println!("{}", lang);
-    //    }
-    //
-    //    for lang in &all_characters[1].languages {
-    //        println!("{}", lang);
-    //    }
-
+//    let common = Language {
+//        id: None,
+//        name: "Common".to_string(),
+//        description: "It's Common, duh".to_string(),
+//    };
+//
+//    let elvish = Language {
+//        id: None,
+//        name: "Elvish".to_string(),
+//        description: "It's Elvish, duh".to_string(),
+//    };
+//
+//    let orcish = Language {
+//        id: None,
+//        name: "Orcish".to_string(),
+//        description: "It's Orcish, duh".to_string(),
+//    };
+//
+//    let infernal = Language {
+//        id: None,
+//        name: "Infernal".to_string(),
+//        description: "It's Infernal, duh".to_string(),
+//    };
+//
     // Instantiate state machine
     //    let mut app = App::new(db)?;
 

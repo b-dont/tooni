@@ -12,6 +12,7 @@ use crate::data::{
     stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
 };
 use std::collections::HashMap;
+use rusqlite::ToSql;
 use std::fmt;
 
 #[derive(Default, Clone)]
@@ -134,106 +135,6 @@ impl Character {
     pub fn new() -> Self {
         Self::default()
     }
-
-    pub fn test_character_frank() -> Self {
-        Character {
-            id: None,
-            name: "Frank".to_string(),
-            alignment: Neutral,
-            stats: HashMap::from([
-                (STR, 12),
-                (DEX, 12),
-                (CON, 12),
-                (INT, 12),
-                (WIS, 12),
-                (CHA, 12),
-            ]),
-            saving_throws: HashMap::from([
-                (STR, true),
-                (DEX, false),
-                (CON, true),
-                (INT, false),
-                (WIS, true),
-                (CHA, false),
-            ]),
-            proficiency_bonus: 2,
-            passive_perception: 12,
-            inspiration: false,
-            speed: 30,
-            gender: "Male".to_string(),
-            height: 6,
-            weight: 100,
-            age: 30,
-            armor_class: 13,
-            initiative: 3,
-            hit_points: 10,
-            temp_hit_points: 0,
-            level: 1,
-            xp: 0,
-            languages: Vec::new(),
-            proficiencies: Vec::new(),
-            invintory: Vec::new(),
-            spells: Vec::new(),
-        }
-    }
-
-    pub fn test_character_kevin() -> Self {
-        Character {
-            id: None,
-            name: "Kevin".to_string(),
-            alignment: LawfulGood,
-            stats: HashMap::from([
-                (STR, 20),
-                (DEX, 20),
-                (CON, 20),
-                (INT, 20),
-                (WIS, 20),
-                (CHA, 20),
-            ]),
-            saving_throws: HashMap::from([
-                (STR, false),
-                (DEX, true),
-                (CON, false),
-                (INT, true),
-                (WIS, false),
-                (CHA, true),
-            ]),
-            proficiency_bonus: 2,
-            passive_perception: 12,
-            inspiration: false,
-            speed: 30,
-            gender: "Female".to_string(),
-            height: 7,
-            weight: 200,
-            age: 35,
-            armor_class: 23,
-            initiative: 4,
-            hit_points: 20,
-            temp_hit_points: 1,
-            level: 1,
-            xp: 0,
-            languages: Vec::new(),
-            proficiencies: Vec::new(),
-            invintory: Vec::new(),
-            spells: Vec::new(),
-        }
-    }
-
-    pub fn print_character(&self) {
-        println!("{}", self);
-        for lang in &self.languages {
-            println!("{}", lang);
-        }
-        for prof in &self.proficiencies {
-            println!("{}", prof);
-        }
-        for item in &self.invintory {
-            println!("{}", item);
-        }
-        for spell in &self.spells {
-            println!("{}", spell);
-        }
-    }
 }
 
 #[derive(Default, Clone)]
@@ -254,4 +155,8 @@ impl SavedCharacter {
     pub fn new() -> Self {
         Self::default()
     }
+}
+
+pub trait Model : std::fmt::Display {
+    fn parameters(&self) -> Vec<Box<dyn ToSql>>;
 }

@@ -12,8 +12,9 @@ use crate::{
     },
     Character,
 };
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Result, Connection, params_from_iter};
 use std::collections::HashMap;
+use super::character::Model;
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -37,6 +38,45 @@ impl Database {
         self.create_feature_tables()?;
 
         Ok(())
+    }
+
+    pub fn create_table(&self, table: Table) -> Result<()> {
+        self.connection.execute(
+            format!("CREATE TABLE IF NOT EXISTS {} ({})", table.name(), table.columns()).as_str(), 
+            []
+        )?;
+        Ok(())
+    }
+
+    pub fn save_to_table(&self, table: Table, modle: &dyn Model) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            format!("REPLACE INTO {} ({}) VALUES ({})", table.name(), table.table_columns(), table.values()).as_str())?;
+
+        stmt.execute(params_from_iter(modle.parameters().into_iter()))?;
+        Ok(())
+    }
+
+    pub fn load_from_table(&self, id: i64, table: Table) -> Result<Box<dyn Model>> {
+        let mut stmt = self.connection.prepare(
+            format!("SELECT ({}) FROM {} WHERE id=?1", table.name(), table.columns()).as_str()
+        )?;
+
+        let queried_prof = stmt.query_row(params![id], |row| {
+            Ok(table.create_model(&row))
+        })?;
+
+        queried_prof
+    }
+
+    pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<dyn Model>>> {
+        let mut stmt = self.connection.prepare(
+            format!("SELECT ({}) FROM {}", table.table_columns(), table.name()).as_str()
+        )?;
+
+        let all_models = stmt.query_map([], |row| {
+            Ok(table.create_model(&row)?)
+        })?;
+        all_models.into_iter().collect()
     }
 
     pub fn create_backgrounds_tables(&self) -> Result<()> {
@@ -674,7 +714,7 @@ impl Database {
 
         let queried_prof = stmt.query_row(params![id], |row| {
             Ok(Proficiency {
-                id: row.get(0)?,
+                id: row.get("id")?,
                 name: row.get(1)?,
                 class: row.get(2)?,
             })
