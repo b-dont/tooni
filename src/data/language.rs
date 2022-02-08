@@ -32,8 +32,8 @@ impl Model for Language {
     where Self : Sized {
         Language {
             id: self.id,
-            name: self.name,
-            description: self.description
+            name: self.name.clone(),
+            description: self.description.clone()
         }
     }
 

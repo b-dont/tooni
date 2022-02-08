@@ -113,14 +113,14 @@ impl Model for Item {
     where Self : Sized {
         Item {
             id: self.id,
-            name: self.name,
-            class: self.class,
+            name: self.name.clone(),
+            class: self.class.clone(),
             quantity: self.quantity,
-            rarity: self.rarity,
+            rarity: self.rarity.clone(),
             value: self.value,
             weight: self.weight,
-            properties: self.properties,
-            description: self.description
+            properties: self.properties.clone(),
+            description: self.description.clone()
         }
     }
 

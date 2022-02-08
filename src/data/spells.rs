@@ -124,14 +124,14 @@ impl Model for Spell {
     where Self : Sized {
         Spell {
             id: self.id,
-            name: self.name,
-            school: self.school,
+            name: self.name.clone(),
+            school: self.school.clone(),
             level: self.level,
             casting_time: self.casting_time,
             range: self.range,
-            components: self.components,
+            components: self.components.clone(),
             duration: self.duration,
-            description: self.description
+            description: self.description.clone()
         }
     }
 }

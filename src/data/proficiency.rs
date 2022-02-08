@@ -81,8 +81,8 @@ impl Model for Proficiency {
     where Self : Sized {
         Proficiency {
             id: self.id,
-            name: self.name,
-            class: self.class
+            name: self.name.clone(),
+            class: self.class.clone()
         }
     }
 

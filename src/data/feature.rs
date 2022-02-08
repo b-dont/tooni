@@ -88,9 +88,9 @@ impl Model for Feature {
     where Self : Sized {
         Feature {
             id: self.id,
-            class: self.class,
-            name: self.name,
-            description: self.description
+            class: self.class.clone(),
+            name: self.name.clone(),
+            description: self.description.clone()
         }
     }
 

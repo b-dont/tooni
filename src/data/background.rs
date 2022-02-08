@@ -57,15 +57,15 @@ impl Model for Background {
     where Self : Sized {
         Background {
             id: self.id,
-            name: self.name,
-            proficiencies: self.proficiencies,
-            languages: self.languages,
-            starting_equipment: self.starting_equipment,
-            features: self.features,
-            personality_traits: self.personality_traits,
-            ideals: self.ideals,
-            bonds: self.bonds,
-            flaws: self.flaws
+            name: self.name.clone(),
+            proficiencies: self.proficiencies.clone(),
+            languages: self.languages.clone(),
+            starting_equipment: self.starting_equipment.clone(),
+            features: self.features.clone(),
+            personality_traits: self.personality_traits.clone(),
+            ideals: self.ideals.clone(),
+            bonds: self.bonds.clone(),
+            flaws: self.flaws.clone()
         }
     }
 
