@@ -68,7 +68,6 @@ impl Background {
             bonds: vec!["".to_string(); 6],
             flaws: vec!["".to_string(); 6],
         };
-
         new_bg
     }
 }
