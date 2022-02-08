@@ -52,6 +52,26 @@ impl Model for Background {
 
         params
     }
+
+    fn return_self(&self) -> Background 
+    where Self : Sized {
+        Background {
+            id: self.id,
+            name: self.name,
+            proficiencies: self.proficiencies,
+            languages: self.languages,
+            starting_equipment: self.starting_equipment,
+            features: self.features,
+            personality_traits: self.personality_traits,
+            ideals: self.ideals,
+            bonds: self.bonds,
+            flaws: self.flaws
+        }
+    }
+
+    fn new(&self) -> Background {
+        Self::default()
+    }
 }
 
 impl Background {

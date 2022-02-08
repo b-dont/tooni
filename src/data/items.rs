@@ -108,6 +108,25 @@ impl Model for Item {
         params.push(Box::new(self.description.clone()));
         params
     }
+
+    fn return_self(&self) -> Item 
+    where Self : Sized {
+        Item {
+            id: self.id,
+            name: self.name,
+            class: self.class,
+            quantity: self.quantity,
+            rarity: self.rarity,
+            value: self.value,
+            weight: self.weight,
+            properties: self.properties,
+            description: self.description
+        }
+    }
+
+    fn new(&self) -> Item {
+        Self::default()    
+    }
 }
 
 impl Item {

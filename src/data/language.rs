@@ -27,6 +27,19 @@ impl Model for Language {
         params.push(Box::new(self.description.clone()));
         params
     }
+
+    fn return_self(&self) -> Language 
+    where Self : Sized {
+        Language {
+            id: self.id,
+            name: self.name,
+            description: self.description
+        }
+    }
+
+    fn new(&self) -> Language {
+        Self::default()    
+    }
 }
 
 impl Language {

@@ -83,6 +83,20 @@ impl Model for Feature {
         params.push(Box::new(self.description.clone()));
         params
     }
+
+    fn return_self(&self) -> Feature
+    where Self : Sized {
+        Feature {
+            id: self.id,
+            class: self.class,
+            name: self.name,
+            description: self.description
+        }
+    }
+
+    fn new(&self) -> Feature {
+        Self::default()    
+    }
 }
 
 impl Feature {

@@ -76,14 +76,17 @@ impl Model for Proficiency {
         params.push(Box::new(self.class.clone()));
         params
     }
-}
 
-impl Proficiency {
-    pub fn new(id: i64, name: String, class: ProficiencyClass) -> Self {
-        Self {
-            id: Some(id),
-            name: Some(name),
-            class: Some(class),
+    fn return_self(&self) -> Proficiency 
+    where Self : Sized {
+        Proficiency {
+            id: self.id,
+            name: self.name,
+            class: self.class
         }
+    }
+
+    fn new(&self) -> Proficiency {
+        Self::default()    
     }
 }
