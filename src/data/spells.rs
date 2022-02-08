@@ -115,6 +115,25 @@ impl Model for Spell {
         params.push(Box::new(self.description.clone()));
         params
     }
+
+    fn new(&self) -> Spell {
+        Self::default()    
+    }
+
+    fn return_self(&self) -> Spell 
+    where Self : Sized {
+        Spell {
+            id: self.id,
+            name: self.name,
+            school: self.school,
+            level: self.level,
+            casting_time: self.casting_time,
+            range: self.range,
+            components: self.components,
+            duration: self.duration,
+            description: self.description
+        }
+    }
 }
 
 impl Spell {
