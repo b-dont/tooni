@@ -11,6 +11,8 @@ pub struct Background {
     pub languages: Option<Vec<Language>>,
     pub starting_equipment: Option<Vec<Item>>,
     pub features: Option<Vec<Feature>>,
+    // TODO: personality_traits needs to always have 
+    // an index of 8; the rest need an index of 6
     pub personality_traits: Vec<String>,
     pub ideals: Vec<String>,
     pub bonds: Vec<String>,
@@ -71,23 +73,5 @@ impl Model for Background {
 
     fn new(&self) -> Background {
         Self::default()
-    }
-}
-
-impl Background {
-    pub fn new() -> Background {
-        let mut new_bg = Background {
-            id: None,
-            name: "".to_string(),
-            proficiencies: None,
-            languages: None,
-            starting_equipment: None,
-            features: None,
-            personality_traits: vec!["".to_string(); 8],
-            ideals: vec!["".to_string(); 6],
-            bonds: vec!["".to_string(); 6],
-            flaws: vec!["".to_string(); 6],
-        };
-        new_bg
     }
 }

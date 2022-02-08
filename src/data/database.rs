@@ -106,7 +106,7 @@ impl Database {
     }
 
     pub fn save(&self, table: Table, model: &dyn Model) -> Result<()> {
-        let mut stmt = self.connection.prepare(
+        et mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
                 table.name(),
@@ -131,6 +131,13 @@ impl Database {
         )?;
 
         let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
+
+        if table.has_junctions() {
+            for junct in table.junctions().unwrap() {
+                self.load_from_junction(junct, id)?;
+            }
+        }
+        
         queried_model
     }
 

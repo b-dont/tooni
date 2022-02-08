@@ -85,7 +85,7 @@ impl Table {
         }
     }
 
-    pub fn junctions(&self) -> Option<Vec<String>> {
+    pub fn junctions(&self) -> Option<Vec<JunctionTable>> {
         match self {
             &Table::ProficiencyTable => None,
             &Table::LanguagesTable => None,
@@ -93,10 +93,10 @@ impl Table {
             &Table::FeaturesTable => None,
             &Table::SpellsTable => None,
             &Table::BackgroundsTable => Some(vec![
-                "proficiencies".to_string(),
-                "languages".to_string(),
-                "items".to_string(),
-                "features".to_string()
+                JunctionTable::BackgroundProfs,
+                JunctionTable::BackgroundLangs,
+                JunctionTable::BackgroundInvintory,
+                JunctionTable::BackgroundFeatures
             ]),
         }
     }
