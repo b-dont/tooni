@@ -3,6 +3,7 @@ use crate::data::{
     character::SavedCharacter,
     tables::{JunctionTable, Table},
 };
+use enum_iterator::IntoEnumIterator;
 use rusqlite::{params, params_from_iter, Connection, Result};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
@@ -15,6 +16,17 @@ impl Database {
         Ok(Self {
             connection: Connection::open("data.sqlite3")?,
         })
+    }
+
+    pub fn create_all_tables(&self) -> Result<()> {
+        for table in Table::into_enum_iter() {
+            self.create_table(table)?;
+        }
+        for junct in JunctionTable::into_enum_iter() {
+            self.create_junction_table(junct)?;
+        }
+
+        Ok(())
     }
 
     pub fn create_table(&self, table: Table) -> Result<()> {
@@ -35,8 +47,8 @@ impl Database {
         self.connection.execute(
             format!(
                 "CREATE TABLE IF NOT EXISTS {} (
-                    {} INTEGER REFERENCES {}, 
-                    {} INTEGER REFERENCES {}, 
+                    {} INTEGER REFERENCES {}(id), 
+                    {} INTEGER REFERENCES {}(id), 
                     PRIMARY KEY ({}, {}))",
                 junct.name(),
                 junct.columns().0,
@@ -67,6 +79,21 @@ impl Database {
 
         stmt.execute(params![object, source])?;
         Ok(())
+    }
+
+    pub fn load_from_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<dyn Model>>> {
+        let mut stmt = self.connection.prepare(
+            format!("SELECT {}, {} FROM {} WHERE {}=?1",
+                    junct.columns().0,
+                    junct.columns().1,
+                    junct.name(),
+                    junct.columns().0
+                ).as_str())?;
+
+        let queried_models = stmt.query_map(params![id], |row|{
+            Ok(self.load(row.get(0)?, row.get(1)?)?)
+        })?;
+        queried_models.into_iter().collect()
     }
 
     pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {

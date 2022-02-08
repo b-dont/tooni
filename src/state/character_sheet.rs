@@ -124,7 +124,6 @@ impl State for CharacterSheet {
                 .map(Spans::from)
                 .collect();
 
-            let all_tabs = Tabs::new(tab_titles)
             let tabs = Tabs::new(tab_titles)
                 .select(self.index)
                 .style(Style::default().fg(Color::Gray))

@@ -2,11 +2,17 @@ use crate::data::{
     character::Model, feature::Feature, items::Item, language::Language, proficiency::Proficiency,
     spells::Spell,
 };
-use rusqlite::{Result, Row};
+use rusqlite::{
+    types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
+    Result,
+    Row
+};
 
+use enum_iterator::IntoEnumIterator;
+use std::{fmt, str::FromStr};
 use super::background::Background;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, IntoEnumIterator)]
 pub enum Table {
     BackgroundsTable,
     ProficiencyTable,
@@ -14,6 +20,46 @@ pub enum Table {
     ItemsTable,
     FeaturesTable,
     SpellsTable,
+}
+
+impl FromSql for Table {
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Table> {
+        Ok(Table::from_str(value.as_str()?).unwrap())
+    }
+}
+
+impl ToSql for Table {
+    fn to_sql(&self) -> Result<ToSqlOutput<'_>> {
+        Ok(ToSqlOutput::from(self.to_string()))
+    }
+}
+
+impl FromStr for Table {
+    type Err = ();
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input {
+            "backgrounds" => Ok(Table::BackgroundsTable),
+            "proficiencies" => Ok(Table::ProficiencyTable),
+            "languages" => Ok(Table::LanguagesTable),
+            "items" => Ok(Table::ItemsTable),
+            "features" => Ok(Table::FeaturesTable),
+            "spells" => Ok(Table::SpellsTable),
+            _ => Err(()),
+        }
+    }
+}
+
+impl fmt::Display for Table {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            &Table::BackgroundsTable => write!(f, "backgrounds"),
+            &Table::ProficiencyTable => write!(f, "proficiencies"),
+            &Table::LanguagesTable => write!(f, "languages"),
+            &Table::ItemsTable => write!(f, "items"),
+            &Table::FeaturesTable => write!(f, "features"),
+            &Table::SpellsTable => write!(f, "spells"),
+        }
+    }
 }
 
 impl Table {
@@ -25,6 +71,33 @@ impl Table {
             &Table::FeaturesTable => "features".to_string(),
             &Table::SpellsTable => "spells".to_string(),
             &Table::BackgroundsTable => "backgrounds".to_string(),
+        }
+    }
+
+    pub fn has_junctions(&self) -> bool {
+        match self {
+            &Table::ProficiencyTable => false,
+            &Table::LanguagesTable => false,
+            &Table::ItemsTable => false,
+            &Table::FeaturesTable => false,
+            &Table::SpellsTable => false,
+            &Table::BackgroundsTable => true,
+        }
+    }
+
+    pub fn junctions(&self) -> Option<Vec<String>> {
+        match self {
+            &Table::ProficiencyTable => None,
+            &Table::LanguagesTable => None,
+            &Table::ItemsTable => None,
+            &Table::FeaturesTable => None,
+            &Table::SpellsTable => None,
+            &Table::BackgroundsTable => Some(vec![
+                "proficiencies".to_string(),
+                "languages".to_string(),
+                "items".to_string(),
+                "features".to_string()
+            ]),
         }
     }
 
@@ -215,10 +288,10 @@ impl Table {
             &Table::BackgroundsTable => Ok(Box::new(Background {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                proficiencies: Vec::new(),
-                languages: Vec::new(),
-                starting_equipment: Vec::new(),
-                features: Vec::new(),
+                proficiencies: Some(vec![]),
+                languages: Some(vec![]),
+                starting_equipment: Some(vec![]),
+                features: Some(vec![]),
                 personality_traits: vec![
                     row.get(2)?,
                     row.get(3)?,
@@ -258,7 +331,7 @@ impl Table {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, IntoEnumIterator)]
 pub enum JunctionTable {
     BackgroundProfs,
     BackgroundLangs,
@@ -290,17 +363,17 @@ impl JunctionTable {
     pub fn references(&self) -> (String, String) {
         match self {
             &JunctionTable::BackgroundProfs => (
-                "backgrounds(id)".to_string(),
-                "proficiencies(id)".to_string(),
+                "backgrounds".to_string(),
+                "proficiencies".to_string(),
             ),
             &JunctionTable::BackgroundLangs => {
-                ("backgrounds(id)".to_string(), "languages(id)".to_string())
+                ("backgrounds".to_string(), "languages".to_string())
             }
             &JunctionTable::BackgroundInvintory => {
-                ("backgrounds(id)".to_string(), "items(id)".to_string())
+                ("backgrounds".to_string(), "items".to_string())
             }
             &JunctionTable::BackgroundFeatures => {
-                ("backgrounds(id)".to_string(), "features(id)".to_string())
+                ("backgrounds".to_string(), "features".to_string())
             }
         }
     }

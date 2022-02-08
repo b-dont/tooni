@@ -1,16 +1,16 @@
 use crate::data::character::Model;
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
 use rusqlite::ToSql;
-use std::fmt;
+use std::{fmt, default};
 
 #[derive(Default, Clone)]
 pub struct Background {
     pub id: Option<i64>,
     pub name: String,
-    pub proficiencies: Vec<Proficiency>,
-    pub languages: Vec<Language>,
-    pub starting_equipment: Vec<Item>,
-    pub features: Vec<Feature>,
+    pub proficiencies: Option<Vec<Proficiency>>,
+    pub languages: Option<Vec<Language>>,
+    pub starting_equipment: Option<Vec<Item>>,
+    pub features: Option<Vec<Feature>>,
     pub personality_traits: Vec<String>,
     pub ideals: Vec<String>,
     pub bonds: Vec<String>,
@@ -55,22 +55,20 @@ impl Model for Background {
 }
 
 impl Background {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn test_background_acolyte() -> Self {
-        Background {
+    pub fn new() -> Background {
+        let mut new_bg = Background {
             id: None,
-            name: "Acolyte".to_string(),
-            proficiencies: Vec::new(),
-            languages: Vec::new(),
-            starting_equipment: Vec::new(),
-            features: Vec::new(),
-            personality_traits: Vec::new(),
-            ideals: Vec::new(),
-            bonds: Vec::new(),
-            flaws: Vec::new(),
-        }
+            name: "".to_string(),
+            proficiencies: None,
+            languages: None,
+            starting_equipment: None,
+            features: None,
+            personality_traits: vec!["".to_string(); 8],
+            ideals: vec!["".to_string(); 6],
+            bonds: vec!["".to_string(); 6],
+            flaws: vec!["".to_string(); 6],
+        };
+
+        new_bg
     }
 }
