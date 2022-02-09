@@ -105,7 +105,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save(&self, table: Table, model: &dyn Model) -> Result<()> {
+    pub fn save(&self, table: Table, model: &impl Model) -> Result<()> {
         let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
@@ -134,14 +134,15 @@ impl Database {
 
         if table.has_junctions() {
             for junct in table.junctions().unwrap() {
-                queried_model.as_ref().add_junctions(self.load_from_junction(junct, id)?)
+                let new_junct = self.load_from_junction(junct, id)?;
+                queried_model.as_ref().unwrap().add_junctions(new_junct);
             }
         }
         
         queried_model
     }
 
-    pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<dyn Model>>> {
+    pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self
             .connection
             .prepare(format!("SELECT {} FROM {}", table.queries(), table.name()).as_str())?;
