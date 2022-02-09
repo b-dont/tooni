@@ -134,7 +134,7 @@ impl Database {
 
         if table.has_junctions() {
             for junct in table.junctions().unwrap() {
-                queried_model.unwrap().add_junctions(junct)
+                queried_model.as_ref().add_junctions(self.load_from_junction(junct, id)?)
             }
         }
         

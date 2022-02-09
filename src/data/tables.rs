@@ -245,7 +245,7 @@ impl Table {
         }
     }
 
-    pub fn create_model(&self, row: &Row) -> Result<Box<dyn Model>> {
+    pub fn create_model(&self, row: &Row) -> Result<Box<impl Model>> {
         match self {
             &Table::ProficiencyTable => Ok(Box::new(Proficiency {
                 id: row.get(0)?,

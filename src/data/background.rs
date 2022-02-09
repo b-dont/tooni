@@ -55,21 +55,21 @@ impl dyn Model {
         params
     }
 
-    fn build_model(&self) -> Background 
-    where Self : Sized {
-        Background {
-            id: self.id,
-            name: self.name.clone(),
-            proficiencies: self.proficiencies.clone(),
-            languages: self.languages.clone(),
-            starting_equipment: self.starting_equipment.clone(),
-            features: self.features.clone(),
-            personality_traits: self.personality_traits.clone(),
-            ideals: self.ideals.clone(),
-            bonds: self.bonds.clone(),
-            flaws: self.flaws.clone()
-        }
-    }
+//    fn build_model(&self) -> Background 
+//    where Self : Sized {
+//        Background {
+//            id: self.id,
+//            name: self.name.clone(),
+//            proficiencies: self.proficiencies.clone(),
+//            languages: self.languages.clone(),
+//            starting_equipment: self.starting_equipment.clone(),
+//            features: self.features.clone(),
+//            personality_traits: self.personality_traits.clone(),
+//            ideals: self.ideals.clone(),
+//            bonds: self.bonds.clone(),
+//            flaws: self.flaws.clone()
+//        }
+//    }
 
     fn add_junctions(&self, juncts: Vec<Box<impl Model>>) {
         let mut additions = vec![];
