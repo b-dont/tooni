@@ -28,13 +28,18 @@ impl Model for Language {
         params
     }
 
-    fn return_self(&self) -> Language 
+    fn build_model(&self) -> Language 
     where Self : Sized {
         Language {
             id: self.id,
             name: self.name.clone(),
             description: self.description.clone()
         }
+    }
+
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
+    where Self : Sized {
+        
     }
 
     fn new(&self) -> Language {

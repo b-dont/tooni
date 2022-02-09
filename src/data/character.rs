@@ -156,7 +156,9 @@ impl SavedCharacter {
 pub trait Model: std::fmt::Display {
     fn new(&self) -> Self
         where Self : Sized;
-    fn return_self(&self) -> Self
+    fn build_model(&self) -> Self
+        where Self : Sized;
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
         where Self : Sized;
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
 }

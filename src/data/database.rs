@@ -81,7 +81,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_from_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<dyn Model>>> {
+    pub fn load_from_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self.connection.prepare(
             format!("SELECT {}, {} FROM {} WHERE {}=?1",
                     junct.columns().0,
@@ -106,7 +106,7 @@ impl Database {
     }
 
     pub fn save(&self, table: Table, model: &dyn Model) -> Result<()> {
-        et mut stmt = self.connection.prepare(
+        let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
                 table.name(),
@@ -120,7 +120,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn load(&self, id: i64, table: Table) -> Result<Box<dyn Model>> {
+    pub fn load(&self, id: i64, table: Table) -> Result<Box<impl Model>> {
         let mut stmt = self.connection.prepare(
             format!(
                 "SELECT {} FROM {} WHERE id=?1",
@@ -134,7 +134,7 @@ impl Database {
 
         if table.has_junctions() {
             for junct in table.junctions().unwrap() {
-                self.load_from_junction(junct, id)?;
+                queried_model.unwrap().add_junctions(junct)
             }
         }
         

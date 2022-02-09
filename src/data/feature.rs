@@ -84,7 +84,7 @@ impl Model for Feature {
         params
     }
 
-    fn return_self(&self) -> Feature
+    fn build_model(&self) -> Feature
     where Self : Sized {
         Feature {
             id: self.id,
@@ -92,6 +92,11 @@ impl Model for Feature {
             name: self.name.clone(),
             description: self.description.clone()
         }
+    }
+
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
+    where Self : Sized {
+        
     }
 
     fn new(&self) -> Feature {

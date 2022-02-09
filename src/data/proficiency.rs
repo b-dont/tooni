@@ -77,13 +77,18 @@ impl Model for Proficiency {
         params
     }
 
-    fn return_self(&self) -> Proficiency 
+    fn build_model(&self) -> Proficiency 
     where Self : Sized {
         Proficiency {
             id: self.id,
             name: self.name.clone(),
             class: self.class.clone()
         }
+    }
+
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
+    where Self : Sized {
+        
     }
 
     fn new(&self) -> Proficiency {

@@ -120,7 +120,12 @@ impl Model for Spell {
         Self::default()    
     }
 
-    fn return_self(&self) -> Spell 
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
+    where Self : Sized {
+        
+    }
+
+    fn build_model(&self) -> Spell 
     where Self : Sized {
         Spell {
             id: self.id,

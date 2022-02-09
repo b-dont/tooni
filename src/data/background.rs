@@ -33,7 +33,7 @@ impl fmt::Display for Background {
     }
 }
 
-impl Model for Background {
+impl dyn Model {
     fn parameters(&self) -> Vec<Box<dyn ToSql>> {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
         params.push(Box::new(self.id));
@@ -55,7 +55,7 @@ impl Model for Background {
         params
     }
 
-    fn return_self(&self) -> Background 
+    fn build_model(&self) -> Background 
     where Self : Sized {
         Background {
             id: self.id,
@@ -68,6 +68,15 @@ impl Model for Background {
             ideals: self.ideals.clone(),
             bonds: self.bonds.clone(),
             flaws: self.flaws.clone()
+        }
+    }
+
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>) {
+        let mut additions = vec![];
+
+        for junct in juncts {
+            let mut new_model = junct.build_model();
+            additions.push(new_model);
         }
     }
 

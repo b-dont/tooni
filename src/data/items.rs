@@ -109,7 +109,7 @@ impl Model for Item {
         params
     }
 
-    fn return_self(&self) -> Item 
+    fn build_model(&self) -> Item 
     where Self : Sized {
         Item {
             id: self.id,
@@ -122,6 +122,11 @@ impl Model for Item {
             properties: self.properties.clone(),
             description: self.description.clone()
         }
+    }
+
+    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
+    where Self : Sized {
+        
     }
 
     fn new(&self) -> Item {
