@@ -128,10 +128,6 @@ impl Model for Item {
     where Self : Sized {
         
     }
-
-    fn new(&self) -> Item {
-        Self::default()    
-    }
 }
 
 impl Item {

@@ -98,10 +98,6 @@ impl Model for Feature {
     where Self : Sized {
         
     }
-
-    fn new(&self) -> Feature {
-        Self::default()    
-    }
 }
 
 impl Feature {

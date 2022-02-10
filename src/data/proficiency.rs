@@ -90,8 +90,4 @@ impl Model for Proficiency {
     where Self : Sized {
         
     }
-
-    fn new(&self) -> Proficiency {
-        Self::default()    
-    }
 }

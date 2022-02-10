@@ -65,23 +65,29 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_to_junction(&self, junct: JunctionTable, object: i64, source: i64) -> Result<()> {
+    pub fn load(&self, id: i64, table: Table) -> Result<Box<impl Model>> {
         let mut stmt = self.connection.prepare(
             format!(
-                "REPLACE INTO {} ({}, {}) VALUES ({})",
-                junct.name(),
-                junct.columns().0,
-                junct.columns().1,
-                junct.values()
+                "SELECT {} FROM {} WHERE id=?1",
+                table.queries(),
+                table.name()
             )
             .as_str(),
         )?;
 
-        stmt.execute(params![object, source])?;
-        Ok(())
+        let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
+
+        if table.has_junctions() {
+            for junct in table.junctions().unwrap() {
+                let new_junct = self.load_junction(junct, id)?;
+                queried_model.as_ref().unwrap().add_junctions(new_junct);
+            }
+        }
+        
+        queried_model
     }
 
-    pub fn load_from_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
+    pub fn load_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self.connection.prepare(
             format!("SELECT {}, {} FROM {} WHERE {}=?1",
                     junct.columns().0,
@@ -96,12 +102,19 @@ impl Database {
         queried_models.into_iter().collect()
     }
 
-    pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {
-        let mut stmt = self
-            .connection
-            .prepare(format!("DELETE FROM {} WHERE id=?1", table.name()).as_str())?;
+    pub fn save_junction(&self, junct: JunctionTable, object: i64, source: i64) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            format!(
+                "REPLACE INTO {} ({}, {}) VALUES ({})",
+                junct.name(),
+                junct.columns().0,
+                junct.columns().1,
+                junct.values()
+            )
+            .as_str(),
+        )?;
 
-        stmt.execute(params![id])?;
+        stmt.execute(params![object, source])?;
         Ok(())
     }
 
@@ -120,28 +133,6 @@ impl Database {
         Ok(())
     }
 
-    pub fn load(&self, id: i64, table: Table) -> Result<Box<impl Model>> {
-        let mut stmt = self.connection.prepare(
-            format!(
-                "SELECT {} FROM {} WHERE id=?1",
-                table.queries(),
-                table.name()
-            )
-            .as_str(),
-        )?;
-
-        let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
-
-        if table.has_junctions() {
-            for junct in table.junctions().unwrap() {
-                let new_junct = self.load_from_junction(junct, id)?;
-                queried_model.as_ref().unwrap().add_junctions(new_junct);
-            }
-        }
-        
-        queried_model
-    }
-
     pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self
             .connection
@@ -149,6 +140,15 @@ impl Database {
 
         let all_models = stmt.query_map([], |row| Ok(table.create_model(&row)?))?;
         all_models.into_iter().collect()
+    }
+
+    pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {
+        let mut stmt = self
+            .connection
+            .prepare(format!("DELETE FROM {} WHERE id=?1", table.name()).as_str())?;
+
+        stmt.execute(params![id])?;
+        Ok(())
     }
 
     //    TODO: This method here will need to change, given the other db method and character struct

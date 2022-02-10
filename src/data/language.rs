@@ -41,10 +41,6 @@ impl Model for Language {
     where Self : Sized {
         
     }
-
-    fn new(&self) -> Language {
-        Self::default()    
-    }
 }
 
 impl Language {

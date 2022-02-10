@@ -154,8 +154,6 @@ impl SavedCharacter {
 }
 
 pub trait Model: std::fmt::Display {
-    fn new(&self) -> Self
-        where Self : Sized;
     fn build_model(&self) -> Self
         where Self : Sized;
     fn add_junctions(&self, juncts: Vec<Box<impl Model>>)

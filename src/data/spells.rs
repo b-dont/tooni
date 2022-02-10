@@ -116,10 +116,6 @@ impl Model for Spell {
         params
     }
 
-    fn new(&self) -> Spell {
-        Self::default()    
-    }
-
     fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
     where Self : Sized {
         
