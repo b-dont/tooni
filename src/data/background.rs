@@ -1,6 +1,6 @@
 use crate::data::character::Model;
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
-use rusqlite::ToSql;
+use rusqlite::{ToSql, Row};
 use std::fmt;
 
 #[derive(Default, Clone)]
@@ -33,27 +33,7 @@ impl fmt::Display for Background {
     }
 }
 
-<<<<<<< HEAD
-impl dyn Model {
-    fn build_model(&self) -> Background 
-    where Self : Sized {
-        Background {
-            id: self.id,
-            name: self.name.clone(),
-            proficiencies: self.proficiencies.clone(),
-            languages: self.languages.clone(),
-            starting_equipment: self.starting_equipment.clone(),
-            features: self.features.clone(),
-            personality_traits: self.personality_traits.clone(),
-            ideals: self.ideals.clone(),
-            bonds: self.bonds.clone(),
-            flaws: self.flaws.clone()
-        }
-    }
-
-=======
 impl Model for Background {
->>>>>>> 1a06b89d1a6ae07b21594b2a79f5c19f1283f5b1
     fn parameters(&self) -> Vec<Box<dyn ToSql>> {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
         params.push(Box::new(self.id));
@@ -75,9 +55,7 @@ impl Model for Background {
         params
     }
 
-<<<<<<< HEAD
-=======
-    fn build_model(&self) -> Background 
+    fn build_model(&self, row: &Row) -> Background 
     where Self : Sized {
         Background {
             id: self.id,
@@ -93,12 +71,11 @@ impl Model for Background {
         }
     }
 
->>>>>>> 1a06b89d1a6ae07b21594b2a79f5c19f1283f5b1
     fn add_junctions(&self, juncts: Vec<Box<impl Model>>) {
         let mut additions = vec![];
 
         for junct in juncts {
-            let mut new_model = junct.build_model();
+            let mut new_model = junct.build_model(row);
             additions.push(new_model);
         }
     }

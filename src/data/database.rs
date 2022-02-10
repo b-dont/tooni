@@ -87,6 +87,21 @@ impl Database {
         queried_model
     }
 
+    pub fn save(&self, table: Table, model: &impl Model) -> Result<()> {
+        let mut stmt = self.connection.prepare(
+            format!(
+                "REPLACE INTO {} ({}) VALUES ({})",
+                table.name(),
+                table.queries(),
+                table.values()
+            )
+            .as_str(),
+        )?;
+
+        stmt.execute(params_from_iter(model.parameters().into_iter()))?;
+        Ok(())
+    }
+
     pub fn load_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self.connection.prepare(
             format!("SELECT {}, {} FROM {} WHERE {}=?1",
@@ -115,21 +130,6 @@ impl Database {
         )?;
 
         stmt.execute(params![object, source])?;
-        Ok(())
-    }
-
-    pub fn save(&self, table: Table, model: &impl Model) -> Result<()> {
-        let mut stmt = self.connection.prepare(
-            format!(
-                "REPLACE INTO {} ({}) VALUES ({})",
-                table.name(),
-                table.queries(),
-                table.values()
-            )
-            .as_str(),
-        )?;
-
-        stmt.execute(params_from_iter(model.parameters().into_iter()))?;
         Ok(())
     }
 
