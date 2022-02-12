@@ -153,13 +153,18 @@ impl SavedCharacter {
     }
 }
 
-pub trait Model: std::fmt::Display {
-    fn build(&self, row: &Row) -> Result<()>
+pub trait ComplexModel: Model {
+    fn junctions(&self) -> HashMap<String, Vec<i64>>;
+}
+
+pub trait Model {
+    // TODO: Poss make this a macro
+    fn build(row: &Row) -> Result<Self>
     where
         Self: Sized;
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
-    fn table(&self) -> String;
-    fn columns(&self) -> String;
-    fn queries(&self) -> String;
-    fn values(&self) -> String;
+    fn table() -> String;
+    fn columns() -> String;
+    fn queries() -> String;
+    fn values() -> String;
 }

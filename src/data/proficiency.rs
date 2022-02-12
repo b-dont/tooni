@@ -83,33 +83,30 @@ impl Model for Proficiency {
         params
     }
 
-    fn build(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.class = row.get(2)?;
-
-        Ok(())
+    fn build(row: &Row) -> Result<Proficiency> {
+        Ok(Proficiency {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            class: row.get(2)?
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "proficiencies".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER, 
         name TEXT NOT NULL, 
         class TEXT NOT NULL"
             .to_string()
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, name, class".to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3".to_string()
     }
 }

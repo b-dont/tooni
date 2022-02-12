@@ -115,28 +115,25 @@ impl Model for Item {
         params
     }
 
-    fn build(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.class = row.get(2)?;
-        self.quantity = row.get(3)?;
-        self.rarity = row.get(4)?;
-        self.value = row.get(5)?;
-        self.weight = row.get(6)?;
-        self.properties = row.get(7)?;
-        self.description = row.get(8)?;
-
-        Ok(())
+    fn build(row: &Row) -> Result<Item> {
+        Ok(Item {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            class: row.get(2)?,
+            quantity: row.get(3)?,
+            rarity: row.get(4)?,
+            value: row.get(5)?,
+            weight: row.get(6)?,
+            properties: row.get(7)?,
+            description: row.get(8)?,
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "items".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER PRIMARY KEY,
          name TEXT NOT NULL,
          class TEXT NOT NULL,
@@ -150,11 +147,11 @@ impl Model for Item {
 
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, name, class, quantity, rarity, value, weight, properties, description".to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
     }
 }

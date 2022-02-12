@@ -90,23 +90,20 @@ impl Model for Feature {
         params
     }
 
-    fn build(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.class = row.get(2)?;
-        self.description = row.get(3)?;
-
-        Ok(())
+    fn build(row: &Row) -> Result<Feature> {
+        Ok(Feature {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            class: row.get(2)?,
+            description: row.get(3)?,
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "features".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER PRIMARY KEY,
         class TEXT NOT NULL,
         name TEXT NOT NULL,
@@ -114,11 +111,11 @@ impl Model for Feature {
         .to_string()
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, class, name, description".to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3, ?4".to_string()
     }
 }

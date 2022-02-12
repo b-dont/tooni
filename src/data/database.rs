@@ -17,48 +17,25 @@ impl Database {
         })
     }
 
-    pub fn create_junction_table(&self, junct: JunctionTable) -> Result<()> {
-        self.connection.execute(
-            format!(
-                "CREATE TABLE IF NOT EXISTS {} (
-                    {} INTEGER REFERENCES {}(id), 
-                    {} INTEGER REFERENCES {}(id), 
-                    PRIMARY KEY ({}, {}))",
-                junct.name(),
-                junct.columns().0,
-                junct.references().0,
-                junct.columns().1,
-                junct.references().1,
-                junct.columns().0,
-                junct.columns().1,
-            )
-            .as_str(),
-            [],
-        )?;
-
-        Ok(())
-    }
-
-    pub fn load(&self, id: i64, model: &impl Model) -> Result<()> {
+    pub fn load<T: Model>(&self, id: i64) -> Result<T> {
         let mut stmt = self.connection.prepare(
             format!(
                 "SELECT {} FROM {} WHERE id=?1",
-                model.queries(),
-                model.table()
+                T::queries(),
+                T::table()
             )
             .as_str(),
         )?;
 
-        stmt.query_row(params![id], |row| Ok(model.build(&row)))?;
-        Ok(())
+        stmt.query_row(params![id], |row| Ok(T::build(&row)))?
     }
 
-    pub fn save(&self, model: &impl Model) -> Result<()> {
+    pub fn save<T: Model>(&self, model: T) -> Result<()> {
         let mut table_stmt = self.connection.execute(
             format!(
                 "CREATE TABLE IF NOT EXISTS {} ({})",
-                model.table(),
-                model.columns()
+                T::table(),
+                T::columns()
             )
             .as_str(),
             [],
@@ -67,9 +44,9 @@ impl Database {
         let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
-                model.table(),
-                model.queries(),
-                model.values()
+                T::table(),
+                T::queries(),
+                T::values()
             )
             .as_str(),
         )?;
@@ -78,59 +55,30 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
-        let mut stmt = self.connection.prepare(
-            format!(
-                "SELECT {}, {} FROM {} WHERE {}=?1",
-                junct.columns().0,
-                junct.columns().1,
-                junct.name(),
-                junct.columns().0
-            )
-            .as_str(),
-        )?;
-
-        let queried_models =
-            stmt.query_map(params![id], |row| Ok(self.load(row.get(0)?, row.get(1)?)?))?;
-        queried_models.into_iter().collect()
-    }
-
-    pub fn save_junction(&self, model: &impl Model) -> Result<()> {
-        let mut stmt = self.connection.prepare(
-            format!(
-                "REPLACE INTO {} ({}, {}) VALUES ({})",
-                junct.name(),
-                junct.columns().0,
-                junct.columns().1,
-                junct.values()
-            )
-            .as_str(),
-        )?;
-
-        stmt.execute(params![object, source])?;
-        Ok(())
-    }
-
-    pub fn get_all_models(&self, model: &impl Model) -> Result<Vec<Box<impl Model>>> {
+    pub fn save_junction<T: Model>(&self, model: T) -> Result<()> {
         let mut stmt = self
             .connection
-            .prepare(format!("SELECT {} FROM {}", model.queries(), model.table()).as_str())?;
-
-        let rows = stmt.query_map([], |row| Ok(Box::new(model.build(&row)?.clone())))?;
-        let mut all_models: Vec<Box<_>> = vec![];
-
-        for result in rows {
-            all_models.push(result?);
-        }
-
-        Ok(all_models)
-
+            .prepare(
+                format!(
+                    "REPLACE INTO {} ({}) VALUES (?1, ?2)"
+                    ,
+                    ).as_str()
+            )?;
     }
 
-    pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {
+    pub fn get_all_models<T: Model>(&self) -> Result<Vec<T>> {
         let mut stmt = self
             .connection
-            .prepare(format!("DELETE FROM {} WHERE id=?1", table.name()).as_str())?;
+            .prepare(format!("SELECT {} FROM {}", T::queries(), T::table()).as_str())?;
+
+        let rows = stmt.query_map([], |row| Ok(T::build(&row)?))?;
+        rows.into_iter().collect()
+    }
+
+    pub fn delete<T: Model>(&self, id: i64) -> Result<()> {
+        let mut stmt = self
+            .connection
+            .prepare(format!("DELETE FROM {} WHERE id=?1", T::table()).as_str())?;
 
         stmt.execute(params![id])?;
         Ok(())

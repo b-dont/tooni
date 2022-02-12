@@ -122,27 +122,25 @@ impl Model for Spell {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.school = row.get(2)?;
-        self.level = row.get(3)?;
-        self.casting_time = row.get(4)?;
-        self.range = row.get(5)?;
-        self.components = row.get(6)?;
-        self.duration = row.get(7)?;
-        self.description = row.get(8)?;
-        Ok(())
+    fn build(row: &Row) -> Result<Self> {
+        Ok(Spell {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            school: row.get(2)?,
+            level: row.get(3)?,
+            casting_time: row.get(4)?,
+            range: row.get(5)?,
+            components: row.get(6)?,
+            duration: row.get(7)?,
+            description: row.get(8)?
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "spells".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         school TEXT NOT NULL,
@@ -155,12 +153,12 @@ impl Model for Spell {
             .to_string()
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, name, school, level, casting_time, range, components, duration, description"
             .to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
     }
 }

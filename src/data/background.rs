@@ -1,7 +1,7 @@
-use crate::data::character::Model;
+use crate::data::character::{Model, ComplexModel};
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
 use rusqlite::{Result, Row, ToSql};
-use std::fmt;
+use std::{fmt, collections::HashMap};
 
 #[derive(Default, Clone)]
 pub struct Background {
@@ -37,6 +37,38 @@ impl fmt::Display for Background {
     }
 }
 
+impl ComplexModel for Background {
+    fn junctions(&self) -> HashMap<String, Vec<i64>> {
+
+        let prof_ids = self.proficiencies.unwrap_or(vec![])
+            .into_iter()
+            .map(|prof| prof.id.unwrap())
+            .collect::<Vec<_>>();
+
+        let lang_ids = self.languages.unwrap_or(vec![])
+            .into_iter()
+            .map(|lang| lang.id.unwrap())
+            .collect::<Vec<_>>();
+
+        let item_ids = self.starting_equipment.unwrap_or(vec![])
+            .into_iter()
+            .map(|item| item.id.unwrap())
+            .collect::<Vec<_>>();
+
+        let feature_ids = self.features.unwrap_or(vec![])
+            .into_iter()
+            .map(|feature| feature.id.unwrap())
+            .collect::<Vec<_>>();
+
+        HashMap::from([
+            ("background_proficiencies".to_string(), prof_ids),
+            ("background_languages".to_string(), lang_ids),
+            ("background_features".to_string(), feature_ids),
+            ("background_inventory".to_string(), item_ids),
+        ])
+    }
+}
+
 impl Model for Background {
     fn parameters(&self) -> Vec<Box<dyn ToSql>> {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
@@ -59,13 +91,11 @@ impl Model for Background {
         params
     }
 
-    fn build(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.personality_traits = Some(vec![
+    fn build(row: &Row) -> Result<Background> {
+        Ok(Background {
+        id: row.get(0)?,
+        name: row.get(1)?,
+        personality_traits: Some(vec![
             row.get(2)?, 
             row.get(3)?,
             row.get(4)?,
@@ -74,40 +104,43 @@ impl Model for Background {
             row.get(7)?,
             row.get(8)?,
             row.get(9)?,
-        ]);
-        self.ideals = Some(vec![
+        ]),
+        ideals: Some(vec![
             row.get(10)?, 
             row.get(11)?,
             row.get(12)?,
             row.get(13)?,
             row.get(14)?,
             row.get(15)?,
-        ]);
-        self.bonds = Some(vec![
+        ]),
+        bonds: Some(vec![
             row.get(16)?, 
             row.get(17)?,
             row.get(18)?,
             row.get(19)?,
             row.get(20)?,
             row.get(21)?,
-        ]);
-        self.bonds = Some(vec![
+        ]),
+        flaws: Some(vec![
             row.get(22)?, 
             row.get(23)?,
             row.get(24)?,
             row.get(25)?,
             row.get(26)?,
             row.get(27)?,
-        ]);
-
-        Ok(())
+        ]),
+        proficiencies: None,
+        languages: None,
+        features: None,
+        starting_equipment: None,
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "backgrounds".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER, 
         name TEXT NOT NULL, 
         personality_traits TEXT NOT NULL, 
@@ -117,11 +150,11 @@ impl Model for Background {
             .to_string()
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, name, personality_traits, ideals, bonds, flaws".to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6".to_string()
     }
 }

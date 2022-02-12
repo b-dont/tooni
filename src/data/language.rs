@@ -34,33 +34,30 @@ impl Model for Language {
         params
     }
 
-    fn build(&self, row: &Row) -> Result<()>
-    where
-        Self: Sized,
-    {
-        self.id = row.get(0)?;
-        self.name = row.get(1)?;
-        self.description = row.get(2)?;
-
-        Ok(())
+    fn build(row: &Row) -> Result<Language> {
+        Ok(Language {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            description: row.get(2)?,
+        })
     }
 
-    fn table(&self) -> String {
+    fn table() -> String {
         "languages".to_string()
     }
 
-    fn columns(&self) -> String {
+    fn columns() -> String {
         "id INTEGER PRIMARY KEY,
         name TEXT UNIQUE NOT NULL,
         description TEXT UNIQUE NOT NULL"
             .to_string()
     }
 
-    fn queries(&self) -> String {
+    fn queries() -> String {
         "id, name, description".to_string()
     }
 
-    fn values(&self) -> String {
+    fn values() -> String {
         "?1, ?2, ?3".to_string()
     }
 }
