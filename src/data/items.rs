@@ -68,6 +68,12 @@ pub struct Item {
     pub description: String,
 }
 
+impl Item {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
+}
+
 impl fmt::Display for Item {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
@@ -109,7 +115,7 @@ impl Model for Item {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Result<()>
+    fn build(&self, row: &Row) -> Result<()>
     where
         Self: Sized,
     {
@@ -127,18 +133,28 @@ impl Model for Item {
     }
 
     fn table(&self) -> String {
-        todo!();
+        "items".to_string()
     }
 
     fn columns(&self) -> String {
-        todo!();
+        "id INTEGER PRIMARY KEY,
+         name TEXT NOT NULL,
+         class TEXT NOT NULL,
+         quantity INTEGER,
+         rarity TEXT NOT NULL,
+         value INTEGER,
+         weight INTEGER,
+         properties TEXT NOT NULL,
+         description TEXT NOT NULL"
+         .to_string()
+
     }
 
     fn queries(&self) -> String {
-        todo!();
+        "id, name, class, quantity, rarity, value, weight, properties, description".to_string()
     }
 
     fn values(&self) -> String {
-        todo!();
+        "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
     }
 }

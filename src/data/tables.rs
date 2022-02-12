@@ -108,32 +108,29 @@ impl Table {
                 class TEXT NOT NULL
                 "
             .to_string(),
-            &Table::LanguagesTable => 
-            "id INTEGER PRIMARY KEY,
+            &Table::LanguagesTable => "id INTEGER PRIMARY KEY,
             name TEXT UNIQUE NOT NULL,
             description TEXT UNIQUE NOT NULL"
-            .to_string(),
-            &Table::ItemsTable => "
-                id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                class TEXT NOT NULL,
-                quantity INTEGER,
-                rarity TEXT NOT NULL,
-                value INTEGER,
-                weight INTEGER,
-                properties TEXT NOT NULL,
-                description TEXT NOT NULL
-                "
-            .to_string(),
-            &Table::FeaturesTable => "
-                id INTEGER PRIMARY KEY,
-                class TEXT NOT NULL,
-                name TEXT NOT NULL,
-                description TEXT NOT NULL
-                "
-            .to_string(),
-            &Table::SpellsTable => 
+                .to_string(),
+            &Table::ItemsTable => 
             "id INTEGER PRIMARY KEY,
+             name TEXT NOT NULL,
+             class TEXT NOT NULL,
+             quantity INTEGER,
+             rarity TEXT NOT NULL,
+             value INTEGER,
+             weight INTEGER,
+             properties TEXT NOT NULL,
+             description TEXT NOT NULL"
+            .to_string(),
+            &Table::FeaturesTable => 
+            "id INTEGER PRIMARY KEY,
+            class TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL
+            "
+            .to_string(),
+            &Table::SpellsTable => "id INTEGER PRIMARY KEY,
             name TEXT NOT NULL,
             school TEXT NOT NULL,
             level INTEGER,

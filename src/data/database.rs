@@ -3,8 +3,6 @@ use crate::data::{
     character::SavedCharacter,
     tables::{JunctionTable, Table},
 };
-use anyhow::Result;
-use enum_iterator::IntoEnumIterator;
 use rusqlite::{params, params_from_iter, Connection, Result};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
@@ -17,20 +15,6 @@ impl Database {
         Ok(Self {
             connection: Connection::open("data.sqlite3")?,
         })
-    }
-
-    pub fn create_table(&self, table: Table) -> Result<()> {
-        self.connection.execute(
-            format!(
-                "CREATE TABLE IF NOT EXISTS {} ({})",
-                table.name(),
-                table.columns()
-            )
-            .as_str(),
-            [],
-        )?;
-
-        Ok(())
     }
 
     pub fn create_junction_table(&self, junct: JunctionTable) -> Result<()> {
@@ -55,7 +39,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn load(&self, id: i64, model: &impl Model) -> Result<()>{
+    pub fn load(&self, id: i64, model: &impl Model) -> Result<()> {
         let mut stmt = self.connection.prepare(
             format!(
                 "SELECT {} FROM {} WHERE id=?1",
@@ -65,11 +49,21 @@ impl Database {
             .as_str(),
         )?;
 
-        stmt.query_row(params![id], |row| Ok(model.build_model(&row)))?;
+        stmt.query_row(params![id], |row| Ok(model.build(&row)))?;
         Ok(())
     }
 
     pub fn save(&self, model: &impl Model) -> Result<()> {
+        let mut table_stmt = self.connection.execute(
+            format!(
+                "CREATE TABLE IF NOT EXISTS {} ({})",
+                model.table(),
+                model.columns()
+            )
+            .as_str(),
+            [],
+        )?;
+
         let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
@@ -86,16 +80,18 @@ impl Database {
 
     pub fn load_junction(&self, junct: JunctionTable, id: i64) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self.connection.prepare(
-            format!("SELECT {}, {} FROM {} WHERE {}=?1",
-                    junct.columns().0,
-                    junct.columns().1,
-                    junct.name(),
-                    junct.columns().0
-                ).as_str())?;
+            format!(
+                "SELECT {}, {} FROM {} WHERE {}=?1",
+                junct.columns().0,
+                junct.columns().1,
+                junct.name(),
+                junct.columns().0
+            )
+            .as_str(),
+        )?;
 
-        let queried_models = stmt.query_map(params![id], |row|{
-            Ok(self.load(row.get(0)?, row.get(1)?)?)
-        })?;
+        let queried_models =
+            stmt.query_map(params![id], |row| Ok(self.load(row.get(0)?, row.get(1)?)?))?;
         queried_models.into_iter().collect()
     }
 
@@ -115,13 +111,20 @@ impl Database {
         Ok(())
     }
 
-    pub fn get_all_rows(&self, table: Table) -> Result<Vec<Box<impl Model>>> {
+    pub fn get_all_models(&self, model: &impl Model) -> Result<Vec<Box<impl Model>>> {
         let mut stmt = self
             .connection
-            .prepare(format!("SELECT {} FROM {}", table.queries(), table.name()).as_str())?;
+            .prepare(format!("SELECT {} FROM {}", model.queries(), model.table()).as_str())?;
 
-        let all_models = stmt.query_map([], |row| Ok(table.create_model(&row)?))?;
-        all_models.into_iter().collect()
+        let rows = stmt.query_map([], |row| Ok(Box::new(model.build(&row)?.clone())))?;
+        let mut all_models: Vec<Box<_>> = vec![];
+
+        for result in rows {
+            all_models.push(result?);
+        }
+
+        Ok(all_models)
+
     }
 
     pub fn delete_row(&self, id: i64, table: Table) -> Result<()> {

@@ -56,9 +56,15 @@ impl fmt::Display for FeatureClass {
 #[derive(Default, Debug, Clone)]
 pub struct Feature {
     pub id: Option<i64>,
-    pub class: Option<FeatureClass>,
     pub name: String,
+    pub class: Option<FeatureClass>,
     pub description: String,
+}
+
+impl Feature {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
 }
 
 impl fmt::Display for Feature {
@@ -66,10 +72,10 @@ impl fmt::Display for Feature {
         writeln!(
             f,
             "ID: {:#?}, 
-            Class: {:#?},
             Name: {}, 
+            Class: {:#?},
             Description: {}",
-            self.id, self.class, self.name, self.description
+            self.id, self.name, self.class, self.description
         )
     }
 }
@@ -78,37 +84,41 @@ impl Model for Feature {
     fn parameters(&self) -> Vec<Box<dyn ToSql>> {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
         params.push(Box::new(self.id));
-        params.push(Box::new(self.class.clone()));
         params.push(Box::new(self.name.clone()));
+        params.push(Box::new(self.class.clone()));
         params.push(Box::new(self.description.clone()));
         params
     }
 
-    fn build_model(&self, row: &Row) -> Feature
+    fn build(&self, row: &Row) -> Result<()>
     where
         Self: Sized,
     {
-        Feature {
-            id: self.id,
-            class: self.class.clone(),
-            name: self.name.clone(),
-            description: self.description.clone(),
-        }
+        self.id = row.get(0)?;
+        self.name = row.get(1)?;
+        self.class = row.get(2)?;
+        self.description = row.get(3)?;
+
+        Ok(())
     }
 
     fn table(&self) -> String {
-        todo!();
+        "features".to_string()
     }
 
     fn columns(&self) -> String {
-        todo!();
+        "id INTEGER PRIMARY KEY,
+        class TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT NOT NULL"
+        .to_string()
     }
 
     fn queries(&self) -> String {
-        todo!();
+        "id, class, name, description".to_string()
     }
 
     fn values(&self) -> String {
-        todo!();
+        "?1, ?2, ?3, ?4".to_string()
     }
 }

@@ -1,8 +1,7 @@
 use crate::data::character::Model;
 use rusqlite::{
     types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
-    Result,
-    Row,
+    Result, Row,
 };
 use std::{fmt, str::FromStr};
 
@@ -84,8 +83,10 @@ impl Model for Proficiency {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Result<()> 
-    where Self : Sized {
+    fn build(&self, row: &Row) -> Result<()>
+    where
+        Self: Sized,
+    {
         self.id = row.get(0)?;
         self.name = row.get(1)?;
         self.class = row.get(2)?;
@@ -100,7 +101,8 @@ impl Model for Proficiency {
     fn columns(&self) -> String {
         "id INTEGER, 
         name TEXT NOT NULL, 
-        class TEXT NOT NULL".to_string()
+        class TEXT NOT NULL"
+            .to_string()
     }
 
     fn queries(&self) -> String {

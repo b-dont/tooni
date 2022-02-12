@@ -1,6 +1,6 @@
 use crate::data::character::Model;
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
-use rusqlite::{Row, ToSql};
+use rusqlite::{Result, Row, ToSql};
 use std::fmt;
 
 #[derive(Default, Clone)]
@@ -11,12 +11,16 @@ pub struct Background {
     pub languages: Option<Vec<Language>>,
     pub starting_equipment: Option<Vec<Item>>,
     pub features: Option<Vec<Feature>>,
-    // TODO: personality_traits needs to always have
-    // an index of 8; the rest need an index of 6
-    pub personality_traits: Vec<String>,
-    pub ideals: Vec<String>,
-    pub bonds: Vec<String>,
-    pub flaws: Vec<String>,
+    pub personality_traits: Option<Vec<String>>,
+    pub ideals: Option<Vec<String>>,
+    pub bonds: Option<Vec<String>>,
+    pub flaws: Option<Vec<String>>,
+}
+
+impl Background {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
 }
 
 impl fmt::Display for Background {
@@ -39,38 +43,64 @@ impl Model for Background {
         params.push(Box::new(self.id));
         params.push(Box::new(self.name.clone()));
 
-        for pers_trait in &self.personality_traits {
+        for pers_trait in &self.personality_traits.unwrap_or(vec![String::new(); 8]) {
             params.push(Box::new(pers_trait.clone()));
         }
-        for ideal in &self.ideals {
+        for ideal in &self.ideals.unwrap_or(vec![String::new(); 6]) {
             params.push(Box::new(ideal.clone()));
         }
-        for bond in &self.bonds {
+        for bond in &self.bonds.unwrap_or(vec![String::new(); 6]) {
             params.push(Box::new(bond.clone()));
         }
-        for flaw in &self.flaws {
+        for flaw in &self.flaws.unwrap_or(vec![String::new(); 6]) {
             params.push(Box::new(flaw.clone()));
         }
 
         params
     }
 
-    fn build_model(&self, row: &Row) -> Background
+    fn build(&self, row: &Row) -> Result<()>
     where
         Self: Sized,
     {
-        Background {
-            id: self.id,
-            name: self.name.clone(),
-            proficiencies: self.proficiencies.clone(),
-            languages: self.languages.clone(),
-            starting_equipment: self.starting_equipment.clone(),
-            features: self.features.clone(),
-            personality_traits: self.personality_traits.clone(),
-            ideals: self.ideals.clone(),
-            bonds: self.bonds.clone(),
-            flaws: self.flaws.clone(),
-        }
+        self.id = row.get(0)?;
+        self.name = row.get(1)?;
+        self.personality_traits = Some(vec![
+            row.get(2)?, 
+            row.get(3)?,
+            row.get(4)?,
+            row.get(5)?,
+            row.get(6)?,
+            row.get(7)?,
+            row.get(8)?,
+            row.get(9)?,
+        ]);
+        self.ideals = Some(vec![
+            row.get(10)?, 
+            row.get(11)?,
+            row.get(12)?,
+            row.get(13)?,
+            row.get(14)?,
+            row.get(15)?,
+        ]);
+        self.bonds = Some(vec![
+            row.get(16)?, 
+            row.get(17)?,
+            row.get(18)?,
+            row.get(19)?,
+            row.get(20)?,
+            row.get(21)?,
+        ]);
+        self.bonds = Some(vec![
+            row.get(22)?, 
+            row.get(23)?,
+            row.get(24)?,
+            row.get(25)?,
+            row.get(26)?,
+            row.get(27)?,
+        ]);
+
+        Ok(())
     }
 
     fn table(&self) -> String {
@@ -83,7 +113,8 @@ impl Model for Background {
         personality_traits TEXT NOT NULL, 
         ideals TEXT NOT NULL, 
         bonds TEXT NOT NULL, 
-        flaws TEXT NOT NULL".to_string()
+        flaws TEXT NOT NULL"
+            .to_string()
     }
 
     fn queries(&self) -> String {

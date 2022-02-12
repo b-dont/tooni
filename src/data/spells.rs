@@ -75,6 +75,12 @@ pub struct Spell {
     pub description: String,
 }
 
+impl Spell {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
+}
+
 impl fmt::Display for Spell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
@@ -145,11 +151,13 @@ impl Model for Spell {
         range INTEGER,
         components TEXT NOT NULL,
         duration INTEGER,
-        description TEXT NOT NULL".to_string()
+        description TEXT NOT NULL"
+            .to_string()
     }
 
     fn queries(&self) -> String {
-        "id, name, school, level, casting_time, range, components, duration, description".to_string()
+        "id, name, school, level, casting_time, range, components, duration, description"
+            .to_string()
     }
 
     fn values(&self) -> String {

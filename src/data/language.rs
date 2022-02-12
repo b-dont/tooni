@@ -9,6 +9,12 @@ pub struct Language {
     pub description: String,
 }
 
+impl Language {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
+}
+
 impl fmt::Display for Language {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
@@ -28,7 +34,7 @@ impl Model for Language {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Result<()>
+    fn build(&self, row: &Row) -> Result<()>
     where
         Self: Sized,
     {
@@ -47,7 +53,7 @@ impl Model for Language {
         "id INTEGER PRIMARY KEY,
         name TEXT UNIQUE NOT NULL,
         description TEXT UNIQUE NOT NULL"
-        .to_string()
+            .to_string()
     }
 
     fn queries(&self) -> String {
