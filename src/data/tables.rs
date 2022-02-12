@@ -4,13 +4,12 @@ use crate::data::{
 };
 use rusqlite::{
     types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
-    Result,
-    Row
+    Result, Row,
 };
 
+use super::background::Background;
 use enum_iterator::IntoEnumIterator;
 use std::{fmt, str::FromStr};
-use super::background::Background;
 
 #[derive(Debug, Clone, IntoEnumIterator)]
 pub enum Table {
@@ -96,7 +95,7 @@ impl Table {
                 JunctionTable::BackgroundProfs,
                 JunctionTable::BackgroundLangs,
                 JunctionTable::BackgroundInvintory,
-                JunctionTable::BackgroundFeatures
+                JunctionTable::BackgroundFeatures,
             ]),
         }
     }
@@ -109,11 +108,10 @@ impl Table {
                 class TEXT NOT NULL
                 "
             .to_string(),
-            &Table::LanguagesTable => "
-                id INTEGER PRIMARY KEY,
-                name TEXT UNIQUE NOT NULL,
-                description TEXT UNIQUE NOT NULL
-                "
+            &Table::LanguagesTable => 
+            "id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT UNIQUE NOT NULL"
             .to_string(),
             &Table::ItemsTable => "
                 id INTEGER PRIMARY KEY,
@@ -134,17 +132,17 @@ impl Table {
                 description TEXT NOT NULL
                 "
             .to_string(),
-            &Table::SpellsTable => "
-                id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                school TEXT NOT NULL,
-                level INTEGER,
-                casting_time INTEGER,
-                range INTEGER,
-                components TEXT NOT NULL,
-                duration INTEGER,
-                description TEXT NOT NULL
-                "
+            &Table::SpellsTable => 
+            "id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            school TEXT NOT NULL,
+            level INTEGER,
+            casting_time INTEGER,
+            range INTEGER,
+            components TEXT NOT NULL,
+            duration INTEGER,
+            description TEXT NOT NULL
+            "
             .to_string(),
             &Table::BackgroundsTable => "
                 id INTEGER PRIMARY KEY,
@@ -244,91 +242,6 @@ impl Table {
             .to_string(),
         }
     }
-
-    pub fn create_model(&self, row: &Row) -> Result<Box<impl Model>> {
-        match self {
-            &Table::ProficiencyTable => Ok(Box::new(Proficiency {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                class: row.get(2)?,
-            })),
-            &Table::LanguagesTable => Ok(Box::new(Language {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                description: row.get(2)?,
-            })),
-            &Table::ItemsTable => Ok(Box::new(Item {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                class: row.get(2)?,
-                quantity: row.get(3)?,
-                rarity: row.get(4)?,
-                value: row.get(5)?,
-                weight: row.get(6)?,
-                properties: row.get(7)?,
-                description: row.get(8)?,
-            })),
-            &Table::FeaturesTable => Ok(Box::new(Feature {
-                id: row.get(0)?,
-                class: row.get(1)?,
-                name: row.get(2)?,
-                description: row.get(3)?,
-            })),
-            &Table::SpellsTable => Ok(Box::new(Spell {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                school: row.get(2)?,
-                level: row.get(3)?,
-                casting_time: row.get(4)?,
-                range: row.get(5)?,
-                components: row.get(6)?,
-                duration: row.get(7)?,
-                description: row.get(8)?,
-            })),
-            &Table::BackgroundsTable => Ok(Box::new(Background {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                proficiencies: Some(vec![]),
-                languages: Some(vec![]),
-                starting_equipment: Some(vec![]),
-                features: Some(vec![]),
-                personality_traits: vec![
-                    row.get(2)?,
-                    row.get(3)?,
-                    row.get(4)?,
-                    row.get(5)?,
-                    row.get(6)?,
-                    row.get(7)?,
-                    row.get(8)?,
-                    row.get(9)?,
-                ],
-                ideals: vec![
-                    row.get(10)?,
-                    row.get(11)?,
-                    row.get(12)?,
-                    row.get(13)?,
-                    row.get(14)?,
-                    row.get(15)?,
-                ],
-                bonds: vec![
-                    row.get(16)?,
-                    row.get(17)?,
-                    row.get(18)?,
-                    row.get(19)?,
-                    row.get(20)?,
-                    row.get(21)?,
-                ],
-                flaws: vec![
-                    row.get(22)?,
-                    row.get(23)?,
-                    row.get(24)?,
-                    row.get(25)?,
-                    row.get(26)?,
-                    row.get(27)?,
-                ],
-            })),
-        }
-    }
 }
 
 #[derive(Debug, Clone, IntoEnumIterator)]
@@ -362,16 +275,11 @@ impl JunctionTable {
 
     pub fn references(&self) -> (String, String) {
         match self {
-            &JunctionTable::BackgroundProfs => (
-                "backgrounds".to_string(),
-                "proficiencies".to_string(),
-            ),
-            &JunctionTable::BackgroundLangs => {
-                ("backgrounds".to_string(), "languages".to_string())
+            &JunctionTable::BackgroundProfs => {
+                ("backgrounds".to_string(), "proficiencies".to_string())
             }
-            &JunctionTable::BackgroundInvintory => {
-                ("backgrounds".to_string(), "items".to_string())
-            }
+            &JunctionTable::BackgroundLangs => ("backgrounds".to_string(), "languages".to_string()),
+            &JunctionTable::BackgroundInvintory => ("backgrounds".to_string(), "items".to_string()),
             &JunctionTable::BackgroundFeatures => {
                 ("backgrounds".to_string(), "features".to_string())
             }

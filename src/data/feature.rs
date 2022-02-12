@@ -2,7 +2,7 @@ use crate::data::character::Model;
 use ::std::{fmt, str::FromStr};
 use rusqlite::{
     types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
-    Result,
+    Result, Row,
 };
 
 #[derive(Debug, Clone)]
@@ -84,24 +84,31 @@ impl Model for Feature {
         params
     }
 
-    fn build_model(&self) -> Feature
-    where Self : Sized {
+    fn build_model(&self, row: &Row) -> Feature
+    where
+        Self: Sized,
+    {
         Feature {
             id: self.id,
             class: self.class.clone(),
             name: self.name.clone(),
-            description: self.description.clone()
+            description: self.description.clone(),
         }
     }
 
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
-    where Self : Sized {
-        
+    fn table(&self) -> String {
+        todo!();
     }
-}
 
-impl Feature {
-    pub fn new() -> Self {
-        Self::default()
+    fn columns(&self) -> String {
+        todo!();
+    }
+
+    fn queries(&self) -> String {
+        todo!();
+    }
+
+    fn values(&self) -> String {
+        todo!();
     }
 }

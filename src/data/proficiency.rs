@@ -59,6 +59,12 @@ pub struct Proficiency {
     pub class: Option<ProficiencyClass>,
 }
 
+impl Proficiency {
+    pub fn new(&self) -> Self {
+        Self::default()
+    }
+}
+
 impl fmt::Display for Proficiency {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
@@ -78,17 +84,30 @@ impl Model for Proficiency {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Proficiency 
+    fn build_model(&self, row: &Row) -> Result<()> 
     where Self : Sized {
-        Proficiency {
-            id: self.id,
-            name: self.name.clone(),
-            class: self.class.clone()
-        }
+        self.id = row.get(0)?;
+        self.name = row.get(1)?;
+        self.class = row.get(2)?;
+
+        Ok(())
     }
 
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
-    where Self : Sized {
-        
+    fn table(&self) -> String {
+        "proficiencies".to_string()
+    }
+
+    fn columns(&self) -> String {
+        "id INTEGER, 
+        name TEXT NOT NULL, 
+        class TEXT NOT NULL".to_string()
+    }
+
+    fn queries(&self) -> String {
+        "id, name, class".to_string()
+    }
+
+    fn values(&self) -> String {
+        "?1, ?2, ?3".to_string()
     }
 }

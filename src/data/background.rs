@@ -1,6 +1,6 @@
 use crate::data::character::Model;
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
-use rusqlite::{ToSql, Row};
+use rusqlite::{Row, ToSql};
 use std::fmt;
 
 #[derive(Default, Clone)]
@@ -11,7 +11,7 @@ pub struct Background {
     pub languages: Option<Vec<Language>>,
     pub starting_equipment: Option<Vec<Item>>,
     pub features: Option<Vec<Feature>>,
-    // TODO: personality_traits needs to always have 
+    // TODO: personality_traits needs to always have
     // an index of 8; the rest need an index of 6
     pub personality_traits: Vec<String>,
     pub ideals: Vec<String>,
@@ -55,8 +55,10 @@ impl Model for Background {
         params
     }
 
-    fn build_model(&self, row: &Row) -> Background 
-    where Self : Sized {
+    fn build_model(&self, row: &Row) -> Background
+    where
+        Self: Sized,
+    {
         Background {
             id: self.id,
             name: self.name.clone(),
@@ -67,16 +69,28 @@ impl Model for Background {
             personality_traits: self.personality_traits.clone(),
             ideals: self.ideals.clone(),
             bonds: self.bonds.clone(),
-            flaws: self.flaws.clone()
+            flaws: self.flaws.clone(),
         }
     }
 
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>) {
-        let mut additions = vec![];
+    fn table(&self) -> String {
+        "backgrounds".to_string()
+    }
 
-        for junct in juncts {
-            let mut new_model = junct.build_model(row);
-            additions.push(new_model);
-        }
+    fn columns(&self) -> String {
+        "id INTEGER, 
+        name TEXT NOT NULL, 
+        personality_traits TEXT NOT NULL, 
+        ideals TEXT NOT NULL, 
+        bonds TEXT NOT NULL, 
+        flaws TEXT NOT NULL".to_string()
+    }
+
+    fn queries(&self) -> String {
+        "id, name, personality_traits, ideals, bonds, flaws".to_string()
+    }
+
+    fn values(&self) -> String {
+        "?1, ?2, ?3, ?4, ?5, ?6".to_string()
     }
 }

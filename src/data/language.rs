@@ -1,5 +1,5 @@
 use crate::data::character::Model;
-use rusqlite::ToSql;
+use rusqlite::{Result, Row, ToSql};
 use std::fmt;
 
 #[derive(Default, Debug, Clone)]
@@ -28,23 +28,33 @@ impl Model for Language {
         params
     }
 
-    fn build_model(&self) -> Language 
-    where Self : Sized {
-        Language {
-            id: self.id,
-            name: self.name.clone(),
-            description: self.description.clone()
-        }
+    fn build_model(&self, row: &Row) -> Result<()>
+    where
+        Self: Sized,
+    {
+        self.id = row.get(0)?;
+        self.name = row.get(1)?;
+        self.description = row.get(2)?;
+
+        Ok(())
     }
 
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
-    where Self : Sized {
-        
+    fn table(&self) -> String {
+        "languages".to_string()
     }
-}
 
-impl Language {
-    pub fn new() -> Self {
-        Self::default()
+    fn columns(&self) -> String {
+        "id INTEGER PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        description TEXT UNIQUE NOT NULL"
+        .to_string()
+    }
+
+    fn queries(&self) -> String {
+        "id, name, description".to_string()
+    }
+
+    fn values(&self) -> String {
+        "?1, ?2, ?3".to_string()
     }
 }

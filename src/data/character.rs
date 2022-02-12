@@ -7,7 +7,7 @@ use crate::data::{
     stats::Stats,
     stats::Stats::{CHA, CON, DEX, INT, STR, WIS},
 };
-use rusqlite::ToSql;
+use rusqlite::{Result, ToSql, Row};
 use std::collections::HashMap;
 use std::fmt;
 
@@ -154,9 +154,12 @@ impl SavedCharacter {
 }
 
 pub trait Model: std::fmt::Display {
-    fn build_model(&self, row: &Row) -> Self
-        where Self : Sized;
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
-        where Self : Sized;
+    fn build_model(&self, row: &Row) -> Result<()>
+    where
+        Self: Sized;
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
+    fn table(&self) -> String;
+    fn columns(&self) -> String;
+    fn queries(&self) -> String;
+    fn values(&self) -> String;
 }

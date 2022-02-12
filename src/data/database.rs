@@ -3,6 +3,7 @@ use crate::data::{
     character::SavedCharacter,
     tables::{JunctionTable, Table},
 };
+use anyhow::Result;
 use enum_iterator::IntoEnumIterator;
 use rusqlite::{params, params_from_iter, Connection, Result};
 
@@ -16,17 +17,6 @@ impl Database {
         Ok(Self {
             connection: Connection::open("data.sqlite3")?,
         })
-    }
-
-    pub fn create_all_tables(&self) -> Result<()> {
-        for table in Table::into_enum_iter() {
-            self.create_table(table)?;
-        }
-        for junct in JunctionTable::into_enum_iter() {
-            self.create_junction_table(junct)?;
-        }
-
-        Ok(())
     }
 
     pub fn create_table(&self, table: Table) -> Result<()> {
@@ -65,35 +55,27 @@ impl Database {
         Ok(())
     }
 
-    pub fn load(&self, id: i64, table: Table) -> Result<Box<impl Model>> {
+    pub fn load(&self, id: i64, model: &impl Model) -> Result<()>{
         let mut stmt = self.connection.prepare(
             format!(
                 "SELECT {} FROM {} WHERE id=?1",
-                table.queries(),
-                table.name()
+                model.queries(),
+                model.table()
             )
             .as_str(),
         )?;
 
-        let queried_model = stmt.query_row(params![id], |row| Ok(table.create_model(&row)))?;
-
-        if table.has_junctions() {
-            for junct in table.junctions().unwrap() {
-                let new_junct = self.load_junction(junct, id)?;
-                queried_model.as_ref().unwrap().add_junctions(new_junct);
-            }
-        }
-        
-        queried_model
+        stmt.query_row(params![id], |row| Ok(model.build_model(&row)))?;
+        Ok(())
     }
 
-    pub fn save(&self, table: Table, model: &impl Model) -> Result<()> {
+    pub fn save(&self, model: &impl Model) -> Result<()> {
         let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}) VALUES ({})",
-                table.name(),
-                table.queries(),
-                table.values()
+                model.table(),
+                model.queries(),
+                model.values()
             )
             .as_str(),
         )?;
@@ -117,7 +99,7 @@ impl Database {
         queried_models.into_iter().collect()
     }
 
-    pub fn save_junction(&self, junct: JunctionTable, object: i64, source: i64) -> Result<()> {
+    pub fn save_junction(&self, model: &impl Model) -> Result<()> {
         let mut stmt = self.connection.prepare(
             format!(
                 "REPLACE INTO {} ({}, {}) VALUES ({})",

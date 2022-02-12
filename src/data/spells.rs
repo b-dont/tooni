@@ -1,7 +1,7 @@
 use crate::data::character::Model;
 use rusqlite::{
     types::{FromSql, FromSqlResult, ToSql, ToSqlOutput, ValueRef},
-    Result,
+    Result, Row,
 };
 use std::{fmt, str::FromStr};
 
@@ -116,29 +116,43 @@ impl Model for Spell {
         params
     }
 
-    fn add_junctions(&self, juncts: Vec<Box<impl Model>>)
-    where Self : Sized {
-        
+    fn build_model(&self, row: &Row) -> Result<()>
+    where
+        Self: Sized,
+    {
+        self.id = row.get(0)?;
+        self.name = row.get(1)?;
+        self.school = row.get(2)?;
+        self.level = row.get(3)?;
+        self.casting_time = row.get(4)?;
+        self.range = row.get(5)?;
+        self.components = row.get(6)?;
+        self.duration = row.get(7)?;
+        self.description = row.get(8)?;
+        Ok(())
     }
 
-    fn build_model(&self) -> Spell 
-    where Self : Sized {
-        Spell {
-            id: self.id,
-            name: self.name.clone(),
-            school: self.school.clone(),
-            level: self.level,
-            casting_time: self.casting_time,
-            range: self.range,
-            components: self.components.clone(),
-            duration: self.duration,
-            description: self.description.clone()
-        }
+    fn table(&self) -> String {
+        "spells".to_string()
     }
-}
 
-impl Spell {
-    pub fn new() -> Self {
-        Self::default()
+    fn columns(&self) -> String {
+        "id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        school TEXT NOT NULL,
+        level INTEGER,
+        casting_time INTEGER,
+        range INTEGER,
+        components TEXT NOT NULL,
+        duration INTEGER,
+        description TEXT NOT NULL".to_string()
+    }
+
+    fn queries(&self) -> String {
+        "id, name, school, level, casting_time, range, components, duration, description".to_string()
+    }
+
+    fn values(&self) -> String {
+        "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
     }
 }
