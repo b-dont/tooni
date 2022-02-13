@@ -1,6 +1,6 @@
 use super::character::{ComplexModel, Model};
 use crate::data::character::SavedCharacter;
-use rusqlite::{params, params_from_iter, Connection, Result};
+use rusqlite::{Row, params, params_from_iter, Connection, Result};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -14,12 +14,21 @@ impl Database {
         })
     }
 
-    pub fn load<T: Model>(&self, id: i64) -> Result<T> {
+    pub fn load<T: Model + ComplexModel>(&self, id: i64) -> Result<T> {
         let mut stmt = self
             .connection
             .prepare(format!("SELECT {} FROM {} WHERE id=?1", T::queries(), T::table()).as_str())?;
 
-        stmt.query_row(params![id], |row| Ok(T::build(&row)))?
+        let queried_model = stmt.query_row(params![id], |row| Ok(T::build(&row)))?;
+
+        if T::has_junctions() {
+            for table in T::junct_tables() {
+                let mut all_juncts = self.load_junction::<T>(T::junct_columns(&table), &table, id)?;
+                queried_model.unwrap().add_junctions(all_juncts);
+            }
+        }
+
+        queried_model
     }
 
     pub fn save<T: Model + ComplexModel>(&self, model: &T) -> Result<()> {
@@ -45,7 +54,7 @@ impl Database {
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
 
         if T::has_junctions() {
-            self.save_junctions(model)?;
+            self._save_junctions(model)?;
         }
 
         Ok(())
@@ -60,7 +69,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_junctions<T: ComplexModel>(&self, model: &T) -> Result<()> {
+    pub fn _save_junctions<T: ComplexModel>(&self, model: &T) -> Result<()> {
         for table in T::junct_tables() {
             self.connection.execute(
                 format!(
@@ -95,6 +104,19 @@ impl Database {
             }
         }
         Ok(())
+    }
+
+    pub fn load_junction<T: Model>(&self, columns: (String, String), table: &str, id: i64) -> Result<Vec<T>> {
+        let mut stmt = self.connection.prepare(
+            format!("SELECT {}, {} FROM {} WHERE id=?1",
+            columns.0,
+            columns.1,
+            table,
+            ).as_str()
+        )?;
+
+        let juncts = stmt.query_map([id], |row| Ok(T::build(row)?))?;
+        juncts.into_iter().collect()
     }
 
     pub fn get_all_models<T: Model + ComplexModel>(&self) -> Result<Vec<T>> {

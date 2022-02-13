@@ -75,6 +75,16 @@ impl ComplexModel for Background {
         }
     }
 
+    fn add_junctions<T: Model>(&self, junctions: Vec<T>) {
+        for junct in junctions {
+            match junct {
+                Proficiency => if let Some(profs) = self.proficiencies {
+                    profs.push(junct);
+                }
+            }
+        }
+    }
+
     fn references(table: &str) -> (String, String) {
         match table {
             "background_proficiencies" => ("backgrounds".to_string(), "proficiencies".to_string()),

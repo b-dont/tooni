@@ -10,4 +10,3 @@ pub mod proficiency;
 pub mod race;
 pub mod spells;
 pub mod stats;
-pub mod tables;

@@ -155,6 +155,7 @@ impl SavedCharacter {
 
 pub trait ComplexModel: Model {
     fn junctions(&self, table: &str) -> Vec<i64>;
+    fn add_junctions<T: Model>(&self, junctions: Vec<T>);
     fn references(table: &str) -> (String, String);
     fn junct_columns(table: &str) -> (String, String);
     fn junct_tables() -> Vec<String>;

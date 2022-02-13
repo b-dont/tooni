@@ -6,8 +6,6 @@ use crate::data::{
     proficiency::{Proficiency, ProficiencyClass},
 };
 use anyhow::Result;
-use data::tables::Table;
-use data::tables::Table::{LanguagesTable, ProficiencyTable};
 
 // use crossterm::{
 //     cursor, queue,
@@ -26,7 +24,7 @@ fn main() -> Result<()> {
     //    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
     //    enable_raw_mode()?;
 
-    let db = Database::new()?;
+//    let db = Database::new()?;
     //    db.create_table(Table::LanguagesTable)?;
     //    let all_langs = db.get_all_rows(Table::LanguagesTable)?;
     //
