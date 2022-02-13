@@ -38,34 +38,61 @@ impl fmt::Display for Background {
 }
 
 impl ComplexModel for Background {
-    fn junctions(&self) -> HashMap<String, Vec<i64>> {
+    fn junctions(&self, table: &str) -> Vec<i64> {
+        match table {
+            "background_proficiencies" => self.proficiencies.unwrap_or(vec![])
+                .into_iter()
+                .map(|prof| prof.id.unwrap())
+                .collect::<Vec<_>>(),
 
-        let prof_ids = self.proficiencies.unwrap_or(vec![])
-            .into_iter()
-            .map(|prof| prof.id.unwrap())
-            .collect::<Vec<_>>();
+            "background_languages" => self.languages.unwrap_or(vec![])
+                .into_iter()
+                .map(|lang| lang.id.unwrap())
+                .collect::<Vec<_>>(),
 
-        let lang_ids = self.languages.unwrap_or(vec![])
-            .into_iter()
-            .map(|lang| lang.id.unwrap())
-            .collect::<Vec<_>>();
+            "background_inventory" => self.starting_equipment.unwrap_or(vec![])
+                .into_iter()
+                .map(|item| item.id.unwrap())
+                .collect::<Vec<_>>(),
 
-        let item_ids = self.starting_equipment.unwrap_or(vec![])
-            .into_iter()
-            .map(|item| item.id.unwrap())
-            .collect::<Vec<_>>();
+            "background_features" => self.features.unwrap_or(vec![])
+                .into_iter()
+                .map(|feature| feature.id.unwrap())
+                .collect::<Vec<_>>()
+        }
+    }
 
-        let feature_ids = self.features.unwrap_or(vec![])
-            .into_iter()
-            .map(|feature| feature.id.unwrap())
-            .collect::<Vec<_>>();
+    fn references(table: &str) -> (String, String) {
+        match table {
+            "background_proficiencies" => ("backgrounds".to_string(), "proficiencies".to_string()),
+            "background_languages" => ("backgrounds".to_string(), "languages".to_string()),
+            "background_inventory" => ("backgrounds".to_string(), "items".to_string()),
+            "background_features" => ("backgrounds".to_string(), "features".to_string())
+        }
+    }
 
-        HashMap::from([
-            ("background_proficiencies".to_string(), prof_ids),
-            ("background_languages".to_string(), lang_ids),
-            ("background_features".to_string(), feature_ids),
-            ("background_inventory".to_string(), item_ids),
-        ])
+    fn junct_columns(table: &str) -> (String, String) {
+        match table {
+            "background_proficiencies" => ("background".to_string(), "proficiency".to_string()),
+            "background_languages" => ("background".to_string(), "language".to_string()),
+            "background_inventory" => ("background".to_string(), "item".to_string()),
+            "background_features" => ("background".to_string(), "feature".to_string()),
+        }
+    }
+
+    fn junct_tables() -> Vec<String> {
+        vec![
+            "background_proficiencies".to_string(),
+            "background_languages".to_string(),
+            "background_inventory".to_string(),
+            "background_features".to_string(),
+        ]
+    }
+
+    fn id(&self) -> Option<i64> {
+        if let Some(id) = self.id {
+            Some(id)
+        } else { None }
     }
 }
 

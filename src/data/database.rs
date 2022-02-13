@@ -1,4 +1,6 @@
-use super::character::Model;
+use std::arch::x86_64::m128Ext;
+
+use super::character::{Model, ComplexModel};
 use crate::data::{
     character::SavedCharacter,
     tables::{JunctionTable, Table},
@@ -55,15 +57,48 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_junction<T: Model>(&self, model: T) -> Result<()> {
+    pub fn delete<T: Model>(&self, id: i64) -> Result<()> {
         let mut stmt = self
             .connection
-            .prepare(
+            .prepare(format!("DELETE FROM {} WHERE id=?1", T::table()).as_str())?;
+
+        stmt.execute(params![id])?;
+        Ok(())
+    }
+
+    pub fn save_junction<T: ComplexModel>(&self, model: T) -> Result<()> {
+        for table in T::junct_tables() {
+            self.connection.execute(
                 format!(
-                    "REPLACE INTO {} ({}) VALUES (?1, ?2)"
-                    ,
-                    ).as_str()
+                    "CREATE TABLE IF NOT EXISTS {} (
+                        {} INTEGER REFERENCES {}(id),
+                        {} INTEGER REFERENCES {}(id),
+                        PRIMARY KEY ({}, {})
+                    )", 
+                    table,
+                    T::junct_columns(&table).0,
+                    T::references(&table).0,
+                    T::junct_columns(&table).1,
+                    T::references(&table).1,
+                    T::junct_columns(&table).0,
+                    T::junct_columns(&table).1
+                ).as_str(),
+                []
             )?;
+
+            for junct in model.junctions(&table) {
+                self.connection.execute(
+                    format!(
+                        "REPLACE INTO {} ({}, {}) VALUES (?1, ?2)", 
+                        table,
+                        T::junct_columns(&table).0,
+                        T::junct_columns(&table).1,
+                        ).as_str(), 
+                    [model.id(), Some(junct)]
+                )?;
+            }
+        }
+        Ok(())
     }
 
     pub fn get_all_models<T: Model>(&self) -> Result<Vec<T>> {
@@ -73,15 +108,6 @@ impl Database {
 
         let rows = stmt.query_map([], |row| Ok(T::build(&row)?))?;
         rows.into_iter().collect()
-    }
-
-    pub fn delete<T: Model>(&self, id: i64) -> Result<()> {
-        let mut stmt = self
-            .connection
-            .prepare(format!("DELETE FROM {} WHERE id=?1", T::table()).as_str())?;
-
-        stmt.execute(params![id])?;
-        Ok(())
     }
 
     //    TODO: This method here will need to change, given the other db method and character struct

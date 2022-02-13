@@ -154,7 +154,11 @@ impl SavedCharacter {
 }
 
 pub trait ComplexModel: Model {
-    fn junctions(&self) -> HashMap<String, Vec<i64>>;
+    fn junctions(&self, table: &str) -> Vec<i64>;
+    fn references(table: &str) -> (String, String);
+    fn junct_columns(table: &str) -> (String, String);
+    fn junct_tables() -> Vec<String>;
+    fn id(&self) -> Option<i64>;
 }
 
 pub trait Model {
