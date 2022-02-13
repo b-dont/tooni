@@ -171,4 +171,5 @@ pub trait Model {
     fn columns() -> String;
     fn queries() -> String;
     fn values() -> String;
+    fn has_junctions() -> bool;
 }

@@ -1,10 +1,5 @@
-use std::arch::x86_64::m128Ext;
-
-use super::character::{Model, ComplexModel};
-use crate::data::{
-    character::SavedCharacter,
-    tables::{JunctionTable, Table},
-};
+use super::character::{ComplexModel, Model};
+use crate::data::character::SavedCharacter;
 use rusqlite::{params, params_from_iter, Connection, Result};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
@@ -20,20 +15,15 @@ impl Database {
     }
 
     pub fn load<T: Model>(&self, id: i64) -> Result<T> {
-        let mut stmt = self.connection.prepare(
-            format!(
-                "SELECT {} FROM {} WHERE id=?1",
-                T::queries(),
-                T::table()
-            )
-            .as_str(),
-        )?;
+        let mut stmt = self
+            .connection
+            .prepare(format!("SELECT {} FROM {} WHERE id=?1", T::queries(), T::table()).as_str())?;
 
         stmt.query_row(params![id], |row| Ok(T::build(&row)))?
     }
 
-    pub fn save<T: Model>(&self, model: T) -> Result<()> {
-        let mut table_stmt = self.connection.execute(
+    pub fn save<T: Model + ComplexModel>(&self, model: &T) -> Result<()> {
+        self.connection.execute(
             format!(
                 "CREATE TABLE IF NOT EXISTS {} ({})",
                 T::table(),
@@ -52,8 +42,12 @@ impl Database {
             )
             .as_str(),
         )?;
-
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
+
+        if T::has_junctions() {
+            self.save_junctions(model)?;
+        }
+
         Ok(())
     }
 
@@ -66,7 +60,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn save_junction<T: ComplexModel>(&self, model: T) -> Result<()> {
+    pub fn save_junctions<T: ComplexModel>(&self, model: &T) -> Result<()> {
         for table in T::junct_tables() {
             self.connection.execute(
                 format!(
@@ -74,7 +68,7 @@ impl Database {
                         {} INTEGER REFERENCES {}(id),
                         {} INTEGER REFERENCES {}(id),
                         PRIMARY KEY ({}, {})
-                    )", 
+                    )",
                     table,
                     T::junct_columns(&table).0,
                     T::references(&table).0,
@@ -82,26 +76,28 @@ impl Database {
                     T::references(&table).1,
                     T::junct_columns(&table).0,
                     T::junct_columns(&table).1
-                ).as_str(),
-                []
+                )
+                .as_str(),
+                [],
             )?;
 
             for junct in model.junctions(&table) {
                 self.connection.execute(
                     format!(
-                        "REPLACE INTO {} ({}, {}) VALUES (?1, ?2)", 
+                        "REPLACE INTO {} ({}, {}) VALUES (?1, ?2)",
                         table,
                         T::junct_columns(&table).0,
                         T::junct_columns(&table).1,
-                        ).as_str(), 
-                    [model.id(), Some(junct)]
+                    )
+                    .as_str(),
+                    [model.id(), Some(junct)],
                 )?;
             }
         }
         Ok(())
     }
 
-    pub fn get_all_models<T: Model>(&self) -> Result<Vec<T>> {
+    pub fn get_all_models<T: Model + ComplexModel>(&self) -> Result<Vec<T>> {
         let mut stmt = self
             .connection
             .prepare(format!("SELECT {} FROM {}", T::queries(), T::table()).as_str())?;

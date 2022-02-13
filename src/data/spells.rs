@@ -132,7 +132,7 @@ impl Model for Spell {
             range: row.get(5)?,
             components: row.get(6)?,
             duration: row.get(7)?,
-            description: row.get(8)?
+            description: row.get(8)?,
         })
     }
 
@@ -160,5 +160,9 @@ impl Model for Spell {
 
     fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
+    }
+
+    fn has_junctions() -> bool {
+        false
     }
 }

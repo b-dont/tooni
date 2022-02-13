@@ -87,7 +87,7 @@ impl Model for Proficiency {
         Ok(Proficiency {
             id: row.get(0)?,
             name: row.get(1)?,
-            class: row.get(2)?
+            class: row.get(2)?,
         })
     }
 
@@ -108,5 +108,9 @@ impl Model for Proficiency {
 
     fn values() -> String {
         "?1, ?2, ?3".to_string()
+    }
+
+    fn has_junctions() -> bool {
+        false
     }
 }

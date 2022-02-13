@@ -108,7 +108,7 @@ impl Model for Feature {
         class TEXT NOT NULL,
         name TEXT NOT NULL,
         description TEXT NOT NULL"
-        .to_string()
+            .to_string()
     }
 
     fn queries() -> String {
@@ -117,5 +117,9 @@ impl Model for Feature {
 
     fn values() -> String {
         "?1, ?2, ?3, ?4".to_string()
+    }
+
+    fn has_junctions() -> bool {
+        false
     }
 }

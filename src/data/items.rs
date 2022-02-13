@@ -143,8 +143,7 @@ impl Model for Item {
          weight INTEGER,
          properties TEXT NOT NULL,
          description TEXT NOT NULL"
-         .to_string()
-
+            .to_string()
     }
 
     fn queries() -> String {
@@ -153,5 +152,9 @@ impl Model for Item {
 
     fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
+    }
+
+    fn has_junctions() -> bool {
+        false
     }
 }

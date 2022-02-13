@@ -60,4 +60,8 @@ impl Model for Language {
     fn values() -> String {
         "?1, ?2, ?3".to_string()
     }
+
+    fn has_junctions() -> bool {
+        false
+    }
 }
