@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     //    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
     //    enable_raw_mode()?;
 
-//    let db = Database::new()?;
+    //    let db = Database::new()?;
     //    db.create_table(Table::LanguagesTable)?;
     //    let all_langs = db.get_all_rows(Table::LanguagesTable)?;
     //
@@ -73,8 +73,7 @@ fn main() -> Result<()> {
     //        class: Some(ProficiencyClass::Armor),
     //    };
     //
-    //    let heavy_armor = Proficiency {
-    //        id: None,
+    //    let heavy_armor = Proficiency { id: None,
     //        name: Some("Heavy Armor".to_string()),
     //        class: Some(ProficiencyClass::Armor),
     //    };

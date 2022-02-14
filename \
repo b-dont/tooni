@@ -1,6 +1,6 @@
-use super::character::Model;
+use super::character::{ComplexModel, Model};
 use crate::data::character::SavedCharacter;
-use rusqlite::{params, params_from_iter, Connection, Result};
+use rusqlite::{Row, params, params_from_iter, Connection, Result};
 
 // TODO: Consider PRAGMA SQLite statement at connection open
 pub struct Database {
@@ -14,16 +14,18 @@ impl Database {
         })
     }
 
-    pub fn load<T: Model>(&self, id: i64) -> Result<T> {
+    pub fn load_model<T: Model>(&self, id: i64) -> Result<T> {
         let mut stmt = self
             .connection
             .prepare(format!("SELECT {} FROM {} WHERE id=?1", T::queries(), T::table()).as_str())?;
 
-        stmt.query_row(params![id], |row| Ok(T::build(&row)))?
+        let queried_model = stmt.query_row(params![id], |row| Ok(T::build(&row)))?;
+        }
 
+        queried_model
     }
 
-    pub fn save<T: Model>(&self, model: &T) -> Result<()> {
+    pub fn save<T: Model + ComplexModel>(&self, model: &T) -> Result<()> {
         self.connection.execute(
             format!(
                 "CREATE TABLE IF NOT EXISTS {} ({})",
@@ -61,8 +63,8 @@ impl Database {
         Ok(())
     }
 
-    pub fn _save_junctions<T: Model>(&self, model: &T) -> Result<()> {
-        for table in T::junct_tables().unwrap() {
+    pub fn _save_junctions<T: ComplexModel>(&self, model: &T) -> Result<()> {
+        for table in T::junct_tables() {
             self.connection.execute(
                 format!(
                     "CREATE TABLE IF NOT EXISTS {} (
@@ -71,24 +73,24 @@ impl Database {
                         PRIMARY KEY ({}, {})
                     )",
                     table,
-                    T::junct_columns(&table).unwrap().0,
-                    T::references(&table).unwrap().0,
-                    T::junct_columns(&table).unwrap().1,
-                    T::references(&table).unwrap().1,
-                    T::junct_columns(&table).unwrap().0,
-                    T::junct_columns(&table).unwrap().1
+                    T::junct_columns(&table).0,
+                    T::references(&table).0,
+                    T::junct_columns(&table).1,
+                    T::references(&table).1,
+                    T::junct_columns(&table).0,
+                    T::junct_columns(&table).1
                 )
                 .as_str(),
                 [],
             )?;
 
-            for junct in model.junctions(&table).unwrap() {
+            for junct in model.junctions(&table) {
                 self.connection.execute(
                     format!(
                         "REPLACE INTO {} ({}, {}) VALUES (?1, ?2)",
                         table,
-                        T::junct_columns(&table).unwrap().0,
-                        T::junct_columns(&table).unwrap().1,
+                        T::junct_columns(&table).0,
+                        T::junct_columns(&table).1,
                     )
                     .as_str(),
                     [model.id(), Some(junct)],
@@ -98,25 +100,26 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_junction<T: Model>(
-        &self,
-        columns: (String, String),
-        table: &str,
-        id: i64,
-    ) -> Result<Vec<i64>> {
+    pub fn load_junction<T: Model>(&self, columns: (String, String), table: &str, id: i64) -> Result<Vec<T>> {
         let mut stmt = self.connection.prepare(
-            format!(
-                "SELECT {}, {} FROM {} WHERE id=?1",
-                columns.0, columns.1, table,
-            )
-            .as_str(),
+            format!("SELECT {}, {} FROM {} WHERE id=?1",
+            columns.0,
+            columns.1,
+            table,
+            ).as_str()
         )?;
 
-        let ids = stmt.query_map([id], |row| Ok(row.get(1)?))?;
-        ids.into_iter().collect()
+        let junct_ids = stmt.query_map([id], |row| Ok(row.get(1)))?;
+        let all_juncts: Vec<T> = Vec::new();
+
+        for junct_id in junct_ids.into_iter() {
+            all_juncts.push(self.load(id)?);
+        }
+
+        Ok(all_juncts)
     }
 
-    pub fn get_all_models<T: Model>(&self) -> Result<Vec<T>> {
+    pub fn get_all_models<T: Model + ComplexModel>(&self) -> Result<Vec<T>> {
         let mut stmt = self
             .connection
             .prepare(format!("SELECT {} FROM {}", T::queries(), T::table()).as_str())?;

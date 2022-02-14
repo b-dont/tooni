@@ -1,7 +1,27 @@
-use crate::data::character::{ComplexModel, Model};
+use crate::data::character::{Model, Junction};
 use crate::data::{feature::Feature, items::Item, language::Language, proficiency::Proficiency};
 use rusqlite::{Result, Row, ToSql};
+use enum_iterator::IntoEnumIterator;
 use std::fmt;
+
+#[derive(Debug, IntoEnumIterator, PartialEq)]
+pub enum BackgroundJunctions {
+    Profs,
+    Langs,
+    Inven,
+    Feats,
+}
+
+impl BackgroundJunctions {
+    pub fn tables() -> Vec<String> {
+        vec![
+            "background_proficiencies".to_string(),
+            "background_languages".to_string(),
+            "background_inventory".to_string(),
+            "background_features".to_string(),
+        ]
+    }
+}
 
 #[derive(Default, Clone)]
 pub struct Background {
@@ -37,99 +57,17 @@ impl fmt::Display for Background {
     }
 }
 
-impl ComplexModel for Background {
-    fn junctions(&self, table: &str) -> Vec<i64> {
-        match table {
-            "background_proficiencies" => self
-                .proficiencies
-                .clone()
-                .unwrap_or(vec![])
-                .into_iter()
-                .map(|prof| prof.id.unwrap())
-                .collect::<Vec<_>>(),
-
-            "background_languages" => self
-                .languages
-                .clone()
-                .unwrap_or(vec![])
-                .into_iter()
-                .map(|lang| lang.id.unwrap())
-                .collect::<Vec<_>>(),
-
-            "background_inventory" => self
-                .starting_equipment
-                .clone()
-                .unwrap_or(vec![])
-                .into_iter()
-                .map(|item| item.id.unwrap())
-                .collect::<Vec<_>>(),
-
-            "background_features" => self
-                .features
-                .clone()
-                .unwrap_or(vec![])
-                .into_iter()
-                .map(|feature| feature.id.unwrap())
-                .collect::<Vec<_>>(),
-            _ => {vec![]}
-        }
-    }
-
-    fn add_junctions<T: Model>(&self, junctions: Vec<T>) {
-        for junct in junctions {
-            match junct {
-                Proficiency => if let Some(profs) = self.proficiencies {
-                    profs.push(junct);
-                }
-            }
-        }
-    }
-
-    fn references(table: &str) -> (String, String) {
-        match table {
-            "background_proficiencies" => ("backgrounds".to_string(), "proficiencies".to_string()),
-            "background_languages" => ("backgrounds".to_string(), "languages".to_string()),
-            "background_inventory" => ("backgrounds".to_string(), "items".to_string()),
-            "background_features" => ("backgrounds".to_string(), "features".to_string()),
-            _ => {(String::new(), String::new())}
-        }
-    }
-
-    fn junct_columns(table: &str) -> (String, String) {
-        match table {
-            "background_proficiencies" => ("background".to_string(), "proficiency".to_string()),
-            "background_languages" => ("background".to_string(), "language".to_string()),
-            "background_inventory" => ("background".to_string(), "item".to_string()),
-            "background_features" => ("background".to_string(), "feature".to_string()),
-            _ => (String::new(), String::new())
-        }
-    }
-
-    fn junct_tables() -> Vec<String> {
-        vec![
-            "background_proficiencies".to_string(),
-            "background_languages".to_string(),
-            "background_inventory".to_string(),
-            "background_features".to_string(),
-        ]
-    }
-
-    fn id(&self) -> Option<i64> {
-        if let Some(id) = self.id {
-            Some(id)
-        } else {
-            None
-        }
-    }
-}
-
 impl Model for Background {
     fn parameters(&self) -> Vec<Box<dyn ToSql>> {
         let mut params: Vec<Box<dyn ToSql>> = Vec::new();
         params.push(Box::new(self.id));
         params.push(Box::new(self.name.clone()));
 
-        for pers_trait in &self.personality_traits.clone().unwrap_or(vec![String::new(); 8]) {
+        for pers_trait in &self
+            .personality_traits
+            .clone()
+            .unwrap_or(vec![String::new(); 8])
+        {
             params.push(Box::new(pers_trait.clone()));
         }
         for ideal in &self.ideals.clone().unwrap_or(vec![String::new(); 6]) {
@@ -190,6 +128,80 @@ impl Model for Background {
         })
     }
 
+//    fn junctions(&self, table: &str) -> Option<Vec<i64>> {
+//        match table {
+//            "background_proficiencies" => Some(
+//                self.proficiencies
+//                    .clone()
+//                    .unwrap_or(vec![])
+//                    .into_iter()
+//                    .map(|prof| prof.id.unwrap())
+//                    .collect::<Vec<_>>(),
+//            ),
+//
+//            "background_languages" => Some(
+//                self.languages
+//                    .clone()
+//                    .unwrap_or(vec![])
+//                    .into_iter()
+//                    .map(|lang| lang.id.unwrap())
+//                    .collect::<Vec<_>>(),
+//            ),
+//
+//            "background_inventory" => Some(
+//                self.starting_equipment
+//                    .clone()
+//                    .unwrap_or(vec![])
+//                    .into_iter()
+//                    .map(|item| item.id.unwrap())
+//                    .collect::<Vec<_>>(),
+//            ),
+//
+//            "background_features" => Some(
+//                self.features
+//                    .clone()
+//                    .unwrap_or(vec![])
+//                    .into_iter()
+//                    .map(|feature| feature.id.unwrap())
+//                    .collect::<Vec<_>>(),
+//            ),
+//            _ => Some(vec![]),
+//        }
+//    }
+//
+//    fn references(table: &str) -> Option<(String, String)> {
+//        match table {
+//            "background_proficiencies" => {
+//                Some(("backgrounds".to_string(), "proficiencies".to_string()))
+//            }
+//            "background_languages" => Some(("backgrounds".to_string(), "languages".to_string())),
+//            "background_inventory" => Some(("backgrounds".to_string(), "items".to_string())),
+//            "background_features" => Some(("backgrounds".to_string(), "features".to_string())),
+//            _ => Some((String::new(), String::new())),
+//        }
+//    }
+//
+//    fn junct_columns(table: &str) -> Option<(String, String)> {
+//        match table {
+//            "background_proficiencies" => {
+//                Some(("background".to_string(), "proficiency".to_string()))
+//            }
+//            "background_languages" => Some(("background".to_string(), "language".to_string())),
+//            "background_inventory" => Some(("background".to_string(), "item".to_string())),
+//            "background_features" => Some(("background".to_string(), "feature".to_string())),
+//            _ => Some((String::new(), String::new())),
+//        }
+//    }
+//
+//    fn junct_tables() -> Option<Vec<String>> {
+//        Some(vec![
+//            "background_proficiencies".to_string(),
+//            "background_languages".to_string(),
+//            "background_inventory".to_string(),
+//            "background_features".to_string(),
+//        ])
+//    }
+
     fn table() -> String {
         "backgrounds".to_string()
     }
@@ -212,7 +224,11 @@ impl Model for Background {
         "?1, ?2, ?3, ?4, ?5, ?6".to_string()
     }
 
-    fn has_junctions() -> bool {
-        true
+    fn id(&self) -> Option<i64> {
+        self.id
+    }
+
+    fn junction<T: Junction>() -> Option<Vec<T>> {
+        Some(BackgroundJunctions::into_enum_iter().collect())
     }
 }

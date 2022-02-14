@@ -153,15 +153,6 @@ impl SavedCharacter {
     }
 }
 
-pub trait ComplexModel: Model {
-    fn junctions(&self, table: &str) -> Vec<i64>;
-    fn add_junctions<T: Model>(&self, junctions: Vec<T>);
-    fn references(table: &str) -> (String, String);
-    fn junct_columns(table: &str) -> (String, String);
-    fn junct_tables() -> Vec<String>;
-    fn id(&self) -> Option<i64>;
-}
-
 pub trait Model {
     // TODO: Poss make this a macro
     fn build(row: &Row) -> Result<Self>
@@ -172,5 +163,10 @@ pub trait Model {
     fn columns() -> String;
     fn queries() -> String;
     fn values() -> String;
-    fn has_junctions() -> bool;
+    fn id(&self) -> Option<i64>;
+    fn junction<T: Junction>() -> Option<Vec<T>>
+}
+
+pub trait Junction {
+    
 }

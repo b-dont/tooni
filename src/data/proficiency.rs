@@ -113,4 +113,8 @@ impl Model for Proficiency {
     fn has_junctions() -> bool {
         false
     }
+
+    fn id(&self) -> Option<i64> {
+        self.id
+    }
 }
