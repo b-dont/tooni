@@ -1,4 +1,5 @@
 use crate::data::{
+    background::Background,
     character::Character,
     database::Database,
     items::{Item, ItemRarity},
@@ -6,6 +7,7 @@ use crate::data::{
     proficiency::{Proficiency, ProficiencyClass},
 };
 use anyhow::Result;
+use data::feature::Feature;
 
 // use crossterm::{
 //     cursor, queue,
@@ -24,7 +26,46 @@ fn main() -> Result<()> {
     //    queue!(stdout, EnterAlternateScreen, cursor::MoveTo(0, 0))?;
     //    enable_raw_mode()?;
 
-    //    let db = Database::new()?;
+    let db = Database::new()?;
+
+    let mut test_bg = Background::new();
+    test_bg.personality_traits = Some(vec![
+        "Test Personality Trait 1".to_string(),
+        "Test Personality Trait 2".to_string(),
+    ]);
+    test_bg.ideals = Some(vec![
+        "Test ideal 1".to_string(),
+        "Test ideal 2".to_string(),
+    ]);
+
+    let mut test_lang = Language::new();
+    test_lang.description = "Test langage".to_string();
+    test_lang.name = "Testing".to_string();
+
+    let mut test_item = Item::new();
+    test_item.name = "Testitem".to_string();
+    test_item.description = "Testing".to_string();
+    test_item.class = "Test class".to_string();
+    test_item.rarity = Some(ItemRarity::Common);
+
+    let mut test_feature = Feature::new();
+    test_feature.name = "Test_feature".to_string();
+    test_feature.description = "Testing feature".to_string();
+
+    db.save(&test_lang)?;
+    db.save(&test_item)?;
+    db.save(&test_feature)?;
+
+    let all_langs = db.get_all_models::<Language>()?;
+    let all_items = db.get_all_models::<Item>()?;
+    let all_features = db.get_all_models::<Feature>()?;
+
+    test_bg.languages.unwrap_or(vec![]).push(all_langs[0].clone());
+    test_bg.starting_equipment.unwrap_or(vec![]).push(all_items[0].clone());
+    test_bg.features.unwrap_or(vec![]).push(all_features[0].clone());
+
+    db.save::<Background>(&test_bg)?;
+
     //    db.create_table(Table::LanguagesTable)?;
     //    let all_langs = db.get_all_rows(Table::LanguagesTable)?;
     //

@@ -76,7 +76,7 @@ pub struct Spell {
 }
 
 impl Spell {
-    pub fn new(&self) -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 }
@@ -136,6 +136,10 @@ impl Model for Spell {
         })
     }
 
+    fn junction_ids(&self, table: &str) -> Option<Vec<i64>> {
+        None
+    }
+
     fn table() -> String {
         "spells".to_string()
     }
@@ -160,10 +164,6 @@ impl Model for Spell {
 
     fn values() -> String {
         "?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9".to_string()
-    }
-
-    fn has_junctions() -> bool {
-        false
     }
 
     fn id(&self) -> Option<i64> {

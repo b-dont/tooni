@@ -59,7 +59,7 @@ pub struct Proficiency {
 }
 
 impl Proficiency {
-    pub fn new(&self) -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 }
@@ -91,6 +91,10 @@ impl Model for Proficiency {
         })
     }
 
+    fn junction_ids(&self, table: &str) -> Option<Vec<i64>> {
+        None
+    }
+
     fn table() -> String {
         "proficiencies".to_string()
     }
@@ -108,10 +112,6 @@ impl Model for Proficiency {
 
     fn values() -> String {
         "?1, ?2, ?3".to_string()
-    }
-
-    fn has_junctions() -> bool {
-        false
     }
 
     fn id(&self) -> Option<i64> {

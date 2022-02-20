@@ -158,15 +158,29 @@ pub trait Model {
     fn build(row: &Row) -> Result<Self>
     where
         Self: Sized;
+    fn build_junction(&mut self, table: &str, row: &Row) -> Result<()> {
+        Ok(())
+    }
+    fn junction_ids(&self, table: &str) -> Option<Vec<i64>>;
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
     fn table() -> String;
     fn columns() -> String;
     fn queries() -> String;
     fn values() -> String;
     fn id(&self) -> Option<i64>;
-    fn junction<T: Junction>() -> Option<Vec<T>>
-}
-
-pub trait Junction {
-    
+    fn has_junctions() -> bool {
+        false
+    }
+    fn junct_tables() -> Option<Vec<String>> {
+        None
+    }
+    fn junct_columns(table: &str) -> Option<(String, String)> {
+        None
+    }
+    fn junct_references(table: &str) -> Option<(String, String)> {
+        None
+    }
+    fn junct_qeries(table: &str) -> Option<String> {
+        None
+    }
 }

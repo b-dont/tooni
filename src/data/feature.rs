@@ -62,7 +62,7 @@ pub struct Feature {
 }
 
 impl Feature {
-    pub fn new(&self) -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 }
@@ -99,6 +99,10 @@ impl Model for Feature {
         })
     }
 
+    fn junction_ids(&self, table: &str) -> Option<Vec<i64>> {
+        None
+    }
+
     fn table() -> String {
         "features".to_string()
     }
@@ -117,10 +121,6 @@ impl Model for Feature {
 
     fn values() -> String {
         "?1, ?2, ?3, ?4".to_string()
-    }
-
-    fn has_junctions() -> bool {
-        false
     }
 
     fn id(&self) -> Option<i64> {

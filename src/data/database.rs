@@ -19,8 +19,26 @@ impl Database {
             .connection
             .prepare(format!("SELECT {} FROM {} WHERE id=?1", T::queries(), T::table()).as_str())?;
 
-        stmt.query_row(params![id], |row| Ok(T::build(&row)))?
+        let mut loaded_model = stmt
+            .query_row(params![id], |row| Ok(T::build(&row)))?
+            .unwrap();
 
+        if T::has_junctions() {
+            for table in T::junct_tables().unwrap_or(vec![]) {
+                let junction_ids =
+                    self.load_junction_ids(T::junct_columns(&table).unwrap(), &table, id)?;
+                for junct_id in junction_ids {
+                    self.load_junction(
+                        &table,
+                        &T::junct_columns(&table).unwrap().1,
+                        &T::junct_qeries(&table).unwrap(),
+                        junct_id,
+                        &mut loaded_model,
+                    )?;
+                }
+            }
+        }
+        Ok(loaded_model)
     }
 
     pub fn save<T: Model>(&self, model: &T) -> Result<()> {
@@ -46,7 +64,7 @@ impl Database {
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
 
         if T::has_junctions() {
-            self._save_junctions(model)?;
+            self.save_junctions(model);
         }
 
         Ok(())
@@ -61,8 +79,8 @@ impl Database {
         Ok(())
     }
 
-    pub fn _save_junctions<T: Model>(&self, model: &T) -> Result<()> {
-        for table in T::junct_tables().unwrap() {
+    pub fn save_junctions<T: Model>(&self, model: &T) -> Result<()> {
+        for table in T::junct_tables().unwrap_or(vec![]) {
             self.connection.execute(
                 format!(
                     "CREATE TABLE IF NOT EXISTS {} (
@@ -72,9 +90,9 @@ impl Database {
                     )",
                     table,
                     T::junct_columns(&table).unwrap().0,
-                    T::references(&table).unwrap().0,
+                    T::junct_references(&table).unwrap().0,
                     T::junct_columns(&table).unwrap().1,
-                    T::references(&table).unwrap().1,
+                    T::junct_references(&table).unwrap().1,
                     T::junct_columns(&table).unwrap().0,
                     T::junct_columns(&table).unwrap().1
                 )
@@ -82,7 +100,7 @@ impl Database {
                 [],
             )?;
 
-            for junct in model.junctions(&table).unwrap() {
+            for junct in model.junction_ids(&table).unwrap() {
                 self.connection.execute(
                     format!(
                         "REPLACE INTO {} ({}, {}) VALUES (?1, ?2)",
@@ -98,7 +116,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn load_junction<T: Model>(
+    pub fn load_junction_ids(
         &self,
         columns: (String, String),
         table: &str,
@@ -114,6 +132,22 @@ impl Database {
 
         let ids = stmt.query_map([id], |row| Ok(row.get(1)?))?;
         ids.into_iter().collect()
+    }
+
+    pub fn load_junction<T: Model>(
+        &self,
+        junct_table: &str,
+        table: &str,
+        queries: &str,
+        id: i64,
+        model: &mut T,
+    ) -> Result<()> {
+        let mut stmt = self
+            .connection
+            .prepare(format!("SELECT {} FROM {} WHERE id=?1", queries, table).as_str())?;
+        stmt.query_row([id], |row| Ok(model.build_junction(&junct_table, &row)?))?;
+
+        Ok(())
     }
 
     pub fn get_all_models<T: Model>(&self) -> Result<Vec<T>> {
