@@ -99,24 +99,20 @@ impl Model for Feature {
         })
     }
 
-    fn junction_ids(&self, table: &str) -> Option<Vec<i64>> {
-        None
-    }
-
     fn table() -> String {
         "features".to_string()
     }
 
     fn columns() -> String {
         "id INTEGER PRIMARY KEY,
-        class TEXT NOT NULL,
         name TEXT NOT NULL,
+        class TEXT NOT NULL,
         description TEXT NOT NULL"
             .to_string()
     }
 
     fn queries() -> String {
-        "id, class, name, description".to_string()
+        "id, name, class, description".to_string()
     }
 
     fn values() -> String {

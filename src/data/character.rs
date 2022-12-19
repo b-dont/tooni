@@ -161,7 +161,9 @@ pub trait Model {
     fn build_junction(&mut self, table: &str, row: &Row) -> Result<()> {
         Ok(())
     }
-    fn junction_ids(&self, table: &str) -> Option<Vec<i64>>;
+    fn junction_ids(&self, table: &str) -> Option<Vec<i64>> {
+        None
+    }
     fn parameters(&self) -> Vec<Box<dyn ToSql>>;
     fn table() -> String;
     fn columns() -> String;

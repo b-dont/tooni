@@ -64,7 +64,7 @@ impl Database {
         stmt.execute(params_from_iter(model.parameters().into_iter()))?;
 
         if T::has_junctions() {
-            self.save_junctions(model);
+            self.save_junctions(model)?;
         }
 
         Ok(())
